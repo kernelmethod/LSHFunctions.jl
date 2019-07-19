@@ -23,21 +23,43 @@ CosSimHash{T}(input_length :: Integer, n_hashes :: Integer) where {T} =
 """
 L^p distance LSH function.
 """
-struct LpDistHash{T, Integer, A <: AbstractMatrix{T}} <: LSHFamily{T}
+struct LpDistHash{T, A <: AbstractMatrix{T}} <: LSHFamily{T}
 	coeff :: A
 	denom :: T
 	shift :: Vector{T}
 end
 
-LpDistHash{T,1}(input_length :: Integer, n_hashes :: Integer, denom :: Real) where {T} =
-	LpDistHash{T,1}(T.(rand(Cauchy(0, 1), n_hashes, input_length)), denom)
+function LpDistHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, power::Integer = 2) where {T}
+	coeff = begin
+		if power == 1
+			rand(Cauchy(0, 1), n_hashes, input_length)
+		elseif power == 2
+			randn(n_hashes, input_length)
+		end
+	end
 
-LpDistHash{T,2}(input_length :: Integer, n_hashes :: Integer, denom :: Real) where {T} =
-	LpDistHash{T,2}(randn(T, n_hashes, input_length), denom)
+	LpDistHash{T}(T.(coeff), denom)
+end
 
-LpDistHash{T,N}(coeff :: A, denom :: Real) where {T, N, A <: AbstractMatrix{T}} =
-	LpDistHash{T,N,A}(coeff, T(denom), rand(T, size(coeff, 1)))
+LpDistHash{T}(coeff :: A, denom :: Real) where {T, A <: AbstractMatrix{T}} =
+	LpDistHash{T,A}(coeff, T(denom), rand(T, size(coeff, 1)))
 
+LpDistHash(args...; kws...) =
+	LpDistHash{Float32}(args...; kws...)
+
+# L1DistHash and L2DistHash convenience wrappers
+#
+# NOTE: at the moment, it is impossible to pass type parameters to either of these
+# wrappers. That means that users are stuck with the default type for LpDistHash
+# structs if they use either of the following methods, instead of the general
+# LpDistHash constructor.
+L1DistHash(input_length :: Integer, n_hashes :: Integer, denom :: Real; kws...) where {T} =
+	LpDistHash(input_length, n_hashes, denom, power = 1; kws...)
+
+L2DistHash(input_length :: Integer, n_hashes :: Integer, denom :: Real; kws...) where {T} =
+	LpDistHash(input_length, n_hashes, denom, power = 2; kws...)
+
+# Definition of the actual hash function
 function (h::LpDistHash)(x::AbstractArray)
 	coeff, denom, shift = h.coeff, h.denom, h.shift
 	hashes = coeff * x
