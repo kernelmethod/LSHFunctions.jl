@@ -1,0 +1,7 @@
+name = "LSH"
+uuid = "5134c85a-a9db-11e9-340f-8514dff59a31"
+authors = ["Will Shand <wish5031@colorado.edu>"]
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

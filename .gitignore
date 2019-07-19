@@ -1,0 +1,10 @@
+*~
+*.swp
+
+# Profiling and benchmarking
+*.prof
+*.perf
+*.mem
+*.prof.*
+*.perf.*
+*.mem.*
