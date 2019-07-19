@@ -1,8 +1,7 @@
-using Test, NeuralHashPruning, Random
+using Test, Random, LSH
 
 @testset "LSH tests" begin
 	Random.seed!(0)
-	import NeuralHashPruning: LpDistHash, MIPSHash
 
 	@testset "L^p hashing tests" begin
 		@testset "Can construct a simple L^p distance hash function" begin

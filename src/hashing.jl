@@ -58,9 +58,9 @@ Asymmetric LSH for approximate maximum inner product search. Ref:
 
 	https://arxiv.org/abs/1405.5869
 """
-struct MIPSHash{T,S <: AbstractArray{T}} <: LSHFamily{T}
-	coeff_A :: S
-	coeff_B :: S
+struct MIPSHash{T} <: LSHFamily{T}
+	coeff_A :: Matrix{T}
+	coeff_B :: Matrix{T}
 	denom :: T
 	shift :: Vector{T}
 	Qshift :: Vector{T}
@@ -74,7 +74,7 @@ function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::I
 	shift = rand(T, n_hashes)
 	Qshift = coeff_B * fill(T(1/2), m)
 
-	MIPSHash(coeff_A, coeff_B, Qshift, denom, shift, m)
+	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
 end
 
 MIPSHash(args...; kws...) =
