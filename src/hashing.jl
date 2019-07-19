@@ -97,7 +97,7 @@ function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::I
 	coeff_B = randn(T, n_hashes, m)
 	denom = T(denom)
 	shift = rand(T, n_hashes)
-	Qshift = coeff_B * fill(T(1/2), m)
+	Qshift = coeff_B * fill(T(1/2), m) + shift
 
 	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
 end
@@ -109,27 +109,29 @@ MIPSHash(args...; kws...) =
 Function definitions for the two hash functions used by the approximate MIPS LSH,
 h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
 =#
-function MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FAMILY_DTYPES}
+function MIPSHash_P_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x
 
-	# Compute the norms of the inputs, followed by norms^2, norms^4, ... norms^(2^m).
-	# Multiply these by the second array of coefficients and add them to aTx, so
-	# that in totality we compute
-	#
-	# 		aTx = [coeff_A, coeff_B] * P(x)
-	# 			= [coeff_A, coeff_B] * [x; norms; norms^2; ...; norms^(2^m)]
-	#
-	# By making these computations in a somewhat roundabout way (rather than following
-	# the formula above), we save a lot of memory by avoiding concatenations.
-	norms = norm.(eachcol(x))
-	ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+	if h.m > 0
+		# Compute the norms of the inputs, followed by norms^2, norms^4, ... norms^(2^m).
+		# Multiply these by the second array of coefficients and add them to aTx, so
+		# that in totality we compute
+		#
+		# 		aTx = [coeff_A, coeff_B] * P(x)
+		# 			= [coeff_A, coeff_B] * [x; norms; norms^2; ...; norms^(2^m)]
+		#
+		# By making these computations in a somewhat roundabout way (rather than following
+		# the formula above), we save a lot of memory by avoiding concatenations.
+		norms = norm.(eachcol(x))
+		ger!(1.0, h.coeff_B[:,1], norms, aTx)
 
-	# Note that m is typically small, so these iterations don't do much to harm performance
-	for ii = 2:h.m
-		@. norms = norms^2
-		ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+		# Note that m is typically small, so these iterations don't do much to harm performance
+		for ii = 2:h.m
+			@. norms = norms^2
+			ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+		end
 	end
 
 	# Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
@@ -144,7 +146,7 @@ MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAM
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P_LSH, Tuple{MIPSHash, AbstractArray}, h, x)
 
-function MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FAMILY_DTYPES}
+function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x
