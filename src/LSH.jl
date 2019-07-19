@@ -2,7 +2,9 @@ module LSH
 
 using Distributions
 
-include("hashing.jl")
+include("LSHBase.jl")
+include("symmetric.jl")
+include("asymmetric.jl")
 
 export CosSimHash, LpDistHash, L1DistHash, L2DistHash, MIPSHash
 
