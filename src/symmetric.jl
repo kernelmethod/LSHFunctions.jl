@@ -71,7 +71,7 @@ L2DistHash(input_length :: Integer, n_hashes :: Integer, denom :: Real; kws...) 
 function (h::LpDistHash)(x::AbstractArray)
 	coeff, denom, shift = h.coeff, h.denom, h.shift
 	hashes = coeff * x
-	hashes = @. (hashes + shift) / denom
+	hashes = @. hashes / denom + shift
 	floor.(Int32, hashes)
 end
 

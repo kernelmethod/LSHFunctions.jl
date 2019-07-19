@@ -21,7 +21,7 @@ function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::I
 	coeff_B = randn(T, n_hashes, m)
 	denom = T(denom)
 	shift = rand(T, n_hashes)
-	Qshift = coeff_B * fill(T(1/2), m) + shift
+	Qshift = coeff_B * fill(T(1/2), m) ./ denom + shift
 
 	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
 end
@@ -40,6 +40,7 @@ function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray; scale::Bool = true) wh
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = if scale
+		norms ./= maxnorm
 		h.coeff_A * x ./ maxnorm
 	else
 		h.coeff_A * x
@@ -65,7 +66,7 @@ function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray; scale::Bool = true) wh
 	end
 
 	# Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
-	@. aTx = (aTx + h.shift) / h.denom
+	@. aTx = aTx / h.denom + h.shift
 
 	return floor.(Int32, aTx)
 end
@@ -91,7 +92,7 @@ function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# since the values concatenated on by Q(x) are always the same, we actually
 	# pre-compute coeff_B * [1/2; 1/2; ...; 1/2] + shift when we construct the
 	# MIPSHash to reduce the number of computations.
-	@. aTx = (aTx + h.Qshift) / h.denom
+	@. aTx = aTx / h.denom + h.Qshift
 
 	return floor.(Int32, aTx)
 end

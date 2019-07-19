@@ -49,11 +49,11 @@ using Test, Random, LSH
 
 			# When m == 0, we should have h(P(x)) == h(Q(x)) for the MIPS hash
 			x = randn(input_length, 32)
-			@test MIPSHash_P_LSH(MIPS_hashfn, x) == MIPSHash_Q_LSH(MIPS_hashfn, x)
+			@test MIPSHash_P_LSH(MIPS_hashfn, x; scale=false) == MIPSHash_Q_LSH(MIPS_hashfn, x)
 
 			# Moreover, we expect that h(P(x)) == h(Q(x)) == k(x), where k is the equivalent
 			# L^2 hash function.
-			@test MIPSHash_P_LSH(MIPS_hashfn, x) == L2_hashfn(x)
+			@test MIPSHash_P_LSH(MIPS_hashfn, x; scale=false) == L2_hashfn(x)
 		end
 	end
 end

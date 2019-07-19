@@ -44,7 +44,7 @@ using Test, Random, LSH
 			# Test on a single input
 			x = randn(input_length)
 			hashes = hashfn(x)
-			manual_hashes = floor.(Int32, (coeff * x .+ shift) ./ denom)
+			manual_hashes = floor.(Int32, coeff * x ./ denom .+ shift)
 
 			@test isa(hashes, Vector{Int32})
 			@test hashes == manual_hashes
@@ -52,7 +52,7 @@ using Test, Random, LSH
 			# Test on many inputs, simultaneously
 			x = randn(input_length, 128)
 			hashes = hashfn(x)
-			manual_hashes = floor.(Int32, (coeff * x .+ shift) ./ denom)
+			manual_hashes = floor.(Int32, coeff * x ./ denom .+ shift)
 
 			@test isa(hashes, Matrix{Int32})
 			@test hashes == manual_hashes
