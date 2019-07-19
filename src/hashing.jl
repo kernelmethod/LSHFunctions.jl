@@ -18,6 +18,9 @@ end
 CosSimHash{T}(input_length :: Integer, n_hashes :: Integer) where {T} =
 	CosSimHash(randn(T, n_hashes, input_length))
 
+CosSimHash(args...; kws...) =
+	CosSimHash{Float32}(args...; kws...)
+
 (h::CosSimHash)(x) = (h.coeff * x) .≥ 0
 
 """
