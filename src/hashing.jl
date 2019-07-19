@@ -132,7 +132,7 @@ function MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FA
 	# Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
 	@. aTx = (aTx + h.shift) / h.denom
 
-	return aTx
+	return floor.(Int32, aTx)
 end
 
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
@@ -158,7 +158,7 @@ function MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FA
 	# MIPSHash to reduce the number of computations.
 	@. aTx = (aTx + h.Qshift) / h.denom
 
-	return aTx
+	return floor.(Int32, aTx)
 end
 
 MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
