@@ -9,8 +9,8 @@ using Test, Random, LSH
 			n_hashes = 8
 			denom = 2
 
-			for N in (1,2)
-				Lp_hash = LpDistHash{Float32,1}(input_length, n_hashes, denom)
+			for p in (1,2)
+				Lp_hash = LpDistHash(input_length, n_hashes, denom, p)
 
 				@test size(Lp_hash.coeff) == (n_hashes, input_length)
 				@test Lp_hash.denom == denom
@@ -21,13 +21,13 @@ using Test, Random, LSH
 		@testset "Type consistency in LpDistHash fields" begin
 			# Should have type consistency between the fields of the struct,
 			# so that we avoid expensive type conversions.
-			Lp_hash = LpDistHash{Float32,1}(5, 5, 1)
+			Lp_hash = LpDistHash{Float32}(5, 5, 1)
 
 			@test isa(Lp_hash.coeff, Array{Float32})
 			@test isa(Lp_hash.denom, Float32)
 			@test isa(Lp_hash.shift, Array{Float32})
 
-			Lp_hash = LpDistHash{Float64,1}(5, 5, 1)
+			Lp_hash = LpDistHash{Float64}(5, 5, 1)
 			@test isa(Lp_hash.coeff, Array{Float64})
 			@test isa(Lp_hash.denom, Float64)
 			@test isa(Lp_hash.shift, Array{Float64})
@@ -38,7 +38,7 @@ using Test, Random, LSH
 			n_hashes = 8
 			denom = 2
 
-			hashfn = LpDistHash{Float32,2}(input_length, n_hashes, denom)
+			hashfn = LpDistHash{Float32}(input_length, n_hashes, denom)
 			coeff, shift = hashfn.coeff, hashfn.shift
 
 			# Test on a single input
@@ -60,6 +60,8 @@ using Test, Random, LSH
 	end
 
 	@testset "MIP hashing tests" begin
+		import LSH: MIPSHash_P_LSH, MIPSHash_Q_LSH
+
 		@testset "Can construct a simple MIPS hash function" begin
 			input_length = 5
 			n_hashes = 8
@@ -90,6 +92,24 @@ using Test, Random, LSH
 				@test isa(hashfn.Qshift, Array{T})
 				@test isa(hashfn.denom, T)
 			end
+		end
+
+		@testset "Equivalent to L^2 hash when m == 0" begin
+			input_length = 10
+			n_hashes = 64
+			denom = 2
+
+			MIPS_hashfn = MIPSHash{Float32}(input_length, n_hashes, denom, 0)
+			coeff_A, shift = MIPS_hashfn.coeff_A, MIPS_hashfn.shift
+			L2_hashfn = LpDistHash{Float32,typeof(coeff_A)}(coeff_A, denom, shift)
+
+			# When m == 0, we should have h(P(x)) == h(Q(x)) for the MIPS hash
+			x = randn(input_length, 32)
+			@test MIPSHash_P_LSH(MIPS_hashfn, x) == MIPSHash_Q_LSH(MIPS_hashfn, x)
+
+			# Moreover, we expect that h(P(x)) == h(Q(x)) == k(x), where k is the equivalent
+			# L^2 hash function.
+			@test MIPSHash_P_LSH(MIPS_hashfn, x) == L2_hashfn(x)
 		end
 	end
 end

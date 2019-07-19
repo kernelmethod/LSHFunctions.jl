@@ -18,26 +18,51 @@ end
 CosSimHash{T}(input_length :: Integer, n_hashes :: Integer) where {T} =
 	CosSimHash(randn(T, n_hashes, input_length))
 
+CosSimHash(args...; kws...) =
+	CosSimHash{Float32}(args...; kws...)
+
 (h::CosSimHash)(x) = (h.coeff * x) .≥ 0
 
 """
 L^p distance LSH function.
 """
-struct LpDistHash{T, Integer, A <: AbstractMatrix{T}} <: LSHFamily{T}
+struct LpDistHash{T, A <: AbstractMatrix{T}} <: LSHFamily{T}
 	coeff :: A
 	denom :: T
 	shift :: Vector{T}
 end
 
-LpDistHash{T,1}(input_length :: Integer, n_hashes :: Integer, denom :: Real) where {T} =
-	LpDistHash{T,1}(T.(rand(Cauchy(0, 1), n_hashes, input_length)), denom)
+function LpDistHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, power::Integer = 2) where {T}
+	coeff = begin
+		if power == 1
+			rand(Cauchy(0, 1), n_hashes, input_length)
+		elseif power == 2
+			randn(n_hashes, input_length)
+		end
+	end
 
-LpDistHash{T,2}(input_length :: Integer, n_hashes :: Integer, denom :: Real) where {T} =
-	LpDistHash{T,2}(randn(T, n_hashes, input_length), denom)
+	LpDistHash{T}(T.(coeff), denom)
+end
 
-LpDistHash{T,N}(coeff :: A, denom :: Real) where {T, N, A <: AbstractMatrix{T}} =
-	LpDistHash{T,N,A}(coeff, T(denom), rand(T, size(coeff, 1)))
+LpDistHash{T}(coeff :: A, denom :: Real) where {T, A <: AbstractMatrix{T}} =
+	LpDistHash{T,A}(coeff, T(denom), rand(T, size(coeff, 1)))
 
+LpDistHash(args...; kws...) =
+	LpDistHash{Float32}(args...; kws...)
+
+# L1DistHash and L2DistHash convenience wrappers
+#
+# NOTE: at the moment, it is impossible to pass type parameters to either of these
+# wrappers. That means that users are stuck with the default type for LpDistHash
+# structs if they use either of the following methods, instead of the general
+# LpDistHash constructor.
+L1DistHash(input_length :: Integer, n_hashes :: Integer, denom :: Real; kws...) where {T} =
+	LpDistHash(input_length, n_hashes, denom, power = 1; kws...)
+
+L2DistHash(input_length :: Integer, n_hashes :: Integer, denom :: Real; kws...) where {T} =
+	LpDistHash(input_length, n_hashes, denom, power = 2; kws...)
+
+# Definition of the actual hash function
 function (h::LpDistHash)(x::AbstractArray)
 	coeff, denom, shift = h.coeff, h.denom, h.shift
 	hashes = coeff * x
@@ -72,7 +97,7 @@ function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::I
 	coeff_B = randn(T, n_hashes, m)
 	denom = T(denom)
 	shift = rand(T, n_hashes)
-	Qshift = coeff_B * fill(T(1/2), m)
+	Qshift = coeff_B * fill(T(1/2), m) + shift
 
 	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
 end
@@ -84,33 +109,35 @@ MIPSHash(args...; kws...) =
 Function definitions for the two hash functions used by the approximate MIPS LSH,
 h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
 =#
-function MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FAMILY_DTYPES}
+function MIPSHash_P_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x
 
-	# Compute the norms of the inputs, followed by norms^2, norms^4, ... norms^(2^m).
-	# Multiply these by the second array of coefficients and add them to aTx, so
-	# that in totality we compute
-	#
-	# 		aTx = [coeff_A, coeff_B] * P(x)
-	# 			= [coeff_A, coeff_B] * [x; norms; norms^2; ...; norms^(2^m)]
-	#
-	# By making these computations in a somewhat roundabout way (rather than following
-	# the formula above), we save a lot of memory by avoiding concatenations.
-	norms = norm.(eachcol(x))
-	ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+	if h.m > 0
+		# Compute the norms of the inputs, followed by norms^2, norms^4, ... norms^(2^m).
+		# Multiply these by the second array of coefficients and add them to aTx, so
+		# that in totality we compute
+		#
+		# 		aTx = [coeff_A, coeff_B] * P(x)
+		# 			= [coeff_A, coeff_B] * [x; norms; norms^2; ...; norms^(2^m)]
+		#
+		# By making these computations in a somewhat roundabout way (rather than following
+		# the formula above), we save a lot of memory by avoiding concatenations.
+		norms = norm.(eachcol(x))
+		ger!(1.0, h.coeff_B[:,1], norms, aTx)
 
-	# Note that m is typically small, so these iterations don't do much to harm performance
-	for ii = 2:h.m
-		@. norms = norms^2
-		ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+		# Note that m is typically small, so these iterations don't do much to harm performance
+		for ii = 2:h.m
+			@. norms = norms^2
+			ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+		end
 	end
 
 	# Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
 	@. aTx = (aTx + h.shift) / h.denom
 
-	return aTx
+	return floor.(Int32, aTx)
 end
 
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
@@ -119,7 +146,7 @@ MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAM
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P_LSH, Tuple{MIPSHash, AbstractArray}, h, x)
 
-function MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FAMILY_DTYPES}
+function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x
@@ -136,7 +163,7 @@ function MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T <: LSH_FA
 	# MIPSHash to reduce the number of computations.
 	@. aTx = (aTx + h.Qshift) / h.denom
 
-	return aTx
+	return floor.(Int32, aTx)
 end
 
 MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
