@@ -83,6 +83,9 @@ function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x
 
+	# Normalize the query vectors
+	aTx = aTx ./ norm.(eachcol(x))'
+
 	# Here, we would multiply the second array of coefficients by the elements that
 	# Q(x) concatenates to x. Then we'd add this to aTx so that in total we compute
 	#
