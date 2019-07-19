@@ -33,7 +33,7 @@ MIPSHash(args...; kws...) =
 Function definitions for the two hash functions used by the approximate MIPS LSH,
 h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
 =#
-function MIPSHash_P_LSH(h :: MIPSHash, x :: AbstractArray)
+function MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray) where {T}
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x
@@ -49,7 +49,7 @@ function MIPSHash_P_LSH(h :: MIPSHash, x :: AbstractArray)
 		# By making these computations in a somewhat roundabout way (rather than following
 		# the formula above), we save a lot of memory by avoiding concatenations.
 		norms = norm.(eachcol(x))
-		ger!(1.0, h.coeff_B[:,1], norms, aTx)
+		ger!(T(1), h.coeff_B[:,1], norms, aTx)
 
 		# Note that m is typically small, so these iterations don't do much to harm performance
 		for ii = 2:h.m
@@ -68,7 +68,7 @@ MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAM
 	MIPSHash_P_LSH(h, T.(x))
 
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_P_LSH, Tuple{MIPSHash, AbstractArray}, h, x)
+	invoke(MIPSHash_P_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x)
 
 function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
