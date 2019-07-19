@@ -36,6 +36,7 @@ h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
 function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray; scale::Bool = true) where {T}
 	norms = norm.(eachcol(x))
 	maxnorm = maximum(norms)
+	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
 
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
