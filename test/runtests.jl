@@ -1,2 +1,2 @@
-include("test_symmetric.jl")
-include("test_asymmetric.jl")
+include("test_lpdist_hash.jl")
+include("test_mips_hash.jl")
