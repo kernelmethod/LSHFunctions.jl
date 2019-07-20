@@ -33,37 +33,34 @@ MIPSHash(args...; kws...) =
 Function definitions for the two hash functions used by the approximate MIPS LSH,
 h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
 =#
-function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray; scale::Bool = true) where {T}
+
+# Helper functions
+mat(x :: AbstractVector) = reshape(x, length(x), 1)
+mat(x :: AbstractMatrix) = x
+
+# h(P(x)) definitions
+function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray) where {T}
 	norms = norm.(eachcol(x))
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
+	norms ./= maxnorm
 
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
-	aTx = if scale
-		norms ./= maxnorm
-		h.coeff_A * x ./ maxnorm
-	else
-		h.coeff_A * x
-	end
-
-	# Reshape aTx to ensure that it's a matrix
-	aTx = reshape(aTx, size(h.coeff_A, 1), size(x, 2))
+	aTx = h.coeff_A * x ./ maxnorm |> mat
 
 	if h.m > 0
-		# Compute the norms of the inputs, followed by norms^2, norms^4, ... norms^(2^m).
+		# Compute norms^2, norms^4, ... norms^(2^m).
 		# Multiply these by the second array of coefficients and add them to aTx, so
 		# that in totality we compute
 		#
 		# 		aTx = [coeff_A, coeff_B] * P(x)
-		# 			= [coeff_A, coeff_B] * [x; norms; norms^2; ...; norms^(2^m)]
+		# 			= [coeff_A, coeff_B] * [x; norms^2; ...; norms^(2^m)]
 		#
 		# By making these computations in a somewhat roundabout way (rather than following
 		# the formula above), we save a lot of memory by avoiding concatenations.
-		ger!(T(1), h.coeff_B[:,1], norms, aTx)
-
 		# Note that m is typically small, so these iterations don't do much to harm performance
-		for ii = 2:h.m
+		for ii = 1:h.m
 			@. norms = norms^2
 			ger!(T(1), h.coeff_B[:,ii], norms, aTx)
 		end
@@ -84,13 +81,20 @@ MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
+# h(Q(x)) definitions
 function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
-	aTx = h.coeff_A * x
+	aTx = h.coeff_A * x |> mat
 
-	# Normalize the query vectors
-	aTx = aTx ./ norm.(eachcol(x))'
+	# Normalize the query vectors. We perform normalization after computing
+	# aTx (rather than before) so that we don't have to allocate a new array
+	# of size(x). Moreover, for large input vectors, the size of aTx is typically
+	# much smaller than the size of x.
+	norms = norm.(eachcol(x))
+	norms[norms .== 0] .= 1
+
+	aTx .= aTx ./ norms'
 
 	# Here, we would multiply the second array of coefficients by the elements that
 	# Q(x) concatenates to x. Then we'd add this to aTx so that in total we compute
