@@ -2,7 +2,6 @@ using Test, Random, LSH
 
 @testset "MIPS hashing tests" begin
 	Random.seed!(0)
-	import LSH: index_hash, query_hash
 	import LinearAlgebra: norm
 	import Base.Iterators: product
 
