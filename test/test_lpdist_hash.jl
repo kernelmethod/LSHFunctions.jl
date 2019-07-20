@@ -2,7 +2,9 @@ using Test, Random, LSH
 
 @testset "L^p hashing tests" begin
 	Random.seed!(0)
-	@testset "Can construct a simple L^p distance hash function" begin
+	import LSH: SymmetricLSHFamily
+
+	@testset "Can construct a L^p distance hash function" begin
 		input_length = 5
 		n_hashes = 8
 		denom = 2
@@ -21,14 +23,25 @@ using Test, Random, LSH
 		# so that we avoid expensive type conversions.
 		Lp_hash = LpDistHash{Float32}(5, 5, 1)
 
-		@test isa(Lp_hash.coeff, Array{Float32})
+		@test isa(Lp_hash, LpDistHash{Float32})
+		@test isa(Lp_hash, SymmetricLSHFamily{Float32})
+		@test isa(Lp_hash.coeff, Matrix{Float32})
 		@test isa(Lp_hash.denom, Float32)
-		@test isa(Lp_hash.shift, Array{Float32})
+		@test isa(Lp_hash.shift, Vector{Float32})
 
 		Lp_hash = LpDistHash{Float64}(5, 5, 1)
-		@test isa(Lp_hash.coeff, Array{Float64})
+		@test isa(Lp_hash, LpDistHash{Float64})
+		@test isa(Lp_hash, SymmetricLSHFamily{Float64})
+		@test isa(Lp_hash.coeff, Matrix{Float64})
 		@test isa(Lp_hash.denom, Float64)
-		@test isa(Lp_hash.shift, Array{Float64})
+		@test isa(Lp_hash.shift, Vector{Float64})
+
+		# The default dtype should be Float32
+		Lp_hash = LpDistHash(5, 5, 1)
+		@test isa(Lp_hash, LpDistHash{Float32})
+		@test isa(Lp_hash.coeff, Matrix{Float32})
+		@test isa(Lp_hash.denom, Float32)
+		@test isa(Lp_hash.shift, Vector{Float32})
 	end
 
 	@testset "Hashes are correctly computed" begin
