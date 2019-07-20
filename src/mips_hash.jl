@@ -1,7 +1,3 @@
-#=
-Definitions for families of asymmetric locality-sensitive hash functions.
-=#
-
 """
 Asymmetric LSH for approximate maximum inner product search. Ref:
 
