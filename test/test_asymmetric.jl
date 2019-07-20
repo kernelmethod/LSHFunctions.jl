@@ -38,6 +38,20 @@ using Test, Random, LSH
 			end
 		end
 
+		@testset "Hashing returns the correct data types" begin
+			hashfn = MIPSHash{Float64}(4, 1, 1., 1)
+
+			# Matrix{Float64} -> Matrix{Int32}
+			x = randn(4, 10)
+			@test isa(MIPSHash_P_LSH(hashfn, x), Matrix{Int32})
+			@test isa(MIPSHash_Q_LSH(hashfn, x), Matrix{Int32})
+
+			# Vector{Float64} -> Matrix{Int32}
+			x = randn(4)
+			@test isa(MIPSHash_P_LSH(hashfn, x), Vector{Int32})
+			@test isa(MISPHash_Q_LSH(hashfn, x), Vector{Int32})
+		end
+
 		@test_skip @testset "Equivalent to L^2 hash when m == 0" begin
 			input_length = 10
 			n_hashes = 64
