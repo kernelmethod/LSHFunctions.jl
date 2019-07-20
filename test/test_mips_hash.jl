@@ -42,13 +42,23 @@ using Test, Random, LSH
 
 		# Matrix{Float64} -> Matrix{Int32}
 		x = randn(4, 10)
-		@test isa(index_hash(hashfn, x), Matrix{Int32})
-		@test isa(query_hash(hashfn, x), Matrix{Int32})
+		p_hashes = index_hash(hashfn, x)
+		q_hashes = query_hash(hashfn, x)
 
-		# Vector{Float64} -> Matrix{Int32}
+		@test isa(p_hashes, Matrix{Int32})
+		@test isa(q_hashes, Matrix{Int32})
+		@test eltype(p_hashes) == hashtype(hashfn)
+		@test eltype(q_hashes) == hashtype(hashfn)
+
+		# Vector{Float64} -> Vector{Int32}
 		x = randn(4)
+		p_hashes = index_hash(hashfn, x)
+		q_hashes = query_hash(hashfn, x)
+
 		@test isa(index_hash(hashfn, x), Vector{Int32})
 		@test isa(query_hash(hashfn, x), Vector{Int32})
+		@test eltype(p_hashes) == hashtype(hashfn)
+		@test eltype(q_hashes) == hashtype(hashfn)
 	end
 
 	@testset "MIPSHash h(P(x)) is correctly computed" begin
@@ -148,14 +158,6 @@ using Test, Random, LSH
 		manual_hashes = floor.(Int32, manual_hashes)
 
 		@test manual_hashes == hashes
-	end
-
-	@testset "Hashes have the correct dtype" begin
-		hashfn = MIPSHash(5, 5, 1, 3)
-		p_hashes = index_hash(hashfn, randn(5))
-		q_hashes = query_hash(hashfn, randn(5))
-		@test eltype(p_hashes) == hashtype(hashfn)
-		@test eltype(q_hashes) == hashtype(hashfn)
 	end
 
 	@testset "MIPSHash generates collisions for large inner products" begin
