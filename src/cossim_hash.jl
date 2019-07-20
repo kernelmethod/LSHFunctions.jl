@@ -21,4 +21,7 @@ CosSimHash(args...; kws...) =
 (h::CosSimHash{T})(x::AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(h, Tuple{AbstractArray}, x)
 
-
+#=
+LSHFamily and SymmetricLSHFamily API compliance
+=#
+hashtype(::CosSimHash) = Bool

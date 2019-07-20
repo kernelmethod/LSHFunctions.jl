@@ -150,6 +150,14 @@ using Test, Random, LSH
 		@test manual_hashes == hashes
 	end
 
+	@testset "Hashes have the correct dtype" begin
+		hashfn = MIPSHash(5, 5, 1, 3)
+		p_hashes = index_hash(hashfn, randn(5))
+		q_hashes = query_hash(hashfn, randn(5))
+		@test eltype(p_hashes) == hashtype(hashfn)
+		@test eltype(q_hashes) == hashtype(hashfn)
+	end
+
 	@testset "MIPSHash generates collisions for large inner products" begin
 		input_length = 5; n_hashes = 128; denom = 1; m = 5
 		hashfn = MIPSHash(input_length, n_hashes, denom, m)

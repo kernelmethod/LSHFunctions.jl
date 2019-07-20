@@ -55,3 +55,8 @@ end
 
 (h::LpDistHash{T})(x::AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(h, Tuple{AbstractArray}, x)
+
+#=
+LSHFamily and SymmetricLSHFamily API compliance
+=#
+hashtype(::LpDistHash) = Int32

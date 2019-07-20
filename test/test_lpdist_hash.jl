@@ -68,4 +68,10 @@ using Test, Random, LSH
 		@test isa(hashes, Matrix{Int32})
 		@test hashes == manual_hashes
 	end
+
+	@testset "Hashes have the correct dtype" begin
+		hashfn = LpDistHash(5, 5, 1)
+		hashes = hashfn(randn(5))
+		@test eltype(hashes) == hashtype(hashfn)
+	end
 end

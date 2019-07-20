@@ -8,6 +8,6 @@ include("lpdist_hash.jl")
 include("mips_hash.jl")
 
 export CosSimHash, LpDistHash, L1DistHash, L2DistHash, MIPSHash,
-	index_hash, query_hash
+	hashtype, index_hash, query_hash
 
 end # module
