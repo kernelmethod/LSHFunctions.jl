@@ -47,6 +47,9 @@ function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray; scale::Bool = true) wh
 		h.coeff_A * x
 	end
 
+	# Reshape aTx to ensure that it's a matrix
+	aTx = reshape(aTx, size(h.coeff_A, 1), size(x, 2))
+
 	if h.m > 0
 		# Compute the norms of the inputs, followed by norms^2, norms^4, ... norms^(2^m).
 		# Multiply these by the second array of coefficients and add them to aTx, so
@@ -78,6 +81,9 @@ MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}; kws...) where {T <:
 MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...)
 
+MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_P_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
+
 function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
@@ -106,3 +112,6 @@ MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAM
 
 MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_Q_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x)
+
+MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_Q_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x) |> vec

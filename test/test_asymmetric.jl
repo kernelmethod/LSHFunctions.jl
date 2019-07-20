@@ -30,10 +30,10 @@ using Test, Random, LSH
 			for T in (Float32, Float64)
 				hashfn = MIPSHash{T}(5, 5, 2, 4)
 
-				@test isa(hashfn.coeff_A, Array{T})
-				@test isa(hashfn.coeff_B, Array{T})
-				@test isa(hashfn.shift, Array{T})
-				@test isa(hashfn.Qshift, Array{T})
+				@test isa(hashfn.coeff_A, Matrix{T})
+				@test isa(hashfn.coeff_B, Matrix{T})
+				@test isa(hashfn.shift, Vector{T})
+				@test isa(hashfn.Qshift, Vector{T})
 				@test isa(hashfn.denom, T)
 			end
 		end
@@ -49,7 +49,7 @@ using Test, Random, LSH
 			# Vector{Float64} -> Matrix{Int32}
 			x = randn(4)
 			@test isa(MIPSHash_P_LSH(hashfn, x), Vector{Int32})
-			@test isa(MISPHash_Q_LSH(hashfn, x), Vector{Int32})
+			@test isa(MIPSHash_Q_LSH(hashfn, x), Vector{Int32})
 		end
 
 		@test_skip @testset "Equivalent to L^2 hash when m == 0" begin
