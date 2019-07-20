@@ -1,11 +1,12 @@
 using Test, Random, LSH
 
-@testset "LSH tests" begin
+@testset "Test asymmetric LSH families" begin
 	Random.seed!(0)
 
 	@testset "MIPS hashing tests" begin
 		import LSH: MIPSHash_P_LSH, MIPSHash_Q_LSH
 		import LinearAlgebra: norm
+		import Base.Iterators: product
 
 		@testset "Can construct a simple MIPS hash function" begin
 			input_length = 5
@@ -152,14 +153,39 @@ using Test, Random, LSH
 			@test manual_hashes == hashes
 		end
 
-		@test_skip @testset "MIPSHash generates collisions for parallel vectors" begin
-			input_length = 5; n_hashes = 8; denom = 2; m = 3
+		@testset "MIPSHash generates collisions for large inner products" begin
+			input_length = 5; n_hashes = 128; denom = 1; m = 5
 			hashfn = MIPSHash(input_length, n_hashes, denom, m)
 
 			x = randn(input_length)
-			inputs = [x (2*x) -x]
-			p_hashes = collect(MIPSHash_P_LSH(hashfn, c) for c in eachcol(inputs))
-			q_hashes = collect(MIPSHash_Q_LSH(hashfn, c) for c in eachcol(inputs))
+			x_query_hashes = MIPSHash_Q_LSH(hashfn, x)
+
+			# Check that MIPSHash isn't just generating a single query hash
+			@test any(x_query_hashes .!= x_query_hashes[1])
+
+			# Compute the indexing hashes for a dataset with four vectors:
+			# a) 10 * x (where x is the test query vector)
+			# b) x
+			# c) A vector of all zeros
+			# d) -x
+			dataset = [(10*x) x zeros(input_length) -x]
+			p_hashes = MIPSHash_P_LSH(hashfn, dataset)
+
+			# Each collection of hashes should be different from one another
+			@test let result = true
+				for (ii,jj) in product(1:4, 1:4)
+					if ii != jj && p_hashes[:,ii] == p_hashes[:,jj]
+						result = false
+						break
+					end
+				end
+				result
+			end
+
+			# The number of collisions should be highest for x and 2*x, second-highest
+			# for x and x, second-lowest for x and zeros, and lowest for x and -x
+			n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
+			@test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
 		end
 	end
 end
