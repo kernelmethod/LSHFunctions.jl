@@ -115,3 +115,9 @@ MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_D
 
 MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_Q_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x) |> vec
+
+#=
+AsymmetricLSHFamily API compliance functions
+=#
+index_hash(h :: MIPSHash, x :: AbstractArray) = MIPSHash_P_LSH(h, x)
+query_hash(h :: MIPSHash, x :: AbstractArray) = MIPSHash_Q_LSH(h, x)

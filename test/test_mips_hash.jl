@@ -2,7 +2,7 @@ using Test, Random, LSH
 
 @testset "MIPS hashing tests" begin
 	Random.seed!(0)
-	import LSH: MIPSHash_P_LSH, MIPSHash_Q_LSH
+	import LSH: index_hash, query_hash
 	import LinearAlgebra: norm
 	import Base.Iterators: product
 
@@ -43,13 +43,13 @@ using Test, Random, LSH
 
 		# Matrix{Float64} -> Matrix{Int32}
 		x = randn(4, 10)
-		@test isa(MIPSHash_P_LSH(hashfn, x), Matrix{Int32})
-		@test isa(MIPSHash_Q_LSH(hashfn, x), Matrix{Int32})
+		@test isa(index_hash(hashfn, x), Matrix{Int32})
+		@test isa(query_hash(hashfn, x), Matrix{Int32})
 
 		# Vector{Float64} -> Matrix{Int32}
 		x = randn(4)
-		@test isa(MIPSHash_P_LSH(hashfn, x), Vector{Int32})
-		@test isa(MIPSHash_Q_LSH(hashfn, x), Vector{Int32})
+		@test isa(index_hash(hashfn, x), Vector{Int32})
+		@test isa(query_hash(hashfn, x), Vector{Int32})
 	end
 
 	@testset "MIPSHash h(P(x)) is correctly computed" begin
@@ -63,7 +63,7 @@ using Test, Random, LSH
 
 		## Test 1: compute hashes on a single input
 		x = randn(input_length)
-		hash = MIPSHash_P_LSH(hashfn, x)
+		hash = index_hash(hashfn, x)
 
 		@test isa(hash, Vector{Int32})
 		@test length(hash) == n_hashes
@@ -82,7 +82,7 @@ using Test, Random, LSH
 		## Test 2: compute hashes on many inputs simultaneously
 		n_inputs = 256
 		x = randn(input_length, n_inputs)
-		hashes = MIPSHash_P_LSH(hashfn, x)
+		hashes = index_hash(hashfn, x)
 
 		@test isa(hashes, Matrix{Int32})
 		@test size(hashes) == (n_hashes, n_inputs)
@@ -116,7 +116,7 @@ using Test, Random, LSH
 
 		## Test 1: test on a single input
 		x = randn(input_length)
-		hash = MIPSHash_Q_LSH(hashfn, x)
+		hash = query_hash(hashfn, x)
 
 		@test isa(hash, Vector{Int32})
 		@test length(hash) == n_hashes
@@ -137,7 +137,7 @@ using Test, Random, LSH
 		## Test 2: test on multiple inputs
 		n_inputs = 256
 		x = randn(input_length, n_inputs)
-		hashes = MIPSHash_Q_LSH(hashfn, x)
+		hashes = query_hash(hashfn, x)
 
 		@test isa(hashes, Matrix{Int32})
 		@test size(hashes) == (n_hashes, n_inputs)
@@ -156,7 +156,7 @@ using Test, Random, LSH
 		hashfn = MIPSHash(input_length, n_hashes, denom, m)
 
 		x = randn(input_length)
-		x_query_hashes = MIPSHash_Q_LSH(hashfn, x)
+		x_query_hashes = query_hash(hashfn, x)
 
 		# Check that MIPSHash isn't just generating a single query hash
 		@test any(x_query_hashes .!= x_query_hashes[1])
@@ -167,7 +167,7 @@ using Test, Random, LSH
 		# c) A vector of all zeros
 		# d) -x
 		dataset = [(10*x) x zeros(input_length) -x]
-		p_hashes = MIPSHash_P_LSH(hashfn, dataset)
+		p_hashes = index_hash(hashfn, dataset)
 
 		# Each collection of hashes should be different from one another
 		@test let result = true
