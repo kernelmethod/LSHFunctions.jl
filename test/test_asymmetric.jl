@@ -1,16 +1,18 @@
 using Test, Random, LSH
 
-@testset "LSH tests" begin
+@testset "Test asymmetric LSH families" begin
 	Random.seed!(0)
 
 	@testset "MIPS hashing tests" begin
 		import LSH: MIPSHash_P_LSH, MIPSHash_Q_LSH
+		import LinearAlgebra: norm
+		import Base.Iterators: product
 
 		@testset "Can construct a simple MIPS hash function" begin
 			input_length = 5
 			n_hashes = 8
 			denom = 2
-			m = 5
+			m = 3
 
 			hashfn = MIPSHash(input_length, n_hashes, denom, m)
 			@test size(hashfn.coeff_A) == (n_hashes, input_length)
@@ -30,30 +32,160 @@ using Test, Random, LSH
 			for T in (Float32, Float64)
 				hashfn = MIPSHash{T}(5, 5, 2, 4)
 
-				@test isa(hashfn.coeff_A, Array{T})
-				@test isa(hashfn.coeff_B, Array{T})
-				@test isa(hashfn.shift, Array{T})
-				@test isa(hashfn.Qshift, Array{T})
+				@test isa(hashfn.coeff_A, Matrix{T})
+				@test isa(hashfn.coeff_B, Matrix{T})
+				@test isa(hashfn.shift, Vector{T})
+				@test isa(hashfn.Qshift, Vector{T})
 				@test isa(hashfn.denom, T)
 			end
 		end
 
-		@test_skip @testset "Equivalent to L^2 hash when m == 0" begin
-			input_length = 10
-			n_hashes = 64
-			denom = 2
+		@testset "Hashing returns the correct data types" begin
+			hashfn = MIPSHash{Float64}(4, 1, 1., 1)
 
-			MIPS_hashfn = MIPSHash{Float32}(input_length, n_hashes, denom, 0)
-			coeff_A, shift = MIPS_hashfn.coeff_A, MIPS_hashfn.shift
-			L2_hashfn = LpDistHash{Float32,typeof(coeff_A)}(coeff_A, denom, shift)
+			# Matrix{Float64} -> Matrix{Int32}
+			x = randn(4, 10)
+			@test isa(MIPSHash_P_LSH(hashfn, x), Matrix{Int32})
+			@test isa(MIPSHash_Q_LSH(hashfn, x), Matrix{Int32})
 
-			# When m == 0, we should have h(P(x)) == h(Q(x)) for the MIPS hash
-			x = randn(input_length, 32)
-			@test MIPSHash_P_LSH(MIPS_hashfn, x; scale=false) == MIPSHash_Q_LSH(MIPS_hashfn, x)
+			# Vector{Float64} -> Matrix{Int32}
+			x = randn(4)
+			@test isa(MIPSHash_P_LSH(hashfn, x), Vector{Int32})
+			@test isa(MIPSHash_Q_LSH(hashfn, x), Vector{Int32})
+		end
 
-			# Moreover, we expect that h(P(x)) == h(Q(x)) == k(x), where k is the equivalent
-			# L^2 hash function.
-			@test MIPSHash_P_LSH(MIPS_hashfn, x; scale=false) == L2_hashfn(x)
+		@testset "MIPSHash h(P(x)) is correctly computed" begin
+			input_length = 5; n_hashes = 128; denom = 0.5
+			hashfn = MIPSHash(input_length, n_hashes, denom, 3)
+			coeff = [hashfn.coeff_A hashfn.coeff_B]
+			shift = hashfn.shift
+
+			@test size(coeff) == (n_hashes, input_length+3)
+			@test size(shift) == (n_hashes,)
+
+			## Test 1: compute hashes on a single input
+			x = randn(input_length)
+			hash = MIPSHash_P_LSH(hashfn, x)
+
+			@test isa(hash, Vector{Int32})
+			@test length(hash) == n_hashes
+
+			# Start by performing the transform P(x)
+			u = x / norm(x)
+			norm_powers = [norm(u)^2, norm(u)^4, norm(u)^8]
+			Px = [u; norm_powers]
+
+			# Now compute the L^2 hash of P(x)
+			manual_hash = coeff * Px ./ denom .+ shift
+			manual_hash = floor.(Int32, manual_hash)
+
+			@test manual_hash == hash
+
+			## Test 2: compute hashes on many inputs simultaneously
+			n_inputs = 256
+			x = randn(input_length, n_inputs)
+			hashes = MIPSHash_P_LSH(hashfn, x)
+
+			@test isa(hashes, Matrix{Int32})
+			@test size(hashes) == (n_hashes, n_inputs)
+
+			# Scale the inputs so that they each have norm ≤ 1
+			norms = norm.(eachcol(x))
+			max_norm = maximum(norms)
+			u = x ./ max_norm
+
+			# Now re-compute the norms and their first few powers, and
+			# append to the matrix u.
+			norms = norm.(eachcol(u))
+			norm_powers = [norms.^2 norms.^4 norms.^8]
+			Px = [u; norm_powers']
+
+			# Now compute the L^2 hash of Px
+			manual_hashes = coeff * Px ./ denom .+ shift
+			manual_hashes = floor.(Int32, manual_hashes)
+
+			@test manual_hashes == hashes
+		end
+
+		@testset "MIPSHash h(Q(x)) is correctly computed" begin
+			input_length = 5; n_hashes = 128; denom = 0.5
+			hashfn = MIPSHash(input_length, n_hashes, denom, 3)
+			coeff = [hashfn.coeff_A hashfn.coeff_B]
+			shift = hashfn.shift
+
+			@test size(coeff) == (n_hashes, input_length+3)
+			@test size(shift) == (n_hashes,)
+
+			## Test 1: test on a single input
+			x = randn(input_length)
+			hash = MIPSHash_Q_LSH(hashfn, x)
+
+			@test isa(hash, Vector{Int32})
+			@test length(hash) == n_hashes
+			
+			# To compute the hash manually, we start by creating the
+			# transform Q(x)
+			u = x ./ norm(x)
+			Qx = [u; 1/2; 1/2; 1/2]
+
+			@test size(Qx) == (input_length+3,)
+
+			# Then, we compute the L^2 hash of Qx
+			manual_hash = coeff * Qx ./ denom .+ shift
+			manual_hash = floor.(Int32, manual_hash)
+			
+			@test manual_hash == hash
+
+			## Test 2: test on multiple inputs
+			n_inputs = 256
+			x = randn(input_length, n_inputs)
+			hashes = MIPSHash_Q_LSH(hashfn, x)
+
+			@test isa(hashes, Matrix{Int32})
+			@test size(hashes) == (n_hashes, n_inputs)
+
+			u = x ./ norm.(eachcol(x))'
+			Qx = [u; fill(1/2, 3, n_inputs)]
+
+			manual_hashes = coeff * Qx ./ denom .+ shift
+			manual_hashes = floor.(Int32, manual_hashes)
+
+			@test manual_hashes == hashes
+		end
+
+		@testset "MIPSHash generates collisions for large inner products" begin
+			input_length = 5; n_hashes = 128; denom = 1; m = 5
+			hashfn = MIPSHash(input_length, n_hashes, denom, m)
+
+			x = randn(input_length)
+			x_query_hashes = MIPSHash_Q_LSH(hashfn, x)
+
+			# Check that MIPSHash isn't just generating a single query hash
+			@test any(x_query_hashes .!= x_query_hashes[1])
+
+			# Compute the indexing hashes for a dataset with four vectors:
+			# a) 10 * x (where x is the test query vector)
+			# b) x
+			# c) A vector of all zeros
+			# d) -x
+			dataset = [(10*x) x zeros(input_length) -x]
+			p_hashes = MIPSHash_P_LSH(hashfn, dataset)
+
+			# Each collection of hashes should be different from one another
+			@test let result = true
+				for (ii,jj) in product(1:4, 1:4)
+					if ii != jj && p_hashes[:,ii] == p_hashes[:,jj]
+						result = false
+						break
+					end
+				end
+				result
+			end
+
+			# The number of collisions should be highest for x and 2*x, second-highest
+			# for x and x, second-lowest for x and zeros, and lowest for x and -x
+			n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
+			@test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
 		end
 	end
 end
