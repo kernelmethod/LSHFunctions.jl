@@ -81,7 +81,7 @@ using Test, Random, LSH
 			@test manual_hash == hash
 
 			## Test 2: compute hashes on many inputs simultaneously
-			n_inputs = 128
+			n_inputs = 256
 			x = randn(input_length, n_inputs)
 			hashes = MIPSHash_P_LSH(hashfn, x)
 
@@ -136,7 +136,7 @@ using Test, Random, LSH
 			@test manual_hash == hash
 
 			## Test 2: test on multiple inputs
-			n_inputs = 128
+			n_inputs = 256
 			x = randn(input_length, n_inputs)
 			hashes = MIPSHash_Q_LSH(hashfn, x)
 
@@ -144,7 +144,7 @@ using Test, Random, LSH
 			@test size(hashes) == (n_hashes, n_inputs)
 
 			u = x ./ norm.(eachcol(x))'
-			Qx = [x; fill(1/2, 3, n_inputs)]
+			Qx = [u; fill(1/2, 3, n_inputs)]
 
 			manual_hashes = coeff * Qx ./ denom .+ shift
 			manual_hashes = floor.(Int32, manual_hashes)
