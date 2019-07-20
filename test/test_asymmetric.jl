@@ -5,12 +5,13 @@ using Test, Random, LSH
 
 	@testset "MIPS hashing tests" begin
 		import LSH: MIPSHash_P_LSH, MIPSHash_Q_LSH
+		import LinearAlgebra: norm
 
 		@testset "Can construct a simple MIPS hash function" begin
 			input_length = 5
 			n_hashes = 8
 			denom = 2
-			m = 5
+			m = 3
 
 			hashfn = MIPSHash(input_length, n_hashes, denom, m)
 			@test size(hashfn.coeff_A) == (n_hashes, input_length)
@@ -52,22 +53,113 @@ using Test, Random, LSH
 			@test isa(MIPSHash_Q_LSH(hashfn, x), Vector{Int32})
 		end
 
-		@test_skip @testset "Equivalent to L^2 hash when m == 0" begin
-			input_length = 10
-			n_hashes = 64
-			denom = 2
+		@testset "MIPSHash h(P(x)) is correctly computed" begin
+			input_length = 5; n_hashes = 128; denom = 0.5
+			hashfn = MIPSHash(input_length, n_hashes, denom, 3)
+			coeff = [hashfn.coeff_A hashfn.coeff_B]
+			shift = hashfn.shift
 
-			MIPS_hashfn = MIPSHash{Float32}(input_length, n_hashes, denom, 0)
-			coeff_A, shift = MIPS_hashfn.coeff_A, MIPS_hashfn.shift
-			L2_hashfn = LpDistHash{Float32,typeof(coeff_A)}(coeff_A, denom, shift)
+			@test size(coeff) == (n_hashes, input_length+3)
+			@test size(shift) == (n_hashes,)
 
-			# When m == 0, we should have h(P(x)) == h(Q(x)) for the MIPS hash
-			x = randn(input_length, 32)
-			@test MIPSHash_P_LSH(MIPS_hashfn, x; scale=false) == MIPSHash_Q_LSH(MIPS_hashfn, x)
+			## Test 1: compute hashes on a single input
+			x = randn(input_length)
+			hash = MIPSHash_P_LSH(hashfn, x)
 
-			# Moreover, we expect that h(P(x)) == h(Q(x)) == k(x), where k is the equivalent
-			# L^2 hash function.
-			@test MIPSHash_P_LSH(MIPS_hashfn, x; scale=false) == L2_hashfn(x)
+			@test isa(hash, Vector{Int32})
+			@test length(hash) == n_hashes
+
+			# Start by performing the transform P(x)
+			u = x / norm(x)
+			norm_powers = [norm(u)^2, norm(u)^4, norm(u)^8]
+			Px = [u; norm_powers]
+
+			# Now compute the L^2 hash of P(x)
+			manual_hash = coeff * Px ./ denom .+ shift
+			manual_hash = floor.(Int32, manual_hash)
+
+			@test manual_hash == hash
+
+			## Test 2: compute hashes on many inputs simultaneously
+			n_inputs = 128
+			x = randn(input_length, n_inputs)
+			hashes = MIPSHash_P_LSH(hashfn, x)
+
+			@test isa(hashes, Matrix{Int32})
+			@test size(hashes) == (n_hashes, n_inputs)
+
+			# Scale the inputs so that they each have norm ≤ 1
+			norms = norm.(eachcol(x))
+			max_norm = maximum(norms)
+			u = x ./ max_norm
+
+			# Now re-compute the norms and their first few powers, and
+			# append to the matrix u.
+			norms = norm.(eachcol(u))
+			norm_powers = [norms.^2 norms.^4 norms.^8]
+			Px = [u; norm_powers']
+
+			# Now compute the L^2 hash of Px
+			manual_hashes = coeff * Px ./ denom .+ shift
+			manual_hashes = floor.(Int32, manual_hashes)
+
+			@test manual_hashes == hashes
+		end
+
+		@testset "MIPSHash h(Q(x)) is correctly computed" begin
+			input_length = 5; n_hashes = 128; denom = 0.5
+			hashfn = MIPSHash(input_length, n_hashes, denom, 3)
+			coeff = [hashfn.coeff_A hashfn.coeff_B]
+			shift = hashfn.shift
+
+			@test size(coeff) == (n_hashes, input_length+3)
+			@test size(shift) == (n_hashes,)
+
+			## Test 1: test on a single input
+			x = randn(input_length)
+			hash = MIPSHash_Q_LSH(hashfn, x)
+
+			@test isa(hash, Vector{Int32})
+			@test length(hash) == n_hashes
+			
+			# To compute the hash manually, we start by creating the
+			# transform Q(x)
+			u = x ./ norm(x)
+			Qx = [u; 1/2; 1/2; 1/2]
+
+			@test size(Qx) == (input_length+3,)
+
+			# Then, we compute the L^2 hash of Qx
+			manual_hash = coeff * Qx ./ denom .+ shift
+			manual_hash = floor.(Int32, manual_hash)
+			
+			@test manual_hash == hash
+
+			## Test 2: test on multiple inputs
+			n_inputs = 128
+			x = randn(input_length, n_inputs)
+			hashes = MIPSHash_Q_LSH(hashfn, x)
+
+			@test isa(hashes, Matrix{Int32})
+			@test size(hashes) == (n_hashes, n_inputs)
+
+			u = x ./ norm.(eachcol(x))'
+			Qx = [x; fill(1/2, 3, n_inputs)]
+
+			manual_hashes = coeff * Qx ./ denom .+ shift
+			manual_hashes = floor.(Int32, manual_hashes)
+
+			@test manual_hashes == hashes
+		end
+
+		@test_skip @testset "MIPSHash generates collisions for parallel vectors" begin
+			input_length = 5; n_hashes = 8; denom = 2; m = 3
+			hashfn = MIPSHash(input_length, n_hashes, denom, m)
+
+			x = randn(input_length)
+			inputs = [x (2*x) -x]
+			p_hashes = collect(MIPSHash_P_LSH(hashfn, c) for c in eachcol(inputs))
+			q_hashes = collect(MIPSHash_Q_LSH(hashfn, c) for c in eachcol(inputs))
 		end
 	end
 end
