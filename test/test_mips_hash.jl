@@ -1,6 +1,6 @@
 using Test, Random, LSH
 
-@testset "MIPS hashing tests" begin
+@testset "MIPSHash tests" begin
 	Random.seed!(0)
 	import LinearAlgebra: norm
 	import Base.Iterators: product
