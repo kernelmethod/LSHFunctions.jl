@@ -3,7 +3,7 @@ Asymmetric LSH for approximate maximum inner product search. Ref:
 
 	https://arxiv.org/abs/1405.5869
 """
-struct MIPSHash{T} <: AsymmetricLSHFamily{T}
+struct MIPSHash{T} <: AsymmetricLSHFunction{T}
 	coeff_A :: Matrix{T}
 	coeff_B :: Matrix{T}
 	denom :: T
@@ -117,7 +117,7 @@ MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_
 	invoke(MIPSHash_Q_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x) |> vec
 
 #=
-LSHFamily and AsymmetricLSHFamily API compliance
+LSHFunction and AsymmetricLSHFunction API compliance
 =#
 index_hash(h :: MIPSHash, x :: AbstractArray) = MIPSHash_P_LSH(h, x)
 query_hash(h :: MIPSHash, x :: AbstractArray) = MIPSHash_Q_LSH(h, x)
