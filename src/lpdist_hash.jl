@@ -4,7 +4,7 @@ import LinearAlgebra.BLAS: ger!
 """
 L^p distance LSH function.
 """
-struct LpDistHash{T, A <: AbstractMatrix{T}} <: SymmetricLSHFamily{T}
+struct LpDistHash{T, A <: AbstractMatrix{T}} <: SymmetricLSHFunction{T}
 	coeff :: A
 	denom :: T
 	shift :: Vector{T}
@@ -57,6 +57,6 @@ end
 	invoke(h, Tuple{AbstractArray}, x)
 
 #=
-LSHFamily and SymmetricLSHFamily API compliance
+LSHFunction and SymmetricLSHFunction API compliance
 =#
 hashtype(::LpDistHash) = Int32

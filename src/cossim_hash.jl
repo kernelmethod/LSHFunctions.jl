@@ -1,7 +1,7 @@
 """
 Cosine similarity LSH function.
 """
-struct CosSimHash{T, A <: Matrix{T}} <: SymmetricLSHFamily{T}
+struct CosSimHash{T, A <: Matrix{T}} <: SymmetricLSHFunction{T}
 	coeff :: A
 end
 
@@ -22,6 +22,6 @@ CosSimHash(args...; kws...) =
 	invoke(h, Tuple{AbstractArray}, x)
 
 #=
-LSHFamily and SymmetricLSHFamily API compliance
+LSHFunction and SymmetricLSHFunction API compliance
 =#
 hashtype(::CosSimHash) = Bool

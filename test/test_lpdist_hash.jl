@@ -2,7 +2,7 @@ using Test, Random, LSH
 
 @testset "L^p hashing tests" begin
 	Random.seed!(0)
-	import LSH: SymmetricLSHFamily
+	import LSH: SymmetricLSHFunction
 
 	@testset "Can construct a L^p distance hash function" begin
 		input_length = 5
@@ -24,14 +24,14 @@ using Test, Random, LSH
 		Lp_hash = LpDistHash{Float32}(5, 5, 1)
 
 		@test isa(Lp_hash, LpDistHash{Float32})
-		@test isa(Lp_hash, SymmetricLSHFamily{Float32})
+		@test isa(Lp_hash, SymmetricLSHFunction{Float32})
 		@test isa(Lp_hash.coeff, Matrix{Float32})
 		@test isa(Lp_hash.denom, Float32)
 		@test isa(Lp_hash.shift, Vector{Float32})
 
 		Lp_hash = LpDistHash{Float64}(5, 5, 1)
 		@test isa(Lp_hash, LpDistHash{Float64})
-		@test isa(Lp_hash, SymmetricLSHFamily{Float64})
+		@test isa(Lp_hash, SymmetricLSHFunction{Float64})
 		@test isa(Lp_hash.coeff, Matrix{Float64})
 		@test isa(Lp_hash.denom, Float64)
 		@test isa(Lp_hash.shift, Vector{Float64})

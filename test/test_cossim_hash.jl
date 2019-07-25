@@ -2,7 +2,7 @@ using Test, Random, LSH
 
 @testset "Cosine similarity tests" begin
 	Random.seed!(0)
-	import LSH: SymmetricLSHFamily
+	import LSH: SymmetricLSHFunction
 
 	@testset "Can construct a cosine similarity hash function" begin
 		input_length = 5
@@ -19,12 +19,12 @@ using Test, Random, LSH
 	@testset "Type consistency in CosSimHash fields" begin
 		hashfn = CosSimHash{Float32}(1, 1)
 		@test isa(hashfn, CosSimHash{Float32})
-		@test isa(hashfn, SymmetricLSHFamily{Float32})
+		@test isa(hashfn, SymmetricLSHFunction{Float32})
 		@test isa(hashfn.coeff, Matrix{Float32})
 
 		hashfn = CosSimHash{Float64}(1, 1)
 		@test isa(hashfn, CosSimHash{Float64})
-		@test isa(hashfn, SymmetricLSHFamily{Float64})
+		@test isa(hashfn, SymmetricLSHFunction{Float64})
 		@test isa(hashfn.coeff, Matrix{Float64})
 
 		# The default should be for hashfn to be a CosSimHash{Float32}
