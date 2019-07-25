@@ -10,7 +10,7 @@ using Test, Random, LSH
 		denom = 2
 
 		for p in (1,2)
-			Lp_hash = LpDistHash(input_length, n_hashes, denom, p)
+			Lp_hash = LpHash(input_length, n_hashes, denom, p)
 
 			@test size(Lp_hash.coeff) == (n_hashes, input_length)
 			@test Lp_hash.denom == denom
@@ -18,27 +18,27 @@ using Test, Random, LSH
 		end
 	end
 
-	@testset "Type consistency in LpDistHash fields" begin
+	@testset "Type consistency in LpHash fields" begin
 		# Should have type consistency between the fields of the struct,
 		# so that we avoid expensive type conversions.
-		Lp_hash = LpDistHash{Float32}(5, 5, 1)
+		Lp_hash = LpHash{Float32}(5, 5, 1)
 
-		@test isa(Lp_hash, LpDistHash{Float32})
+		@test isa(Lp_hash, LpHash{Float32})
 		@test isa(Lp_hash, SymmetricLSHFunction{Float32})
 		@test isa(Lp_hash.coeff, Matrix{Float32})
 		@test isa(Lp_hash.denom, Float32)
 		@test isa(Lp_hash.shift, Vector{Float32})
 
-		Lp_hash = LpDistHash{Float64}(5, 5, 1)
-		@test isa(Lp_hash, LpDistHash{Float64})
+		Lp_hash = LpHash{Float64}(5, 5, 1)
+		@test isa(Lp_hash, LpHash{Float64})
 		@test isa(Lp_hash, SymmetricLSHFunction{Float64})
 		@test isa(Lp_hash.coeff, Matrix{Float64})
 		@test isa(Lp_hash.denom, Float64)
 		@test isa(Lp_hash.shift, Vector{Float64})
 
 		# The default dtype should be Float32
-		Lp_hash = LpDistHash(5, 5, 1)
-		@test isa(Lp_hash, LpDistHash{Float32})
+		Lp_hash = LpHash(5, 5, 1)
+		@test isa(Lp_hash, LpHash{Float32})
 		@test isa(Lp_hash.coeff, Matrix{Float32})
 		@test isa(Lp_hash.denom, Float32)
 		@test isa(Lp_hash.shift, Vector{Float32})
@@ -49,7 +49,7 @@ using Test, Random, LSH
 		n_hashes = 8
 		denom = 2
 
-		hashfn = LpDistHash{Float32}(input_length, n_hashes, denom)
+		hashfn = LpHash{Float32}(input_length, n_hashes, denom)
 		coeff, shift = hashfn.coeff, hashfn.shift
 
 		# Test on a single input
@@ -70,7 +70,7 @@ using Test, Random, LSH
 	end
 
 	@testset "Hashes have the correct dtype" begin
-		hashfn = LpDistHash(5, 5, 1)
+		hashfn = LpHash(5, 5, 1)
 
 		# Test 1: Vector{Float64} -> Vector{Int32}
 		hashes = hashfn(randn(5))

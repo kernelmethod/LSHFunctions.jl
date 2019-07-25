@@ -7,36 +7,36 @@ using Test, Random, LSH
 	@testset "Can construct a cosine similarity hash function" begin
 		input_length = 5
 		n_hashes = 8
-		hashfn = CosSimHash(input_length, n_hashes)
+		hashfn = SimHash(input_length, n_hashes)
 
 		@test size(hashfn.coeff) == (n_hashes, input_length)
 
 		# Test with just one hash
-		hashfn = CosSimHash(input_length, 1)
+		hashfn = SimHash(input_length, 1)
 		@test size(hashfn.coeff) == (1, input_length)
 	end
 
-	@testset "Type consistency in CosSimHash fields" begin
-		hashfn = CosSimHash{Float32}(1, 1)
-		@test isa(hashfn, CosSimHash{Float32})
+	@testset "Type consistency in SimHash fields" begin
+		hashfn = SimHash{Float32}(1, 1)
+		@test isa(hashfn, SimHash{Float32})
 		@test isa(hashfn, SymmetricLSHFunction{Float32})
 		@test isa(hashfn.coeff, Matrix{Float32})
 
-		hashfn = CosSimHash{Float64}(1, 1)
-		@test isa(hashfn, CosSimHash{Float64})
+		hashfn = SimHash{Float64}(1, 1)
+		@test isa(hashfn, SimHash{Float64})
 		@test isa(hashfn, SymmetricLSHFunction{Float64})
 		@test isa(hashfn.coeff, Matrix{Float64})
 
-		# The default should be for hashfn to be a CosSimHash{Float32}
-		hashfn = CosSimHash(1, 1)
-		@test isa(hashfn, CosSimHash{Float32})
+		# The default should be for hashfn to be a SimHash{Float32}
+		hashfn = SimHash(1, 1)
+		@test isa(hashfn, SimHash{Float32})
 		@test isa(hashfn.coeff, Matrix{Float32})
 	end
 
 	@testset "Hash simple inputs" begin
 		input_length = 5
 		n_hashes = 128
-		hashfn = CosSimHash(input_length, n_hashes)
+		hashfn = SimHash(input_length, n_hashes)
 
 		## Test 1: a single input that is just the zero vector
 		x = zeros(input_length)
@@ -60,10 +60,10 @@ using Test, Random, LSH
 		@test any(hashes[:,1]) && !all(hashes[:,1])
 	end
 
-	@testset "CosSimHash computes hashes correctly" begin
+	@testset "SimHash computes hashes correctly" begin
 		input_length = 5
 		n_hashes = 128
-		hashfn = CosSimHash(input_length, n_hashes)
+		hashfn = SimHash(input_length, n_hashes)
 		coeff = hashfn.coeff
 
 		## Test 1: a single input
@@ -82,7 +82,7 @@ using Test, Random, LSH
 	end
 
 	@testset "Hashing returns the correct data types" begin
-		hashfn = CosSimHash(5, 2)
+		hashfn = SimHash(5, 2)
 
 		## Test 1: Vector{Float64} -> BitArray{1}
 		hashes = hashfn(randn(5))
