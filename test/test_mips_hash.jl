@@ -4,6 +4,7 @@ using Test, Random, LSH
 	Random.seed!(0)
 	import LinearAlgebra: norm
 	import Base.Iterators: product
+	import SparseArrays: sprandn
 
 	@testset "Can construct a simple MIPS hash function" begin
 		input_length = 5
@@ -193,5 +194,21 @@ using Test, Random, LSH
 		# for x and x, second-lowest for x and zeros, and lowest for x and -x
 		n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
 		@test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
+	end
+
+	@testset "Can compute hashes for sparse arrays" begin
+		X = sprandn(Float32, 10, 1000, 0.2)
+		hashfn = MIPSHash(size(X,1), 8, 1, 1)
+
+		ihashes = index_hash(hashfn, X)
+		qhashes = query_hash(hashfn, X)
+
+		# Compare against the case where X is dense
+		X = Matrix(X)
+		ihashes_dense = index_hash(hashfn, X)
+		qhashes_dense = query_hash(hashfn, X)
+		
+		@test ihashes == ihashes_dense
+		@test qhashes == qhashes_dense
 	end
 end

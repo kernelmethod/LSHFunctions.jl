@@ -34,9 +34,29 @@ h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
 mat(x :: AbstractVector) = reshape(x, length(x), 1)
 mat(x :: AbstractMatrix) = x
 
-# h(P(x)) definitions
+#=
+h(P(x)) definitions
+=#
+
+# Helper functions
+col_norms(x::AbstractArray) = map(norm, eachcol(x))
+col_norms(x::Array) = map(BLAS.nrm2, eachcol(x))
+col_norms(x::SparseVector) = [BLAS.nrm2(x.nzval)]
+col_norms(x::SparseMatrixCSC{T}) where {T} = begin
+	output = Vector{T}(undef, size(x,2))
+	@inbounds for ii = 1:size(x,2)
+		result = T(0)
+		start_idx, end_idx = x.colptr[ii], x.colptr[ii+1]-1
+		@simd for idx = start_idx:end_idx
+			result += x.nzval[idx].^2
+		end
+		output[ii] = √result
+	end
+	return output
+end
+
 function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
-	norms = map(BLAS.nrm2, eachcol(x))
+	norms = col_norms(x)
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
 	BLAS.scal!(length(norms), 1/maxnorm, norms, 1)
@@ -77,7 +97,14 @@ MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMI
 MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
-# h(Q(x)) definitions
+# Create a routine MIPSHash_P_update_aTx! to run on the inner loop of MIPSHash_P.
+# We dispatch it on three cases, optimizing based on the types of the arguments.
+
+#MIPSHash_P_update_aTx!(coeff, norms, aTx)
+
+#=
+h(Q(x)) definitions
+=#
 function MIPSHash_Q(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
@@ -87,9 +114,9 @@ function MIPSHash_Q(h :: MIPSHash, x :: AbstractArray)
 	# aTx (rather than before) so that we don't have to allocate a new array
 	# of size(x). Moreover, for large input vectors, the size of aTx is typically
 	# much smaller than the size of x.
-	# TODO: check that f(x) isn't hurting performance
 	f(x::T) where {T} = (x ≈ T(0) ? T(1) : x)
-	norms = map(f ∘ BLAS.nrm2, eachcol(x))
+	norms = col_norms(x)
+	map!(f, norms, norms)
 
 	aTx .= aTx ./ norms'
 
