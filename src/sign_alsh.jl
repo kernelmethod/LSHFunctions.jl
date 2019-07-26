@@ -46,6 +46,7 @@ function SignALSH_P(h::SignALSH{T}, x::AbstractArray) where {T}
 	norms = col_norms(x)
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
+	norms .*= 1/maxnorm
 
 	Ax = h.coeff_A * x .* (1/maxnorm)
 
