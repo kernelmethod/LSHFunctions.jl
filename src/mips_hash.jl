@@ -39,11 +39,11 @@ function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray) where {T}
 	norms = map(BLAS.nrm2, eachcol(x))
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
-	norms ./= maxnorm
+	BLAS.scal!(length(norms), 1/maxnorm, norms, 1)
 
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
-	aTx = h.coeff_A * x ./ maxnorm |> mat
+	aTx = h.coeff_A * x .* (1/maxnorm) |> mat
 
 	if h.m > 0
 		# Compute norms^2, norms^4, ... norms^(2^m).
@@ -57,7 +57,7 @@ function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray) where {T}
 		# the formula above), we save a lot of memory by avoiding concatenations.
 		# Note that m is typically small, so these iterations don't do much to harm performance
 		for ii = 1:h.m
-			@. norms = norms^2
+			norms .^= 2
 			ger!(T(1), h.coeff_B[:,ii], norms, aTx)
 		end
 	end
@@ -87,8 +87,9 @@ function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	# aTx (rather than before) so that we don't have to allocate a new array
 	# of size(x). Moreover, for large input vectors, the size of aTx is typically
 	# much smaller than the size of x.
-	norms = norm.(eachcol(x))
-	norms[norms .== 0] .= 1
+	# TODO: check that f(x) isn't hurting performance
+	f(x::T) where {T} = (x ≈ T(0) ? T(1) : x)
+	norms = map(f ∘ BLAS.nrm2, eachcol(x))
 
 	aTx .= aTx ./ norms'
 
