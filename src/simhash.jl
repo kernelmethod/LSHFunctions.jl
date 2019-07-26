@@ -25,3 +25,4 @@ SimHash(args...; kws...) =
 LSHFunction and SymmetricLSHFunction API compliance
 =#
 hashtype(::SimHash) = Bool
+n_hashes(h::SimHash) = size(h.coeff, 1)

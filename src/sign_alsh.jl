@@ -102,3 +102,4 @@ LSHFunction and AsymmetricLSHFunction API compliacne
 index_hash(h::SignALSH, x) = SignALSH_P(h, x)
 query_hash(h::SignALSH, x) = SignALSH_Q(h, x)
 hashtype(::SignALSH) = Bool
+n_hashes(h::SignALSH) = size(h.coeff_A, 1)

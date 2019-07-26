@@ -20,6 +20,7 @@ APIs for LSH families.
 
 # General API for all LSHFunction types
 function hashtype(::LSHFunction) end
+function n_hashes(::LSHFunction) end
 
 # Asymmetric LSH families
 function index_hash(::AsymmetricLSHFunction, x) end

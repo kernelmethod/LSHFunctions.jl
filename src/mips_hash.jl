@@ -126,3 +126,4 @@ LSHFunction and AsymmetricLSHFunction API compliance
 index_hash(h :: MIPSHash, x) = MIPSHash_P(h, x)
 query_hash(h :: MIPSHash, x) = MIPSHash_Q(h, x)
 hashtype(::MIPSHash) = Int32
+n_hashes(h::MIPSHash) = length(h.shift)

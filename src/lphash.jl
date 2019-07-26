@@ -60,3 +60,4 @@ end
 LSHFunction and SymmetricLSHFunction API compliance
 =#
 hashtype(::LpHash) = Int32
+n_hashes(h::LpHash) = length(h.shift)
