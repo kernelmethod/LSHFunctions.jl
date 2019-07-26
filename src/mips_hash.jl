@@ -78,11 +78,6 @@ MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMI
 MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
-# Create a routine MIPSHash_P_update_aTx! to run on the inner loop of MIPSHash_P.
-# We dispatch it on three cases, optimizing based on the types of the arguments.
-
-#MIPSHash_P_update_aTx!(coeff, norms, aTx)
-
 #=
 h(Q(x)) definitions
 =#
