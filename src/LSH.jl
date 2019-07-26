@@ -1,6 +1,6 @@
 module LSH
 
-using Distributions
+using Distributions, LinearAlgebra
 
 include("LSHBase.jl")
 include("simhash.jl")

@@ -36,7 +36,7 @@ mat(x :: AbstractMatrix) = x
 
 # h(P(x)) definitions
 function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray) where {T}
-	norms = map(norm, eachcol(x))
+	norms = map(BLAS.nrm2, eachcol(x))
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
 	norms ./= maxnorm
