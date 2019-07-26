@@ -38,23 +38,6 @@ mat(x :: AbstractMatrix) = x
 h(P(x)) definitions
 =#
 
-# Helper functions
-col_norms(x::AbstractArray) = map(norm, eachcol(x))
-col_norms(x::Array) = map(BLAS.nrm2, eachcol(x))
-col_norms(x::SparseVector) = [BLAS.nrm2(x.nzval)]
-col_norms(x::SparseMatrixCSC{T}) where {T} = begin
-	output = Vector{T}(undef, size(x,2))
-	@inbounds for ii = 1:size(x,2)
-		result = T(0)
-		start_idx, end_idx = x.colptr[ii], x.colptr[ii+1]-1
-		@simd for idx = start_idx:end_idx
-			result += x.nzval[idx].^2
-		end
-		output[ii] = √result
-	end
-	return output
-end
-
 function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	norms = col_norms(x)
 	maxnorm = maximum(norms)
