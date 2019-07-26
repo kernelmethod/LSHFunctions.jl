@@ -7,8 +7,9 @@ include("LSHBase.jl")
 include("simhash.jl")
 include("lphash.jl")
 include("mips_hash.jl")
+include("sign_alsh.jl")
 
 export SimHash, LpHash, L1Hash, L2Hash, MIPSHash,
-	hashtype, index_hash, query_hash
+	SignALSH, hashtype, index_hash, query_hash
 
 end # module
