@@ -119,6 +119,6 @@ MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_
 #=
 LSHFunction and AsymmetricLSHFunction API compliance
 =#
-index_hash(h :: MIPSHash, x :: AbstractArray) = MIPSHash_P_LSH(h, x)
-query_hash(h :: MIPSHash, x :: AbstractArray) = MIPSHash_Q_LSH(h, x)
+index_hash(h :: MIPSHash, x) = MIPSHash_P_LSH(h, x)
+query_hash(h :: MIPSHash, x) = MIPSHash_Q_LSH(h, x)
 hashtype(::MIPSHash) = Int32
