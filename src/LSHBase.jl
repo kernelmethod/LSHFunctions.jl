@@ -22,5 +22,5 @@ APIs for LSH families.
 function hashtype(::LSHFunction) end
 
 # Asymmetric LSH families
-function index_hash(::AsymmetricLSHFunction, x :: AbstractArray) end
-function query_hash(::AsymmetricLSHFunction, x :: AbstractArray) end
+function index_hash(::AsymmetricLSHFunction, x) end
+function query_hash(::AsymmetricLSHFunction, x) end

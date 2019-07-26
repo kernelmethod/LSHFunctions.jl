@@ -1,6 +1,6 @@
 using Test, Random, LSH
 
-@testset "Cosine similarity tests" begin
+@testset "SimHash tests" begin
 	Random.seed!(0)
 	import LSH: SymmetricLSHFunction
 

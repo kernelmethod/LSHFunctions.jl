@@ -1,6 +1,6 @@
 using Test, Random, LSH
 
-@testset "L^p hashing tests" begin
+@testset "LpHash tests" begin
 	Random.seed!(0)
 	import LSH: SymmetricLSHFunction
 

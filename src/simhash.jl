@@ -1,7 +1,7 @@
 """
 Cosine similarity LSH function.
 """
-struct SimHash{T, A <: Matrix{T}} <: SymmetricLSHFunction{T}
+struct SimHash{T, A <: AbstractMatrix{T}} <: SymmetricLSHFunction{T}
 	coeff :: A
 end
 
