@@ -35,7 +35,7 @@ mat(x :: AbstractVector) = reshape(x, length(x), 1)
 mat(x :: AbstractMatrix) = x
 
 # h(P(x)) definitions
-function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray) where {T}
+function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	norms = map(BLAS.nrm2, eachcol(x))
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
@@ -68,17 +68,17 @@ function MIPSHash_P_LSH(h::MIPSHash{T}, x::AbstractArray) where {T}
 	return floor.(Int32, aTx)
 end
 
-MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}; kws...) where {T <: LSH_FAMILY_DTYPES} =
-	MIPSHash_P_LSH(h, T.(x); kws...)
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{<:Real}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	MIPSHash_P(h, T.(x); kws...)
 
-MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_P_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...)
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...)
 
-MIPSHash_P_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_P_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
 # h(Q(x)) definitions
-function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
+function MIPSHash_Q(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x |> mat
@@ -108,18 +108,18 @@ function MIPSHash_Q_LSH(h :: MIPSHash, x :: AbstractArray)
 	return floor.(Int32, aTx)
 end
 
-MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
-	MIPSHash_Q_LSH(h, T.(x))
+MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
+	MIPSHash_Q(h, T.(x))
 
-MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_Q_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x)
+MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_Q, Tuple{MIPSHash{T}, AbstractArray}, h, x)
 
-MIPSHash_Q_LSH(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_Q_LSH, Tuple{MIPSHash{T}, AbstractArray}, h, x) |> vec
+MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_Q, Tuple{MIPSHash{T}, AbstractArray}, h, x) |> vec
 
 #=
 LSHFunction and AsymmetricLSHFunction API compliance
 =#
-index_hash(h :: MIPSHash, x) = MIPSHash_P_LSH(h, x)
-query_hash(h :: MIPSHash, x) = MIPSHash_Q_LSH(h, x)
+index_hash(h :: MIPSHash, x) = MIPSHash_P(h, x)
+query_hash(h :: MIPSHash, x) = MIPSHash_Q(h, x)
 hashtype(::MIPSHash) = Int32
