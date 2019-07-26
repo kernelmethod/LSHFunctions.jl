@@ -48,21 +48,19 @@ function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	# Note: aTx is an n_hashes × n_inputs array
 	aTx = h.coeff_A * x .* (1/maxnorm) |> mat
 
-	if h.m > 0
-		# Compute norms^2, norms^4, ... norms^(2^m).
-		# Multiply these by the second array of coefficients and add them to aTx, so
-		# that in totality we compute
-		#
-		# 		aTx = [coeff_A, coeff_B] * P(x)
-		# 			= [coeff_A, coeff_B] * [x; norms^2; ...; norms^(2^m)]
-		#
-		# By making these computations in a somewhat roundabout way (rather than following
-		# the formula above), we save a lot of memory by avoiding concatenations.
-		# Note that m is typically small, so these iterations don't do much to harm performance
-		for ii = 1:h.m
-			norms .^= 2
-			ger!(T(1), h.coeff_B[:,ii], norms, aTx)
-		end
+	# Compute norms^2, norms^4, ... norms^(2^m).
+	# Multiply these by the second array of coefficients and add them to aTx, so
+	# that in totality we compute
+	#
+	# 		aTx = [coeff_A, coeff_B] * P(x)
+	# 			= [coeff_A, coeff_B] * [x; norms^2; ...; norms^(2^m)]
+	#
+	# By making these computations in a somewhat roundabout way (rather than following
+	# the formula above), we save a lot of memory by avoiding concatenations.
+	# Note that m is typically small, so these iterations don't do much to harm performance
+	for ii = 1:h.m
+		norms .^= 2
+		BLAS.ger!(T(1), h.coeff_B[:,ii], norms, aTx)
 	end
 
 	# Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
