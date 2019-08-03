@@ -22,6 +22,10 @@ APIs for LSH families.
 function hashtype(::LSHFunction) end
 function n_hashes(::LSHFunction) end
 
+# Symmetric LSH families
+index_hash(h::SymmetricLSHFunction, x) = h(x)
+query_hash(h::SymmetricLSHFunction, x) = h(x)
+
 # Asymmetric LSH families
 function index_hash(::AsymmetricLSHFunction, x) end
 function query_hash(::AsymmetricLSHFunction, x) end
