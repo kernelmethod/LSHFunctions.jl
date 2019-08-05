@@ -13,13 +13,15 @@ struct MIPSHash{T} <: AsymmetricLSHFunction{T}
 end
 
 function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::Integer) where {T <: LSH_FAMILY_DTYPES}
-	coeff_A = randn(T, n_hashes, input_length)
-	coeff_B = randn(T, n_hashes, m)
+	coeff_A = Matrix{T}(undef, n_hashes, input_length)
+	coeff_B = Matrix{T}(undef, n_hashes, m)
 	denom = T(denom)
-	shift = rand(T, n_hashes)
-	Qshift = coeff_B * fill(T(1/2), m) ./ denom + shift
+	shift = Vector{T}(undef, n_hashes)
+	Qshift = Vector{T}(undef, n_hashes)
 
-	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
+	hashfn = MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
+	redraw!(hashfn)
+	return hashfn
 end
 
 MIPSHash(args...; kws...) =
@@ -127,3 +129,10 @@ index_hash(h :: MIPSHash, x) = MIPSHash_P(h, x)
 query_hash(h :: MIPSHash, x) = MIPSHash_Q(h, x)
 hashtype(::MIPSHash) = Int32
 n_hashes(h::MIPSHash) = length(h.shift)
+
+function redraw!(h::MIPSHash{T}) where T
+	map!(_ -> randn(T), h.coeff_A, h.coeff_A)
+	map!(_ -> randn(T), h.coeff_B, h.coeff_B)
+	map!(_ -> rand(T), h.shift, h.shift)
+	h.Qshift .= h.coeff_B * fill(T(1/2), h.m) ./ h.denom .+ h.shift
+end

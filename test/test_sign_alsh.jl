@@ -73,4 +73,16 @@ using Test, Random, LSH, LinearAlgebra
 		n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
 		@test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
 	end
+
+	@testset "Can re-draw random coefficients" begin
+		hashfn = SignALSH(5, 2)
+		coeff_A = deepcopy(hashfn.coeff_A)
+		coeff_B = deepcopy(hashfn.coeff_B)
+		P_shift = deepcopy(hashfn.P_shift)
+
+		redraw!(hashfn)
+		@test all(hashfn.coeff_A .!= coeff_A)
+		@test all(hashfn.coeff_B .!= coeff_B)
+		@test all(hashfn.P_shift .!= P_shift)
+	end
 end

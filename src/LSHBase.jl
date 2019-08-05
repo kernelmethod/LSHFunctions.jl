@@ -15,12 +15,13 @@ abstract type SymmetricLSHFunction{T} <: LSHFunction{T} end
 abstract type AsymmetricLSHFunction{T} <: LSHFunction{T} end
 
 #=
-APIs for LSH families.
+API for LSH families.
 =#
 
 # General API for all LSHFunction types
 function hashtype(::LSHFunction) end
 function n_hashes(::LSHFunction) end
+function redraw!(::LSHFunction) end
 
 # Symmetric LSH families
 index_hash(h::SymmetricLSHFunction, x) = h(x)

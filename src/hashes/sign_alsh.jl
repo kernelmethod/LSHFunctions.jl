@@ -18,14 +18,13 @@ Constructors
 =#
 
 function SignALSH{T}(input_length::Integer, n_hashes::Integer, m::Integer = 3) where {T}
-	coeff_A = randn(T, n_hashes, input_length)
-	coeff_B = randn(T, n_hashes, m)
+	coeff_A = Matrix{T}(undef, n_hashes, input_length)
+	coeff_B = Matrix{T}(undef, n_hashes, m)
+	P_shift = Vector{T}(undef, n_hashes)
 
-	# Pre compute coeff_B * [1/2, 1/2, ..., 1/2] (as used in the transformation
-	# P(x)) to reduce the cost of the indexing hash.
-	P_shift = coeff_B * fill(T(1/2), m)
-
-	SignALSH(coeff_A, coeff_B, P_shift, Int64(m))
+	hashfn = SignALSH(coeff_A, coeff_B, P_shift, Int64(m))
+	redraw!(hashfn)
+	return hashfn
 end
 
 SignALSH(args...; kws...) =
@@ -103,3 +102,9 @@ index_hash(h::SignALSH, x) = SignALSH_P(h, x)
 query_hash(h::SignALSH, x) = SignALSH_Q(h, x)
 hashtype(::SignALSH) = Bool
 n_hashes(h::SignALSH) = size(h.coeff_A, 1)
+
+function redraw!(h::SignALSH{T}) where {T}
+	map!(_ -> randn(T), h.coeff_A, h.coeff_A)
+	map!(_ -> randn(T), h.coeff_B, h.coeff_B)
+	h.P_shift .= h.coeff_B * fill(T(1/2), h.m)
+end

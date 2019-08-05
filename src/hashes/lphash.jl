@@ -8,22 +8,17 @@ struct LpHash{T, A <: AbstractMatrix{T}} <: SymmetricLSHFunction{T}
 	coeff :: A
 	denom :: T
 	shift :: Vector{T}
+	power :: Int64
 end
 
 function LpHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, power::Integer = 2) where {T}
-	coeff = begin
-		if power == 1
-			rand(Cauchy(0, 1), n_hashes, input_length)
-		elseif power == 2
-			randn(n_hashes, input_length)
-		end
-	end
+	coeff = Matrix{T}(undef, n_hashes, input_length)
+	shift = Vector{T}(undef, n_hashes)
 
-	LpHash{T}(T.(coeff), denom)
+	hashfn = LpHash{T,typeof(coeff)}(coeff, T(denom), shift, Int64(power))
+	redraw!(hashfn)
+	return hashfn
 end
-
-LpHash{T}(coeff :: A, denom :: Real) where {T, A <: AbstractMatrix{T}} =
-	LpHash{T,A}(coeff, T(denom), rand(T, size(coeff, 1)))
 
 LpHash(args...; kws...) =
 	LpHash{Float32}(args...; kws...)
@@ -61,3 +56,18 @@ LSHFunction and SymmetricLSHFunction API compliance
 =#
 hashtype(::LpHash) = Int32
 n_hashes(h::LpHash) = length(h.shift)
+
+function redraw!(h::LpHash{T}) where T
+	distr = begin
+		if h.power == 1
+			Cauchy(0,1)
+		elseif h.power == 2
+			Normal(0,1)
+		else
+			error("'power' must be 1 or 2")
+		end
+	end
+
+	map!(_ -> T(rand(distr)), h.coeff, h.coeff)
+	map!(_ -> rand(T), h.shift, h.shift)
+end

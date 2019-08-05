@@ -162,7 +162,7 @@ using Test, Random, LSH
 	end
 
 	@testset "MIPSHash generates collisions for large inner products" begin
-		input_length = 5; n_hashes = 128; denom = 1; m = 5
+		input_length = 5; n_hashes = 256; denom = 1; m = 5
 		hashfn = MIPSHash(input_length, n_hashes, denom, m)
 
 		x = randn(input_length)
@@ -210,5 +210,19 @@ using Test, Random, LSH
 		
 		@test ihashes == ihashes_dense
 		@test qhashes == qhashes_dense
+	end
+
+	@testset "Can re-draw random coefficients" begin
+		hashfn = MIPSHash(5, 8, 1, 1)
+		coeff_A = deepcopy(hashfn.coeff_A)
+		coeff_B = deepcopy(hashfn.coeff_B)
+		shift = deepcopy(hashfn.shift)
+		Qshift = deepcopy(hashfn.Qshift)
+
+		redraw!(hashfn)
+		@test all(hashfn.coeff_A .!= coeff_A)
+		@test all(hashfn.coeff_B .!= coeff_B)
+		@test all(hashfn.shift .!= shift)
+		@test all(hashfn.Qshift .!= Qshift)
 	end
 end

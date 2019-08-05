@@ -94,4 +94,12 @@ using Test, Random, LSH
 		@test eltype(hashes) == hashtype(hashfn)
 		@test isa(hashes, BitArray{2})
 	end
+
+	@testset "Can re-draw random coefficients" begin
+		hashfn = SimHash(5, 2)
+		initial_coeff = deepcopy(hashfn.coeff)
+
+		redraw!(hashfn)
+		@test all(hashfn.coeff .!= initial_coeff)
+	end
 end

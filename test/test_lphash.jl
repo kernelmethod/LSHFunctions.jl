@@ -82,4 +82,14 @@ using Test, Random, LSH
 		@test eltype(hashes) == hashtype(hashfn)
 		@test isa(hashes, Matrix{Int32})
 	end
+
+	@testset "Can re-draw random coefficients" begin
+		hashfn = LpHash(5, 5, 1)
+		coeff = deepcopy(hashfn.coeff)
+		shift = deepcopy(hashfn.shift)
+
+		redraw!(hashfn)
+		@test all(hashfn.coeff .!= coeff)
+		@test all(hashfn.shift .!= shift)
+	end
 end
