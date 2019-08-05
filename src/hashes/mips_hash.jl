@@ -12,7 +12,7 @@ struct MIPSHash{T} <: AsymmetricLSHFunction{T}
 	m :: Integer
 end
 
-function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::Integer) where {T <: LSH_FAMILY_DTYPES}
+function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::Integer = 3) where {T <: LSH_FAMILY_DTYPES}
 	coeff_A = Matrix{T}(undef, n_hashes, input_length)
 	coeff_B = Matrix{T}(undef, n_hashes, m)
 	denom = T(denom)
