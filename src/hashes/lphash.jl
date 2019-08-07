@@ -54,8 +54,8 @@ end
 #=
 LSHFunction and SymmetricLSHFunction API compliance
 =#
-hashtype(::LpHash) = Int32
 n_hashes(h::LpHash) = length(h.shift)
+hashtype(::LpHash) = Vector{Int32}
 
 function redraw!(h::LpHash{T}) where T
 	distr = begin

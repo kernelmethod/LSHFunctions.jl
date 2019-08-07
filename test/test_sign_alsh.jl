@@ -17,7 +17,8 @@ using Test, Random, LSH, LinearAlgebra
 		ihashes = index_hash(hashfn, X)
 		qhashes = query_hash(hashfn, X)
 
-		@test eltype(ihashes) == eltype(qhashes) == hashtype(hashfn)
+		@test eltype(ihashes) == eltype(qhashes)
+		@test BitArray{1} == hashtype(hashfn)
 
 		# 1. Compute the indexing hashes manually
 		norms = map(norm, eachcol(X))

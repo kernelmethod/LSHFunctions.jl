@@ -48,8 +48,8 @@ using Test, Random, LSH
 
 		@test isa(p_hashes, Matrix{Int32})
 		@test isa(q_hashes, Matrix{Int32})
-		@test eltype(p_hashes) == hashtype(hashfn)
-		@test eltype(q_hashes) == hashtype(hashfn)
+		@test Vector{eltype(p_hashes)} == hashtype(hashfn)
+		@test Vector{eltype(q_hashes)} == hashtype(hashfn)
 
 		# Vector{Float64} -> Vector{Int32}
 		x = randn(4)
@@ -58,8 +58,6 @@ using Test, Random, LSH
 
 		@test isa(index_hash(hashfn, x), Vector{Int32})
 		@test isa(query_hash(hashfn, x), Vector{Int32})
-		@test eltype(p_hashes) == hashtype(hashfn)
-		@test eltype(q_hashes) == hashtype(hashfn)
 	end
 
 	@testset "MIPSHash h(P(x)) is correctly computed" begin

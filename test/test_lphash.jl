@@ -74,12 +74,11 @@ using Test, Random, LSH
 
 		# Test 1: Vector{Float64} -> Vector{Int32}
 		hashes = hashfn(randn(5))
-		@test eltype(hashes) == hashtype(hashfn)
+		@test Vector{eltype(hashes)} == hashtype(hashfn)
 		@test isa(hashes, Vector{Int32})
 
 		# Test 2: Matrix{Float64} -> Matrix{Int32}
 		hashes = hashfn(randn(5, 10))
-		@test eltype(hashes) == hashtype(hashfn)
 		@test isa(hashes, Matrix{Int32})
 	end
 

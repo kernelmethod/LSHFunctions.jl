@@ -127,8 +127,9 @@ LSHFunction and AsymmetricLSHFunction API compliance
 =#
 index_hash(h :: MIPSHash, x) = MIPSHash_P(h, x)
 query_hash(h :: MIPSHash, x) = MIPSHash_Q(h, x)
-hashtype(::MIPSHash) = Int32
+
 n_hashes(h::MIPSHash) = length(h.shift)
+hashtype(::MIPSHash) = Vector{Int32}
 
 function redraw!(h::MIPSHash{T}) where T
 	map!(_ -> randn(T), h.coeff_A, h.coeff_A)

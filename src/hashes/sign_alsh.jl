@@ -100,8 +100,9 @@ LSHFunction and AsymmetricLSHFunction API compliacne
 =#
 index_hash(h::SignALSH, x) = SignALSH_P(h, x)
 query_hash(h::SignALSH, x) = SignALSH_Q(h, x)
-hashtype(::SignALSH) = Bool
+
 n_hashes(h::SignALSH) = size(h.coeff_A, 1)
+hashtype(::SignALSH) = BitArray{1}
 
 function redraw!(h::SignALSH{T}) where {T}
 	map!(_ -> randn(T), h.coeff_A, h.coeff_A)

@@ -28,9 +28,8 @@ SimHash(args...; kws...) =
 #=
 LSHFunction and SymmetricLSHFunction API compliance
 =#
-hashtype(::SimHash) = Bool
-
 n_hashes(h::SimHash) = size(h.coeff, 1)
+hashtype(::SimHash) = BitArray{1}
 
 redraw!(h::SimHash{T}) where {T} =
 	map!(_ -> randn(T), h.coeff, h.coeff)

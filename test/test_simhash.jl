@@ -10,6 +10,7 @@ using Test, Random, LSH
 		hashfn = SimHash(input_length, n_hashes)
 
 		@test size(hashfn.coeff) == (n_hashes, input_length)
+		@test BitArray{1} == hashtype(hashfn)
 
 		# Test with just one hash
 		hashfn = SimHash(input_length, 1)
@@ -86,12 +87,10 @@ using Test, Random, LSH
 
 		## Test 1: Vector{Float64} -> BitArray{1}
 		hashes = hashfn(randn(5))
-		@test eltype(hashes) == hashtype(hashfn)
 		@test isa(hashes, BitArray{1})
 
 		## Test 2: Matrix{Float64} -> BitArray{2}
 		hashes = hashfn(randn(5, 10))
-		@test eltype(hashes) == hashtype(hashfn)
 		@test isa(hashes, BitArray{2})
 	end
 
