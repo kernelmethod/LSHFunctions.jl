@@ -149,4 +149,41 @@ using Test, Random, LSH
 			@test_throws ErrorException insert!(table, rand(input_size), rand())
 		end
 	end
+
+	@testset "Create an LSHTable that uses Sets for entries" begin
+		input_size = 16
+		n_hashes = 64
+
+		hashfn = SimHash(input_size, n_hashes)
+		table = LSHTable(hashfn; valtype=Int64, entrytype=Set)
+
+		X = rand(input_size, 128)
+		insert!(table, X, 1:size(X,2))
+
+		@test all(isa(table[x], Set{Int64}) for x in eachcol(X))
+
+		# Should be able to set the unique_values flag even when entrytype=Set
+		table = LSHTable(hashfn; unique_values=true, entrytype=Set)
+		x = randn(input_size)
+		insert!(table, x, "test")
+
+		@test length(keys(table)) == 1
+		@test table[x] == Set(["test"])
+
+		y = randn(input_size)
+		insert!(table, y, "test")
+
+		@test length(keys(table)) == 1
+		@test table[y] == Set(["test"])
+	end
+
+	@testset "Get an empty set/empty vector when no collisions are found" begin
+		hashfn = SimHash(16, 5)
+
+		table = LSHTable(hashfn; valtype=Integer, entrytype=Vector)
+		@test table[rand(16)] == Vector{Integer}(undef, 0)
+
+		table = LSHTable(hashfn; entrytype=Set{String})
+		@test table[rand(16)] == Set{String}()
+	end
 end

@@ -10,19 +10,30 @@ hashes computed by an `LSHFunction`, while values are user-specified and inserte
 using the `insert!` function. To find all of the collisions for an input `x`, you
 can simply index into the table, e.g. using `table[x]`.
 """
-struct LSHTable{H,V,F<:LSHFunction}
+struct LSHTable{H,V,F<:LSHFunction,E<:Union{Vector{V},Set{V}},L}
 	hashfn :: F
-	table :: Dict{H,Vector{V}}
-	value_loc :: Dict{V,Pair{H,Int64}}
+	table :: Dict{H,E}
+	value_loc :: Dict{V,L}
 	unique_values :: Bool
 end
 
 # Outer constructors
-function LSHTable(hashfn; valtype=Any, unique_values::Bool=false)
+function LSHTable(hashfn; valtype=Any, unique_values=false, entrytype=Vector)
 	htype = hashtype(hashfn)
+	vtype, etype, ltype = begin
+		if entrytype <: Vector
+			vtype = (valtype <: eltype(entrytype)) ? valtype : eltype(entrytype)
+			vtype, Vector{vtype}, Pair{htype,Int64}
+		elseif entrytype <: Set
+			vtype = (valtype <: eltype(entrytype)) ? valtype : eltype(entrytype)
+			vtype, Set{vtype}, htype
+		else
+			error("'entrytype' must be a subtype of Vector or Set")
+		end
+	end
 
-	table = Dict{htype,Vector{valtype}}()
-	value_loc = Dict{valtype,Pair{htype,Int64}}()
+	table = Dict{htype,etype}()
+	value_loc = Dict{vtype,ltype}()
 
 	LSHTable(hashfn, table, value_loc, unique_values)
 end
@@ -75,10 +86,11 @@ end
 	quote
 		hashes = index_hash(lshtable, x)
 		$apply_expr
+		return lshtable
 	end
 end
 
-function insert_at_hash!(lshtable::LSHTable{F,H,V}, ih, v) where {F,H,V}
+function insert_at_hash!(lshtable::LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Vector}
 	entry = get!(lshtable.table, ih) do
 		Vector{V}(undef, 0)
 	end
@@ -112,17 +124,54 @@ function insert_at_hash!(lshtable::LSHTable{F,H,V}, ih, v) where {F,H,V}
 	push!(entry, v)
 end
 
+function insert_at_hash!(lshtable::LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Set}
+	entry = get!(lshtable.table, ih) do
+		Set{V}()
+	end
+
+	if lshtable.unique_values
+		# Check if the value already exists in the table. If it does and it exists
+		# at a different hash, then delete the old value.
+		if haskey(lshtable.value_loc, v)
+			old_ih = lshtable.value_loc[v]
+
+			if old_ih == ih
+				# Skip insertion into the table if the value already exists
+				# at the same hash.
+				return
+			else
+				# Remove old entry in the hash table
+				old_entry = lshtable.table[old_ih]
+				delete!(old_entry, v)
+
+				if length(old_entry) == 0
+					delete!(lshtable.table, old_ih)
+				end
+			end
+		end
+
+		# Update the value_loc dictionary to reflect the new index hash
+		lshtable.value_loc[v] = ih
+	end
+
+	push!(entry, v)
+end
+
 #=
 Extensions of Base methods for Dict types
 =#
-function Base.getindex(lshtable::LSHTable, x)
+function Base.getindex(lshtable::LSHTable{F,H,V,E}, x) where {F,H,V,E}
 	qh = query_hash(lshtable, x)
-	(lshtable.table[h] for h in eachcol(qh))
+	(get(lshtable.table, h) do
+	 	E()
+	end for h in eachcol(qh))
 end
 
-function Base.getindex(lshtable::LSHTable, x::AbstractVector)
+function Base.getindex(lshtable::LSHTable{F,H,V,E}, x::AbstractVector) where {F,H,V,E}
 	qh = query_hash(lshtable, x)
-	lshtable.table[qh]
+	get(lshtable.table, qh) do
+		E()
+	end
 end
 
 Base.haskey(lshtable::LSHTable, key) =
@@ -153,6 +202,8 @@ function reset!(lshtable::LSHTable)
 			delete!(lshtable.value_loc, k)
 		end
 	end
+
+	return lshtable
 end
 
 function redraw!(table::LSHTable)

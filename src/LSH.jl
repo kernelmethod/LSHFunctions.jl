@@ -21,7 +21,8 @@ export SimHash, LpHash, L1Hash, L2Hash, MIPSHash,
 Hash tables for LSHFunctions
 =#
 include(joinpath("tables", "table.jl"))
+include(joinpath("tables", "table_group.jl"))
 
-export LSHTable, insert!, reset!
+export LSHTable, LSHTableGroup, insert!, reset!
 
 end # module

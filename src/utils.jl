@@ -24,3 +24,10 @@ col_norms(x::SparseMatrixCSC{T}) where {T} = begin
 	end
 	return output
 end
+
+# Regenerate random coefficients for an array
+function redraw!(X::AbstractArray, rng)
+	for ii in eachindex(X)
+		X[ii] = rng()
+	end
+end

@@ -21,7 +21,10 @@ API for LSH families.
 # General API for all LSHFunction types
 function hashtype(::LSHFunction) end
 function n_hashes(::LSHFunction) end
-function redraw!(::LSHFunction) end
+function redraw!(::F)::F where {F<:LSHFunction} end
+
+redraw(h::LSHFunction) =
+	h |> deepcopy |> redraw!
 
 # Symmetric LSH families
 index_hash(h::SymmetricLSHFunction, x) = h(x)

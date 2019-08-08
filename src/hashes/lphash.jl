@@ -17,7 +17,6 @@ function LpHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, power:
 
 	hashfn = LpHash{T,typeof(coeff)}(coeff, T(denom), shift, Int64(power))
 	redraw!(hashfn)
-	return hashfn
 end
 
 LpHash(args...; kws...) =
@@ -58,16 +57,16 @@ n_hashes(h::LpHash) = length(h.shift)
 hashtype(::LpHash) = Vector{Int32}
 
 function redraw!(h::LpHash{T}) where T
-	distr = begin
-		if h.power == 1
-			Cauchy(0,1)
-		elseif h.power == 2
-			Normal(0,1)
-		else
-			error("'power' must be 1 or 2")
-		end
+	if h.power == 1
+		distr = Cauchy(0,1)
+		redraw!(h.coeff, () -> T(rand(distr)))
+	elseif h.power == 2
+		distr = Normal(0,1)
+		redraw!(h.coeff, () -> T(rand(distr)))
+	else
+		error("'power' must be 1 or 2")
 	end
 
-	map!(_ -> T(rand(distr)), h.coeff, h.coeff)
-	map!(_ -> rand(T), h.shift, h.shift)
+	redraw!(h.shift, () -> rand(T))
+	return h
 end

@@ -24,17 +24,26 @@ function SignALSH{T}(input_length::Integer, n_hashes::Integer, m::Integer = 3) w
 
 	hashfn = SignALSH(coeff_A, coeff_B, P_shift, Int64(m))
 	redraw!(hashfn)
-	return hashfn
 end
 
 SignALSH(args...; kws...) =
 	SignALSH{Float32}(args...; kws...)
 
-#=
-Definitions of h(P(x)) for SignALSH
-=#
+#============
 
-# h(P(x)) definitions
+Definitions of h(P(x)) for SignALSH
+
+=============#
+
+#=
+h(P(x)) definitions
+=#
+SignALSH_P(h::SignALSH{T}, x::AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
+	SignALSH_P(h, T.(x))
+
+SignALSH_P(h::SignALSH{T}, x::AbstractArray{T}) where {T<:LSH_FAMILY_DTYPES} =
+	invoke(SignALSH_P, Tuple{SignALSH{T},AbstractArray}, h, x)
+
 function SignALSH_P(h::SignALSH{T}, x::AbstractArray) where {T}
 	# SignALSH_P is essentially just SimHash on
 	#
@@ -63,22 +72,21 @@ function SignALSH_P(h::SignALSH{T}, x::AbstractArray) where {T}
 		# Note that we don't need to account for the 1/2 terms, which are accounted
 		# for by the earlier addition of P_shift.
 		norms .^= 2
-		BLAS.ger!(T(-1), h.coeff_B[:,ii], norms, Ax)
+		SignALSH_P_update_Ax!(h.coeff_B[:,ii], norms, Ax)
 	end
 
 	return Ax .≥ 0
 end
 
-SignALSH_P(h::SignALSH{T}, x::AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
-	SignALSH_P(h, T.(x))
+SignALSH_P_update_Ax!(coeff::Vector{T}, norms::Vector{T}, Ax::Array{T}) where T =
+	BLAS.ger!(T(-1), coeff, norms, Ax)
 
-SignALSH_P(h::SignALSH{T}, x::AbstractArray{T}) where {T<:LSH_FAMILY_DTYPES} =
-	invoke(SignALSH_P, Tuple{SignALSH{T},AbstractArray}, h, x)
+SignALSH_P_update_Ax!(coeff, norms, Ax) =
+	(Ax .-= coeff' * norms)
 
-SignALSH_P(h::SignALSH{T}, x::AbstractVector{T}) where {T<:LSH_FAMILY_DTYPES} =
-	invoke(SignALSH_P, Tuple{SignALSH{T},AbstractArray}, h, x) |> vec
-
-# h(Q(x)) definitions
+#=
+h(Q(x)) definitions
+=#
 function SignALSH_Q(h::SignALSH{T}, x::AbstractArray) where {T}
 	Ax = h.coeff_A * x
 	norms = col_norms(x)
@@ -105,7 +113,8 @@ n_hashes(h::SignALSH) = size(h.coeff_A, 1)
 hashtype(::SignALSH) = BitArray{1}
 
 function redraw!(h::SignALSH{T}) where {T}
-	map!(_ -> randn(T), h.coeff_A, h.coeff_A)
-	map!(_ -> randn(T), h.coeff_B, h.coeff_B)
+	redraw!(h.coeff_A, () -> randn(T))
+	redraw!(h.coeff_B, () -> randn(T))
 	h.P_shift .= h.coeff_B * fill(T(1/2), h.m)
+	return h
 end

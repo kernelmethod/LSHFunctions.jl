@@ -21,7 +21,6 @@ function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::I
 
 	hashfn = MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
 	redraw!(hashfn)
-	return hashfn
 end
 
 MIPSHash(args...; kws...) =
@@ -39,6 +38,15 @@ mat(x :: AbstractMatrix) = x
 #=
 h(P(x)) definitions
 =#
+
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{<:Real}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	MIPSHash_P(h, T.(x); kws...)
+
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...)
+
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
 function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	norms = col_norms(x)
@@ -62,7 +70,7 @@ function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	# Note that m is typically small, so these iterations don't do much to harm performance
 	for ii = 1:h.m
 		norms .^= 2
-		BLAS.ger!(T(1), h.coeff_B[:,ii], norms, aTx)
+		MIPSHash_P_update_aTx!(h.coeff_B[:,ii], norms, aTx)
 	end
 
 	# Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
@@ -71,14 +79,11 @@ function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	return floor.(Int32, aTx)
 end
 
-MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{<:Real}; kws...) where {T <: LSH_FAMILY_DTYPES} =
-	MIPSHash_P(h, T.(x); kws...)
+MIPSHash_P_update_aTx!(coeff::Vector{T}, norms::Vector{T}, aTx::Array{T}) where T =
+	BLAS.ger!(T(1), coeff, norms, aTx)
 
-MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...)
-
-MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
-	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
+MIPSHash_P_update_aTx!(coeff, norms, aTx) =
+	(aTx .+= coeff' * norms)
 
 #=
 h(Q(x)) definitions
@@ -132,8 +137,9 @@ n_hashes(h::MIPSHash) = length(h.shift)
 hashtype(::MIPSHash) = Vector{Int32}
 
 function redraw!(h::MIPSHash{T}) where T
-	map!(_ -> randn(T), h.coeff_A, h.coeff_A)
-	map!(_ -> randn(T), h.coeff_B, h.coeff_B)
-	map!(_ -> rand(T), h.shift, h.shift)
+	redraw!(h.coeff_A, () -> randn(T))
+	redraw!(h.coeff_B, () -> randn(T))
+	redraw!(h.shift, () -> rand(T))
 	h.Qshift .= h.coeff_B * fill(T(1/2), h.m) ./ h.denom .+ h.shift
+	return h
 end

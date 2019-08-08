@@ -9,7 +9,6 @@ function SimHash{T}(input_length :: Integer, n_hashes :: Integer) where {T}
 	coeff = Matrix{T}(undef, n_hashes, input_length)
 	hashfn = SimHash(coeff)
 	redraw!(hashfn)
-	hashfn
 end
 
 SimHash(args...; kws...) =
@@ -31,5 +30,7 @@ LSHFunction and SymmetricLSHFunction API compliance
 n_hashes(h::SimHash) = size(h.coeff, 1)
 hashtype(::SimHash) = BitArray{1}
 
-redraw!(h::SimHash{T}) where {T} =
-	map!(_ -> randn(T), h.coeff, h.coeff)
+function redraw!(h::SimHash{T}) where {T}
+	redraw!(h.coeff, () -> randn(T))
+	return h
+end
