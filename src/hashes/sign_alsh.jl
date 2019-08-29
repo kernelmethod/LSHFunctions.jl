@@ -81,8 +81,16 @@ end
 SignALSH_P_update_Ax!(coeff::Vector{T}, norms::Vector{T}, Ax::Array{T}) where T =
 	BLAS.ger!(T(-1), coeff, norms, Ax)
 
+# When the coefficients or norms are AbstractVectors, cascade through to reshape
+# them into AbstractMatrix before updating Ax.
+SignALSH_P_update_Ax!(coeff::AbstractVector, norms::AbstractVector, Ax) =
+	SignALSH_P_update_Ax!(reshape(coeff, length(coeff), 1), norms, Ax)
+
+SignALSH_P_update_Ax!(coeff, norms::AbstractVector, Ax) =
+	SignALSH_P_update_Ax!(coeff, reshape(norms, length(norms), 1), Ax)
+
 SignALSH_P_update_Ax!(coeff, norms, Ax) =
-	(Ax .-= coeff' * norms)
+	(Ax .-= coeff * norms')
 
 #=
 h(Q(x)) definitions
