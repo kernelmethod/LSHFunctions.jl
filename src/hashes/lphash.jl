@@ -11,7 +11,12 @@ struct LpHash{T, A <: AbstractMatrix{T}} <: SymmetricLSHFunction{T}
 	power :: Int64
 end
 
-function LpHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, power::Integer = 2) where {T}
+function LpHash{T}(
+        input_length :: Integer,
+        n_hashes :: Integer,
+        denom :: Real,
+        power :: Integer = 2) where {T}
+
 	coeff = Matrix{T}(undef, n_hashes, input_length)
 	shift = Vector{T}(undef, n_hashes)
 
@@ -35,7 +40,7 @@ L2Hash(input_length :: Integer, n_hashes :: Integer, denom :: Real; kws...) wher
 	LpHash(input_length, n_hashes, denom, power = 2; kws...)
 
 # Definition of the actual hash function
-function (h::LpHash)(x::AbstractArray)
+function (h :: LpHash)(x::AbstractArray)
 	coeff, denom, shift = h.coeff, h.denom, h.shift
 	hashes = coeff * x
 	hashes = @. hashes / denom + shift
@@ -44,19 +49,19 @@ end
 
 # When the input x does not already have the appropriate type, perform a type
 # conversion first so that we can hit BLAS
-(h::LpHash{T})(x::AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
+(h :: LpHash{T})(x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
 	h(T.(x))
 
-(h::LpHash{T})(x::AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
+(h :: LpHash{T})(x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(h, Tuple{AbstractArray}, x)
 
 #=
 LSHFunction and SymmetricLSHFunction API compliance
 =#
-n_hashes(h::LpHash) = length(h.shift)
-hashtype(::LpHash) = Vector{Int32}
+n_hashes(h :: LpHash) = length(h.shift)
+hashtype(:: LpHash) = Vector{Int32}
 
-function redraw!(h::LpHash{T}) where T
+function redraw!(h :: LpHash{T}) where T
 	if h.power == 1
 		distr = Cauchy(0,1)
 		redraw!(h.coeff, () -> T(rand(distr)))

@@ -1,4 +1,4 @@
-using Test, Random, LSH, LinearAlgebra
+using Test, Random, LSH, LinearAlgebra, SparseArrays
 
 @testset "SignALSH tests" begin
 	Random.seed!(0)
@@ -85,5 +85,38 @@ using Test, Random, LSH, LinearAlgebra
 		@test all(hashfn.coeff_A .!= coeff_A)
 		@test all(hashfn.coeff_B .!= coeff_B)
 		@test all(hashfn.P_shift .!= P_shift)
+	end
+
+	@testset "Can hash sparse arrays" begin
+		input_size = 100
+		n_inputs = 150
+		n_hashes = 2
+
+		hashfn = SignALSH(input_size, n_hashes)
+		x = sprandn(input_size, n_inputs, 0.2)
+
+		# Mostly just need to test that the following lines don't crash
+		ih = index_hash(hashfn, x)
+		qh = query_hash(hashfn, x)
+
+		@test size(ih) == (n_hashes, n_inputs)
+		@test size(qh) == (n_hashes, n_inputs)
+	end
+
+	@testset "Can hash matrix adjoints" begin
+		input_size = 100
+		n_inputs = 150
+		n_hashes = 2
+		hashfn = SignALSH(input_size, n_hashes)
+
+		## Test 1: regular matrix adjoint
+		x = randn(n_inputs, input_size)'
+		@test index_hash(hashfn, x) == index_hash(hashfn, copy(x))
+		@test query_hash(hashfn, x) == query_hash(hashfn, copy(x))
+
+		## Test 2: sparse matrix adjoint
+		x = sprandn(n_inputs, input_size, 0.2)'
+		@test index_hash(hashfn, x) == index_hash(hashfn, copy(x))
+		@test query_hash(hashfn, x) == query_hash(hashfn, copy(x))
 	end
 end

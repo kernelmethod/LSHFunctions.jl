@@ -12,7 +12,12 @@ struct MIPSHash{T} <: AsymmetricLSHFunction{T}
 	m :: Integer
 end
 
-function MIPSHash{T}(input_length::Integer, n_hashes::Integer, denom::Real, m::Integer = 3) where {T <: LSH_FAMILY_DTYPES}
+function MIPSHash{T}(
+        input_length :: Integer,
+        n_hashes :: Integer,
+        denom :: Real,
+        m :: Integer = 3) where {T <: LSH_FAMILY_DTYPES}
+
 	coeff_A = Matrix{T}(undef, n_hashes, input_length)
 	coeff_B = Matrix{T}(undef, n_hashes, m)
 	denom = T(denom)
@@ -48,7 +53,7 @@ MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMI
 MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
-function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
+function MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray) where {T}
 	norms = col_norms(x)
 	maxnorm = maximum(norms)
 	maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
@@ -79,7 +84,7 @@ function MIPSHash_P(h::MIPSHash{T}, x::AbstractArray) where {T}
 	return floor.(Int32, aTx)
 end
 
-MIPSHash_P_update_aTx!(coeff::Vector{T}, norms::Vector{T}, aTx::Array{T}) where T =
+MIPSHash_P_update_aTx!(coeff :: Vector{T}, norms :: Vector{T}, aTx :: Array{T}) where T =
 	BLAS.ger!(T(1), coeff, norms, aTx)
 
 MIPSHash_P_update_aTx!(coeff, norms, aTx) =
@@ -97,7 +102,7 @@ function MIPSHash_Q(h :: MIPSHash, x :: AbstractArray)
 	# aTx (rather than before) so that we don't have to allocate a new array
 	# of size(x). Moreover, for large input vectors, the size of aTx is typically
 	# much smaller than the size of x.
-	f(x::T) where {T} = (x ≈ T(0) ? T(1) : x)
+	f(x :: T) where {T} = (x ≈ T(0) ? T(1) : x)
 	norms = col_norms(x)
 	map!(f, norms, norms)
 
@@ -133,10 +138,10 @@ LSHFunction and AsymmetricLSHFunction API compliance
 index_hash(h :: MIPSHash, x) = MIPSHash_P(h, x)
 query_hash(h :: MIPSHash, x) = MIPSHash_Q(h, x)
 
-n_hashes(h::MIPSHash) = length(h.shift)
-hashtype(::MIPSHash) = Vector{Int32}
+n_hashes(h :: MIPSHash) = length(h.shift)
+hashtype(:: MIPSHash) = Vector{Int32}
 
-function redraw!(h::MIPSHash{T}) where T
+function redraw!(h :: MIPSHash{T}) where T
 	redraw!(h.coeff_A, () -> randn(T))
 	redraw!(h.coeff_B, () -> randn(T))
 	redraw!(h.shift, () -> rand(T))

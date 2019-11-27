@@ -17,7 +17,11 @@ end
 Constructors
 =#
 
-function SignALSH{T}(input_length::Integer, n_hashes::Integer, m::Integer = 3) where {T}
+function SignALSH{T}(
+        input_length :: Integer,
+        n_hashes :: Integer,
+        m :: Integer = 3) where {T}
+
 	coeff_A = Matrix{T}(undef, n_hashes, input_length)
 	coeff_B = Matrix{T}(undef, n_hashes, m)
 	P_shift = Vector{T}(undef, n_hashes)
@@ -38,13 +42,13 @@ Definitions of h(P(x)) for SignALSH
 #=
 h(P(x)) definitions
 =#
-SignALSH_P(h::SignALSH{T}, x::AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
+SignALSH_P(h :: SignALSH{T}, x :: AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
 	SignALSH_P(h, T.(x))
 
-SignALSH_P(h::SignALSH{T}, x::AbstractArray{T}) where {T<:LSH_FAMILY_DTYPES} =
+SignALSH_P(h :: SignALSH{T}, x :: AbstractArray{T}) where {T<:LSH_FAMILY_DTYPES} =
 	invoke(SignALSH_P, Tuple{SignALSH{T},AbstractArray}, h, x)
 
-function SignALSH_P(h::SignALSH{T}, x::AbstractArray) where {T}
+function SignALSH_P(h :: SignALSH{T}, x :: AbstractArray) where {T}
 	# SignALSH_P is essentially just SimHash on
 	#
 	#	P(x) = [x; 1/2-norms^2; 1/2-norms^4; ... 1/2-norms^(2^m)]
@@ -78,15 +82,15 @@ function SignALSH_P(h::SignALSH{T}, x::AbstractArray) where {T}
 	return Ax .≥ 0
 end
 
-SignALSH_P_update_Ax!(coeff::Vector{T}, norms::Vector{T}, Ax::Array{T}) where T =
+SignALSH_P_update_Ax!(coeff :: Vector{T}, norms :: Vector{T}, Ax :: Array{T}) where T =
 	BLAS.ger!(T(-1), coeff, norms, Ax)
 
 # When the coefficients or norms are AbstractVectors, cascade through to reshape
 # them into AbstractMatrix before updating Ax.
-SignALSH_P_update_Ax!(coeff::AbstractVector, norms::AbstractVector, Ax) =
+SignALSH_P_update_Ax!(coeff :: AbstractVector, norms :: AbstractVector, Ax) =
 	SignALSH_P_update_Ax!(reshape(coeff, length(coeff), 1), norms, Ax)
 
-SignALSH_P_update_Ax!(coeff, norms::AbstractVector, Ax) =
+SignALSH_P_update_Ax!(coeff, norms :: AbstractVector, Ax) =
 	SignALSH_P_update_Ax!(coeff, reshape(norms, length(norms), 1), Ax)
 
 SignALSH_P_update_Ax!(coeff, norms, Ax) =
@@ -95,32 +99,32 @@ SignALSH_P_update_Ax!(coeff, norms, Ax) =
 #=
 h(Q(x)) definitions
 =#
-function SignALSH_Q(h::SignALSH{T}, x::AbstractArray) where {T}
+function SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray) where {T}
 	Ax = h.coeff_A * x
 	norms = col_norms(x)
 	map!(inv, norms, norms)
 	@. Ax * norms' ≥ T(0)
 end
 
-SignALSH_Q(h::SignALSH{T}, x::AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
+SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
 	SignALSH_Q(h, T.(x))
 
-SignALSH_Q(h::SignALSH{T}, x::AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
+SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(SignALSH_Q, Tuple{SignALSH{T},AbstractArray}, h, x)
 
-SignALSH_Q(h::SignALSH{T}, x::AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
+SignALSH_Q(h :: SignALSH{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
 	invoke(SignALSH_Q, Tuple{SignALSH{T},AbstractArray}, h, x) |> vec
 
 #=
-LSHFunction and AsymmetricLSHFunction API compliacne
+LSHFunction and AsymmetricLSHFunction API compliance
 =#
-index_hash(h::SignALSH, x) = SignALSH_P(h, x)
-query_hash(h::SignALSH, x) = SignALSH_Q(h, x)
+index_hash(h :: SignALSH, x) = SignALSH_P(h, x)
+query_hash(h :: SignALSH, x) = SignALSH_Q(h, x)
 
-n_hashes(h::SignALSH) = size(h.coeff_A, 1)
-hashtype(::SignALSH) = BitArray{1}
+n_hashes(h :: SignALSH) = size(h.coeff_A, 1)
+hashtype(:: SignALSH) = BitArray{1}
 
-function redraw!(h::SignALSH{T}) where {T}
+function redraw!(h :: SignALSH{T}) where {T}
 	redraw!(h.coeff_A, () -> randn(T))
 	redraw!(h.coeff_B, () -> randn(T))
 	h.P_shift .= h.coeff_B * fill(T(1/2), h.m)

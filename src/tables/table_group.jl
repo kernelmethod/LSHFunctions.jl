@@ -8,7 +8,7 @@ struct LSHTableGroup{T<:LSHTable}
 end
 
 # Outer constructors
-LSHTableGroup(h::LSHFunction, args...; kws...) =
+LSHTableGroup(h :: LSHFunction, args...; kws...) =
 	LSHTableGroup(() -> redraw(h), args...; kws...)
 
 LSHTableGroup(hfn_generator, n_tables=1; valtype=Any, unique_values=false) =
@@ -28,11 +28,11 @@ Extensions of LSHTable methods to groups of tables
 for func in (:(Base.insert!), :(reset!), :(redraw!))
 	@eval begin
 		"""
-			$(string($(func)))(tablegroup::LSHTableGroup, args...; kws...)
+			$(string($(func)))(tablegroup :: LSHTableGroup, args...; kws...)
 
 		Apply `$(string($(func)))(::LSHTable, args...; kws...)` to each of the tables in an LSHTableGroup.
 		"""
-		function $(func)(tablegroup::LSHTableGroup, args...; kws...)
+		function $(func)(tablegroup :: LSHTableGroup, args...; kws...)
 			for table in tablegroup.tables
 				$(func)(table, args...; kws...)
 			end
@@ -42,5 +42,5 @@ for func in (:(Base.insert!), :(reset!), :(redraw!))
 	end
 end
 
-Base.getindex(tablegroup::LSHTableGroup, x::AbstractVector) =
+Base.getindex(tablegroup :: LSHTableGroup, x :: AbstractVector) =
 	union((table[x] for table in tablegroup.tables)...)

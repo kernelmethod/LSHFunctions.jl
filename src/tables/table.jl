@@ -41,8 +41,8 @@ end
 #=
 Methods for accessing the underlying hash function
 =#
-index_hash(table::LSHTable, x) = index_hash(table.hashfn, x)
-query_hash(table::LSHTable, x) = query_hash(table.hashfn, x)
+index_hash(table :: LSHTable, x) = index_hash(table.hashfn, x)
+query_hash(table :: LSHTable, x) = query_hash(table.hashfn, x)
 
 #=
 Getter/setter methods
@@ -56,7 +56,7 @@ const SINGLE_INSERT_LSHFUNCTION =
 		MIPSHash
 	}
 
-function Base.insert!(lshtable::LSHTable{H,V,F}, x, vals) where
+function Base.insert!(lshtable :: LSHTable{H,V,F}, x, vals) where
 		{H, V, F<:SINGLE_INSERT_LSHFUNCTION}
 
 	if !isempty(keys(lshtable))
@@ -69,7 +69,7 @@ end
 
 # Use @generated since we want the type signature to be Tuple{LSHTable,Any,Any}, but want
 # different behaviors for x::AbstractArray versus x::AbstractVector
-@generated function Base.insert!(lshtable::LSHTable, x::A, vals) where A
+@generated function Base.insert!(lshtable :: LSHTable, x :: A, vals) where A
 	apply_expr = if A <: AbstractVector
 		quote
 			insert_at_hash!(lshtable, hashes, vals)
@@ -90,7 +90,7 @@ end
 	end
 end
 
-function insert_at_hash!(lshtable::LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Vector}
+function insert_at_hash!(lshtable :: LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Vector}
 	entry = get!(lshtable.table, ih) do
 		Vector{V}(undef, 0)
 	end
@@ -124,7 +124,7 @@ function insert_at_hash!(lshtable::LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Vec
 	push!(entry, v)
 end
 
-function insert_at_hash!(lshtable::LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Set}
+function insert_at_hash!(lshtable :: LSHTable{F,H,V,E}, ih, v) where {F,H,V,E<:Set}
 	entry = get!(lshtable.table, ih) do
 		Set{V}()
 	end
@@ -160,36 +160,36 @@ end
 #=
 Extensions of Base methods for Dict types
 =#
-function Base.getindex(lshtable::LSHTable{F,H,V,E}, x) where {F,H,V,E}
+function Base.getindex(lshtable :: LSHTable{F,H,V,E}, x) where {F,H,V,E}
 	qh = query_hash(lshtable, x)
 	(get(lshtable.table, h) do
 	 	E()
 	end for h in eachcol(qh))
 end
 
-function Base.getindex(lshtable::LSHTable{F,H,V,E}, x::AbstractVector) where {F,H,V,E}
+function Base.getindex(lshtable :: LSHTable{F,H,V,E}, x :: AbstractVector) where {F,H,V,E}
 	qh = query_hash(lshtable, x)
 	get(lshtable.table, qh) do
 		E()
 	end
 end
 
-Base.haskey(lshtable::LSHTable, key) =
+Base.haskey(lshtable :: LSHTable, key) =
 	haskey(lshtable.table, key)
 
-Base.keys(lshtable::LSHTable) =
+Base.keys(lshtable :: LSHTable) =
 	keys(lshtable.table)
 
-Base.delete!(lshtable::LSHTable, k) =
+Base.delete!(lshtable :: LSHTable, k) =
 	delete!(lshtable.table, k)
 
-Base.:(==)(lshtable_1::LSHTable, lshtable_2::LSHTable) =
+Base.:(==)(lshtable_1 :: LSHTable, lshtable_2 :: LSHTable) =
 	(lshtable_1.table == lshtable_2.table)
 
 #=
 Additional methods for LSHTable
 =#
-function reset!(lshtable::LSHTable)
+function reset!(lshtable :: LSHTable)
 	# Delete all keys from the table
 	for k in keys(lshtable)
 		delete!(lshtable, k)
@@ -206,7 +206,7 @@ function reset!(lshtable::LSHTable)
 	return lshtable
 end
 
-function redraw!(table::LSHTable)
+function redraw!(table :: LSHTable)
 	redraw!(table.hashfn)
 	reset!(table)
 end
