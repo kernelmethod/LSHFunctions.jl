@@ -27,6 +27,7 @@ redraw(h::LSHFunction) =
 	h |> deepcopy |> redraw!
 
 # Symmetric LSH families
+function (:: SymmetricLSHFunction)(x) end
 index_hash(h :: SymmetricLSHFunction, x) = h(x)
 query_hash(h :: SymmetricLSHFunction, x) = h(x)
 
