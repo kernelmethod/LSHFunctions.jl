@@ -18,3 +18,14 @@ So far, there are hash functions for the following measures of similarity:
   - `SignALSH` (recommended)
 
 In addition, this module provides `LSHTable` and `LSHTableGroup` composite types to make it easier to build hash tables and groups of hash tables for use with LSH.
+
+This package still needs a lot of work, including improvement to the documentation and API. In general, if you want to draw one or more new hash functions, you can use the following syntax:
+
+```julia
+hashfn = HashFunctionFamily(input dimension,
+                            number of hash functions,
+                            [required, family-specific params];
+                            [unrequired, family-spefic keyword params])
+```
+
+This is liable to change in the future.
