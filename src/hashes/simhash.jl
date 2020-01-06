@@ -38,7 +38,7 @@ single_hash_collision_probability(::SimHash, similarity) =
 
 ### Hash computation
 
-(hashfn::SimHash{T})(x::AbstractArray{Real}) where T =
+(hashfn::SimHash{T})(x::AbstractArray) where T =
 	hashfn(T.(x))
 
 (hashfn::SimHash{T})(x::AbstractArray{T}) where T =
