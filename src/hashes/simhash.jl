@@ -38,12 +38,9 @@ single_hash_collision_probability(::SimHash, similarity) =
 
 ### Hash computation
 
-(h :: SimHash)(x :: AbstractArray) =
-	(h.coeff' * x) .≥ 0
+(hashfn::SimHash{T})(x::AbstractArray{Real}) where T =
+	hashfn(T.(x))
 
-(h :: SimHash{T})(x :: AbstractArray{Real}) where T =
-	h(T.(x))
-
-(h :: SimHash{T})(x :: AbstractArray{T}) where T =
-	invoke(h, Tuple{AbstractArray}, x)
+(hashfn::SimHash{T})(x::AbstractArray{T}) where T =
+    (hashfn.coeff' * x) .≥ 0
 
