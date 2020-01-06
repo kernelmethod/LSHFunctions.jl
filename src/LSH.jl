@@ -36,7 +36,7 @@ export SimHash, LpHash, L1Hash, L2Hash, MIPSHash,
        SignALSH, MinHash
 
 # Helper / utility functions for LSHFunctions
-export hashtype, index_hash, query_hash, n_hashes
+export index_hash, query_hash, n_hashes, hashtype, similarity
 
 # Hash tables and related functions
 #=

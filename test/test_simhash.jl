@@ -1,95 +1,124 @@
 using Test, Random, LSH
 
+#==================
+Helper functions
+==================#
+
+# Function that draws two random vectors and computes their hashes with
+# hashfn. Returns true if the number of collisions of individual hashes
+# is within δ of the expected single-hash collision probability, and
+# false otherwise.
+function test_collision_probability(
+        hashfn :: LSH.LSHFunction,
+        δ :: AbstractFloat,
+        sampler = () -> randn(4))
+
+    similarity_fn = similarity(hashfn)
+    x, y = sampler(), sampler()
+    sim = similarity_fn(x,y)
+
+    hx, hy = hashfn(x), hashfn(y)
+    prob = LSH.single_hash_collision_probability(hashfn, sim)
+    coll_freq = mean(hx .== hy)
+
+    prob - δ ≤ coll_freq ≤ prob + δ
+end
+
+#==================
+Tests
+==================#
 @testset "SimHash tests" begin
-	Random.seed!(0)
-	import LSH: SymmetricLSHFunction
+    Random.seed!(0)
+    import LSH: SymmetricLSHFunction
 
-	@testset "Can construct a cosine similarity hash function" begin
-		input_length = 5
-		n_hashes = 8
-		hashfn = SimHash(input_length, n_hashes)
+    @testset "Construct SimHash" begin
+        # Create 128 SimHash hash functions
+        hashfn = LSH.SimHash(128)
 
-		@test BitArray{1} == hashtype(hashfn)
-	end
+        @test n_hashes(hashfn) == 128
+        @test hashtype(hashfn) == BitArray{1}
+        @test similarity(hashfn) == CosSim
 
-	@testset "Type consistency in SimHash fields" begin
-		hashfn = SimHash{Float32}(1, 1)
-		@test isa(hashfn, SimHash{Float32})
-		@test isa(hashfn, SymmetricLSHFunction)
-		@test isa(hashfn.coeff, Matrix{Float32})
+        # By default, SimHash should start off unable to hash inputs of any
+        # size, and should not resize in powers of 2.
+        @test LSH.current_max_input_size(hashfn) == 0
+        @test hashfn.resize_pow2 == false
+    end
 
-		hashfn = SimHash{Float64}(1, 1)
-		@test isa(hashfn, SimHash{Float64})
-		@test isa(hashfn, SymmetricLSHFunction)
-		@test isa(hashfn.coeff, Matrix{Float64})
+    @testset "Hash simple inputs" begin
+        hashfn = SimHash(128)
 
-		# The default should be for hashfn to be a SimHash{Float32}
-		hashfn = SimHash(1, 1)
-		@test isa(hashfn, SimHash{Float32})
-		@test isa(hashfn.coeff, Matrix{Float32})
-	end
+        ## Test 1: a single input that is just the zero vector
+        x = zeros(10)
+        @test all(hashfn(x) .== true)
 
-	@testset "Hash simple inputs" begin
-		input_length = 5
-		n_hashes = 128
-		hashfn = SimHash(input_length, n_hashes)
+        ## Test 2: many inputs, all of which are zero vectors
+        x = zeros(10, 32)
+        @test all(hashfn(x) .== true)
 
-		## Test 1: a single input that is just the zero vector
-		x = zeros(input_length)
-		@test all(hashfn(x) .== true)
+        ## Test 3: many identical inputs
+        u = randn(10)
+        x = similar(u, 10, 32)
+        x .= u
+        hashes = hashfn(x)
+        @test all(hashes[:,1] .== hashes)
 
-		## Test 2: many inputs, all of which are zero vectors
-		x = zeros(input_length, 32)
-		@test all(hashfn(x) .== true)
+        # For any input, the probability that all of its hashes are the
+        # same should be extremely low, 2^(-n_hashes+1). Thus, there
+        # should be at least one true bit and one false bit among
+        # the hashes for an input.
+        @test any(hashes[:,1]) && !all(hashes[:,1])
+    end
 
-		## Test 3: many identical inputs
-		u = randn(input_length)
-		x = similar(u, input_length, 32)
-		x .= u
-		hashes = hashfn(x)
-		@test all(hashes[:,1] .== hashes)
+    @testset "Hashing returns the correct data types" begin
+        hashfn = SimHash(2)
 
-		# For any input, the probability that all of its hashes are the
-		# same should be extremely low, 2^(-n_hashes+1). Thus, there
-		# should be at least one true bit and one false bit among
-		# the hashes for an input.
-		@test any(hashes[:,1]) && !all(hashes[:,1])
-	end
+        ## Test 1: Vector{Float64} -> BitArray{1}
+        hashes = hashfn(randn(5))
+        @test isa(hashes, BitArray{1})
 
-	@testset "SimHash collision probabilities match expectations" begin
-	    # Test that the collision probability for SimHash is what's
-	    # advertised by constructing a large number of hash functions
-	    # and ensuring that the frequency of collisions is close
-	    # to the computed probability.
-	    input_length = 4
-	    n_hashes = 1024
-	    hashfn = SimHash{Float64}(input_length, n_hashes)
+        ## Test 2: Matrix{Float64} -> BitArray{2}
+        hashes = hashfn(randn(5, 10))
+        @test isa(hashes, BitArray{2})
+    end
 
-	    test_collision_probability(δ) = begin
-	        x, y = rand(input_length), rand(input_length)
-	        sim = CosSim(x,y)
-	        prob = LSH.single_hash_collision_probability(hashfn, sim)
+    @testset "SimHash collision probabilities match expectations" begin
+        # Draw a massive number of hash functions, since we're going to be testing
+        # the probability of collision for many different pairs of random inputs.
+        # As the number of pairs increases, the probability that one pair has an
+        # above- or below-average number of collisions increases.
+        hashfn = LSH.SimHash(1024)
 
-	        hx, hy = hashfn(x), hashfn(y)
-            collision_frequency = mean(hx .== hy)
+        # Run test_collision_probability lots of times to ensure that the
+        # collision probability is close to what's advertised.
+        # Dry run: just try once
+        @test test_collision_probability(hashfn, 0.05)
 
-            # Check that the collision frequency is within ±δ of prob
-            prob - δ ≤ collision_frequency ≤ prob + δ
-	    end
+        # Full test: test many more times
+        @test all(test_collision_probability(hashfn, 0.05) for ii = 1:128)
+    end
 
-	    @test test_collision_probability(0.05)
-	    @test all(test_collision_probability(0.05) for ii = 1:128)
-	end
+    @testset "SimHash current_max_input_size scales with input size" begin
+        inputs = [rand(4), rand(7), rand(127), rand(4)]
 
-	@testset "Hashing returns the correct data types" begin
-		hashfn = SimHash(5, 2)
+        ### First round of tests: run with resize_pow2 == false
+        hashfn = LSH.SimHash(1; resize_pow2 = false)
 
-		## Test 1: Vector{Float64} -> BitArray{1}
-		hashes = hashfn(randn(5))
-		@test isa(hashes, BitArray{1})
+        for (ii,x) in enumerate(inputs)
+            max_size_seen = inputs[1:ii] .|> length |> maximum
+            hashfn(x)
+            @test LSH.current_max_input_size(hashfn) == max_size_seen
+        end
 
-		## Test 2: Matrix{Float64} -> BitArray{2}
-		hashes = hashfn(randn(5, 10))
-		@test isa(hashes, BitArray{2})
-	end
+        # Second round of tests: run with resize_pow2 == true
+        hashfn = LSH.SimHash(1; resize_pow2 = true)
+        for (ii,x) in enumerate(inputs)
+            max_size_seen = inputs[1:ii] .|> length |> maximum
+            next_pow_2 = nextpow(2, max_size_seen)
+            hashfn(x)
+            @test LSH.current_max_input_size(hashfn) == next_pow_2
+        end
+    end
+
+
 end
