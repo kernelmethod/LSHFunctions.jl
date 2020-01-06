@@ -29,11 +29,10 @@ Exports
 =#
 
 # Similarity functions
-export CosSim
+export CosSim, ℓ_1, ℓ_2, ℓ_p
 
 # Hash functions
-export SimHash, LpHash, L1Hash, L2Hash, MIPSHash,
-       SignALSH, MinHash
+export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash
 
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity

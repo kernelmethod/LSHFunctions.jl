@@ -20,7 +20,9 @@ available_similarities_as_strings() = available_similarities .|> string |> sort
 Definitions of built-in similarity functions
 ====================#
 
-# Cosine similarity
+#=
+Cosine similarity
+=#
 
 @doc raw"""
     CosSim(x,y)
@@ -55,7 +57,64 @@ CosSim(x,y) = dot(x,y) / (norm(x) * norm(y))
 
 push!(available_similarities, CosSim)
 
-# TODO: L^p distance
+#=
+L^p distance
+=#
+
+@doc raw"""
+    ℓ_p(p, x, y)
+    ℓ_1(x, y)
+    ℓ_2(x, y)
+
+Computes the ``\ell^p`` distance between a pair of vectors, given by
+
+```\math
+\ell^p(x,y) \coloneqq \|x - y\|_p = \sum \left|x_i - y_i\right|^p
+```
+
+Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, they are given unique function names `ℓ_1` and `ℓ_2` that you can use to call them.
+"""
+function ℓ_p(p::Integer, x::Vector{T}, y::Vector{T}) where {T}
+    # TODO: more descriptive error message
+    @assert p > 0
+    @assert length(x) == length(y)
+
+    result = T(0)
+    @inbounds @simd for ii = 1:length(x)
+        result += abs(x[ii] - y[ii])^p
+    end
+
+    return result^(1/p)
+end
+
+@doc (@doc ℓ_p)
+function ℓ_1(x::Vector{T}, y::Vector{T}) where {T}
+    # TODO: more descriptive error message
+    @assert length(x) == length(y)
+
+    result = T(0)
+    @inbounds @simd for ii = 1:length(x)
+        result += abs(x[ii] - y[ii])
+    end
+
+    return result
+end
+
+@doc (@doc ℓ_p)
+function ℓ_2(x::Vector{T}, y::Vector{T}) where {T}
+    # TODO: more descriptive error message
+    @assert length(x) == length(y)
+    result = T(0)
+
+    @inbounds @simd for ii = 1:length(x)
+        result += abs2(x[ii] - y[ii])
+    end
+
+    return √result
+end
+
+push!(available_similarities, ℓ_1)
+push!(available_similarities, ℓ_2)
 
 # TODO: Jaccard similarity
 

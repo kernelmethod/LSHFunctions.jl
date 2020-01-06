@@ -52,9 +52,27 @@ git-tree-sha1 = "51d184211a807ddba5f48d06098e93986759ec43"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 version = "0.21.9"
 
+[[DocStringExtensions]]
+deps = ["LibGit2", "Markdown", "Pkg", "Test"]
+git-tree-sha1 = "88bb0edb352b16608036faadcc071adda068582a"
+uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+version = "0.8.1"
+
+[[Documenter]]
+deps = ["Base64", "Dates", "DocStringExtensions", "InteractiveUtils", "JSON", "LibGit2", "Logging", "Markdown", "REPL", "Test", "Unicode"]
+git-tree-sha1 = "885467cebde4639a3d81953652cc53ff5a73cb87"
+uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+version = "0.24.3"
+
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[JSON]]
+deps = ["Dates", "Mmap", "Parsers", "Unicode"]
+git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
+uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+version = "0.21.0"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -79,6 +97,9 @@ git-tree-sha1 = "de0a5ce9e5289f27df672ffabef4d1e5861247d5"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
 version = "0.4.3"
 
+[[Mmap]]
+uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
 [[OpenBLAS_jll]]
 deps = ["Libdl", "Pkg"]
 git-tree-sha1 = "27f7e3187464eef76b4b7784b79fe10cb302c75c"
@@ -96,6 +117,12 @@ deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
 git-tree-sha1 = "035f8d60ba2a22cb1d2580b1e0e5ce0cb05e4563"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.9.10"
+
+[[Parsers]]
+deps = ["Dates", "Test"]
+git-tree-sha1 = "0139ba59ce9bc680e2925aec5b7db79065d60556"
+uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+version = "0.3.10"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]

@@ -1,82 +1,84 @@
 using Test, Random, LSH
 
 @testset "LpHash tests" begin
-	Random.seed!(0)
-	import LSH: SymmetricLSHFunction
+    Random.seed!(0)
+    import LSH: SymmetricLSHFunction
 
-	@testset "Can construct a L^p distance hash function" begin
-		input_length = 5
-		n_hashes = 8
-		denom = 2
+    @testset "Can construct an ℓ^p distance hash function" begin
+        # Construct a hash for L^1 distance
+        L1_hash = L1Hash(5; r = 2)
+        @test n_hashes(L1_hash) == 5
+        @test L1_hash.r == 2
+        @test L1_hash.power == 1
+        @test similarity(L1_hash) == ℓ_1
 
-		for p in (1,2)
-			Lp_hash = LpHash(input_length, n_hashes, denom, p)
+        # Construct a hash for L^2 distance
+        L2_hash = L2Hash(12; r = 3.4)
+        @test n_hashes(L2_hash) == 12
+        @test L2_hash.r == Float32(3.4)
+        @test L2_hash.power == 2
+        @test similarity(L2_hash) == ℓ_2
 
-			@test size(Lp_hash.coeff) == (n_hashes, input_length)
-			@test Lp_hash.denom == denom
-			@test size(Lp_hash.shift) == (n_hashes,)
-		end
-	end
+        # Construct a hash using a specified dtype
+        @test isa(L1Hash(1; dtype=Float32), LSH.LpHash{Float32})
+        @test isa(L2Hash(1; dtype=Float64), LSH.LpHash{Float64})
+    end
 
-	@testset "Type consistency in LpHash fields" begin
-		# Should have type consistency between the fields of the struct,
-		# so that we avoid expensive type conversions.
-		Lp_hash = LpHash{Float32}(5, 5, 1)
+    @testset "Hashes are correctly computed" begin
+        n_hashes = 8
+        r = 2
 
-		@test isa(Lp_hash, LpHash{Float32})
-		@test isa(Lp_hash.coeff, Matrix{Float32})
-		@test isa(Lp_hash.denom, Float32)
-		@test isa(Lp_hash.shift, Vector{Float32})
+        hashfn = L2Hash(n_hashes; r = r)
 
-		Lp_hash = LpHash{Float64}(5, 5, 1)
-		@test isa(Lp_hash, LpHash{Float64})
-		@test isa(Lp_hash.coeff, Matrix{Float64})
-		@test isa(Lp_hash.denom, Float64)
-		@test isa(Lp_hash.shift, Vector{Float64})
+        # Test on a single input
+        x = randn(8)
+        hashes = hashfn(x)
+        manual_hashes = floor.(Int32, hashfn.coeff * x ./ r .+ hashfn.shift)
 
-		# The default dtype should be Float32
-		Lp_hash = LpHash(5, 5, 1)
-		@test isa(Lp_hash, LpHash{Float32})
-		@test isa(Lp_hash.coeff, Matrix{Float32})
-		@test isa(Lp_hash.denom, Float32)
-		@test isa(Lp_hash.shift, Vector{Float32})
-	end
+        @test isa(hashes, Vector{Int32})
+        @test hashes == manual_hashes
 
-	@testset "Hashes are correctly computed" begin
-		input_length = 5
-		n_hashes = 8
-		denom = 2
+        # Test on many inputs, simultaneously
+        x = randn(8, 128)
+        hashes = hashfn(x)
+        manual_hashes = floor.(Int32, hashfn.coeff * x ./ r .+ hashfn.shift)
 
-		hashfn = LpHash{Float32}(input_length, n_hashes, denom)
-		coeff, shift = hashfn.coeff, hashfn.shift
+        @test isa(hashes, Matrix{Int32})
+        @test hashes == manual_hashes
+    end
 
-		# Test on a single input
-		x = randn(input_length)
-		hashes = hashfn(x)
-		manual_hashes = floor.(Int32, coeff * x ./ denom .+ shift)
+    @testset "Hashes have the correct dtype" begin
+        hashfn = L1Hash(5)
 
-		@test isa(hashes, Vector{Int32})
-		@test hashes == manual_hashes
+        # Test 1: Vector{Float64} -> Vector{Int32}
+        hashes = hashfn(randn(5))
+        @test Vector{eltype(hashes)} == hashtype(hashfn)
+        @test isa(hashes, Vector{Int32})
 
-		# Test on many inputs, simultaneously
-		x = randn(input_length, 128)
-		hashes = hashfn(x)
-		manual_hashes = floor.(Int32, coeff * x ./ denom .+ shift)
+        # Test 2: Matrix{Float64} -> Matrix{Int32}
+        hashes = hashfn(randn(5, 10))
+        @test isa(hashes, Matrix{Int32})
+    end
 
-		@test isa(hashes, Matrix{Int32})
-		@test hashes == manual_hashes
-	end
+    @testset "Nearby points experience more frequent collisions" begin
+        hashfn = L2Hash(1024; dtype=Float64, r=4)
 
-	@testset "Hashes have the correct dtype" begin
-		hashfn = LpHash(5, 5, 1)
+        x1 = randn(128)
+        x2 = x1 + 0.05 * randn(length(x1))
+        x3 = x1 + 0.50 * randn(length(x1))
+        x4 = x1 + 2.00 * randn(length(x1))
 
-		# Test 1: Vector{Float64} -> Vector{Int32}
-		hashes = hashfn(randn(5))
-		@test Vector{eltype(hashes)} == hashtype(hashfn)
-		@test isa(hashes, Vector{Int32})
+        h1, h2, h3, h4 = hashfn(x1), hashfn(x2), hashfn(x3), hashfn(x4)
+        @test sum(h1 .== h4) < sum(h1 .== h3) < sum(h1 .== h2)
+    end
 
-		# Test 2: Matrix{Float64} -> Matrix{Int32}
-		hashes = hashfn(randn(5, 10))
-		@test isa(hashes, Matrix{Int32})
-	end
+    @testset "Hash collision frequency matches probability" begin
+        hashfn = L2Hash(1024, r = 4)
+
+        # Dry run
+        @test test_collision_probability(hashfn, 0.05)
+
+        # Full test
+        @test all(test_collision_probability(hashfn, 0.05) for ii = 1:128)
+    end
 end
