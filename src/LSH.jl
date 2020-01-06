@@ -5,6 +5,8 @@ using Distributions, LinearAlgebra, SparseArrays
 include("utils.jl")
 include("LSHBase.jl")
 
+include("similarities.jl")
+
 #=
 Hash functions
 =#
@@ -17,21 +19,28 @@ include(joinpath("hashes", "sign_alsh.jl"))
 #=
 Hash tables for LSHFunctions
 =#
+#=
 include(joinpath("tables", "table.jl"))
 include(joinpath("tables", "table_group.jl"))
+=#
 
 #=
 Exports
 =#
+
+# Similarity functions
+export CosSim
+
 # Hash functions
 export SimHash, LpHash, L1Hash, L2Hash, MIPSHash,
        SignALSH, MinHash
 
 # Helper / utility functions for LSHFunctions
-export hashtype, index_hash, query_hash, n_hashes,
-       redraw!
+export hashtype, index_hash, query_hash, n_hashes
 
 # Hash tables and related functions
+#=
 export LSHTable, LSHTableGroup, insert!, reset!
+=#
 
 end # module

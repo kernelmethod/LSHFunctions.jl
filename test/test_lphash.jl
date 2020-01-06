@@ -24,14 +24,12 @@ using Test, Random, LSH
 		Lp_hash = LpHash{Float32}(5, 5, 1)
 
 		@test isa(Lp_hash, LpHash{Float32})
-		@test isa(Lp_hash, SymmetricLSHFunction{Float32})
 		@test isa(Lp_hash.coeff, Matrix{Float32})
 		@test isa(Lp_hash.denom, Float32)
 		@test isa(Lp_hash.shift, Vector{Float32})
 
 		Lp_hash = LpHash{Float64}(5, 5, 1)
 		@test isa(Lp_hash, LpHash{Float64})
-		@test isa(Lp_hash, SymmetricLSHFunction{Float64})
 		@test isa(Lp_hash.coeff, Matrix{Float64})
 		@test isa(Lp_hash.denom, Float64)
 		@test isa(Lp_hash.shift, Vector{Float64})
@@ -80,15 +78,5 @@ using Test, Random, LSH
 		# Test 2: Matrix{Float64} -> Matrix{Int32}
 		hashes = hashfn(randn(5, 10))
 		@test isa(hashes, Matrix{Int32})
-	end
-
-	@testset "Can re-draw random coefficients" begin
-		hashfn = LpHash(5, 5, 1)
-		coeff = deepcopy(hashfn.coeff)
-		shift = deepcopy(hashfn.shift)
-
-		redraw!(hashfn)
-		@test all(hashfn.coeff .!= coeff)
-		@test all(hashfn.shift .!= shift)
 	end
 end

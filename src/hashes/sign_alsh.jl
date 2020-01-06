@@ -1,4 +1,14 @@
+#================================================================
+
+Definition of SignALSH, an LSH function for hashing on inner products.
+
+================================================================#
+
 import LinearAlgebra: norm
+
+#========================
+Typedefs
+========================#
 
 """
 Implementation of the SignALSH maximum inner product search (MIPS)
@@ -6,46 +16,41 @@ hash function. Ref:
 
 	https://arxiv.org/abs/1410.5410v2
 """
-struct SignALSH{T, A <: AbstractMatrix{T}} <: AsymmetricLSHFunction{T}
-	coeff_A :: A
-	coeff_B :: A
-	P_shift :: Vector{T}
-	m :: Int64
+struct SignALSH{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
+
+    coeff_A :: Matrix{T}
+    coeff_B :: Matrix{T}
+    P_shift :: Vector{T}
+    m :: Int64
 end
 
-#=
-Constructors
-=#
-
+### External SignALSH constructors
 function SignALSH{T}(
-        input_length :: Integer,
-        n_hashes :: Integer,
-        m :: Integer = 3) where {T}
+        input_length::Integer,
+        n_hashes::Integer,
+        m::Integer = 3) where {T}
 
-	coeff_A = Matrix{T}(undef, n_hashes, input_length)
-	coeff_B = Matrix{T}(undef, n_hashes, m)
-	P_shift = Vector{T}(undef, n_hashes)
+    coeff_A = randn(T, n_hashes, input_length)
+    coeff_B = randn(T, n_hashes, m)
+    P_shift = coeff_B * fill(T(1/2), m)
 
-	hashfn = SignALSH(coeff_A, coeff_B, P_shift, Int64(m))
-	redraw!(hashfn)
+    SignALSH(coeff_A, coeff_B, P_shift, Int64(m))
 end
 
 SignALSH(args...; kws...) =
 	SignALSH{Float32}(args...; kws...)
 
 #============
-
-Definitions of h(P(x)) for SignALSH
-
+Hash computation implementation
 =============#
 
 #=
 h(P(x)) definitions
 =#
-SignALSH_P(h :: SignALSH{T}, x :: AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
+SignALSH_P(h :: SignALSH{T}, x :: AbstractArray{<:Real}) where {T<:Union{Float32,Float64}} =
 	SignALSH_P(h, T.(x))
 
-SignALSH_P(h :: SignALSH{T}, x :: AbstractArray{T}) where {T<:LSH_FAMILY_DTYPES} =
+SignALSH_P(h :: SignALSH{T}, x :: AbstractArray{T}) where {T<:Union{Float32,Float64}} =
 	invoke(SignALSH_P, Tuple{SignALSH{T},AbstractArray}, h, x)
 
 function SignALSH_P(h :: SignALSH{T}, x :: AbstractArray) where {T}
@@ -106,18 +111,18 @@ function SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray) where {T}
 	@. Ax * norms' ≥ T(0)
 end
 
-SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray{<:Real}) where {T<:LSH_FAMILY_DTYPES} =
+SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray{<:Real}) where {T<:Union{Float32,Float64}} =
 	SignALSH_Q(h, T.(x))
 
-SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
+SignALSH_Q(h :: SignALSH{T}, x :: AbstractArray{T}) where {T <: Union{Float32,Float64}} =
 	invoke(SignALSH_Q, Tuple{SignALSH{T},AbstractArray}, h, x)
 
-SignALSH_Q(h :: SignALSH{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
+SignALSH_Q(h :: SignALSH{T}, x :: AbstractVector{T}) where {T <: Union{Float32,Float64}} =
 	invoke(SignALSH_Q, Tuple{SignALSH{T},AbstractArray}, h, x) |> vec
 
-#=
+#========================
 LSHFunction and AsymmetricLSHFunction API compliance
-=#
+========================#
 index_hash(h :: SignALSH, x) = SignALSH_P(h, x)
 query_hash(h :: SignALSH, x) = SignALSH_Q(h, x)
 
@@ -125,8 +130,4 @@ n_hashes(h :: SignALSH) = size(h.coeff_A, 1)
 hashtype(:: SignALSH) = BitArray{1}
 
 function redraw!(h :: SignALSH{T}) where {T}
-	redraw!(h.coeff_A, () -> randn(T))
-	redraw!(h.coeff_B, () -> randn(T))
-	h.P_shift .= h.coeff_B * fill(T(1/2), h.m)
-	return h
 end

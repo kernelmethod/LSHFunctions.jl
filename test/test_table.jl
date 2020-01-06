@@ -4,7 +4,7 @@ Tests for the LSHTable API
 
 using Test, Random, LSH
 
-@testset "LSHTable tests" begin
+@test_skip @testset "LSHTable tests" begin
 	Random.seed!(0)
 
 	@testset "Can construct an LSHTable over SimHash" begin

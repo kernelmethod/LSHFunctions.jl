@@ -1,9 +1,19 @@
+#================================================================
+
+Definition of MIPSHash for hashing on inner products.
+
+================================================================#
+
+#========================
+Typedefs
+========================#
+
 """
 Asymmetric LSH for approximate maximum inner product search. Ref:
 
 	https://arxiv.org/abs/1405.5869
 """
-struct MIPSHash{T} <: AsymmetricLSHFunction{T}
+struct MIPSHash{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
 	coeff_A :: Matrix{T}
 	coeff_B :: Matrix{T}
 	denom :: T
@@ -12,45 +22,45 @@ struct MIPSHash{T} <: AsymmetricLSHFunction{T}
 	m :: Integer
 end
 
+### External MIPSHash constructors
 function MIPSHash{T}(
-        input_length :: Integer,
-        n_hashes :: Integer,
-        denom :: Real,
-        m :: Integer = 3) where {T <: LSH_FAMILY_DTYPES}
+        input_length::Integer,
+        n_hashes::Integer,
+        denom::Real,
+        m::Integer = 3) where {T <: Union{Float32,Float64}}
 
-	coeff_A = Matrix{T}(undef, n_hashes, input_length)
-	coeff_B = Matrix{T}(undef, n_hashes, m)
-	denom = T(denom)
-	shift = Vector{T}(undef, n_hashes)
-	Qshift = Vector{T}(undef, n_hashes)
+    coeff_A = randn(T, n_hashes, input_length)
+    coeff_B = randn(T, n_hashes, m)
+    denom = T(denom)
+    shift = rand(T, n_hashes)
+    Qshift = coeff_B * fill(T(1/2), m) ./ denom .+ shift
 
-	hashfn = MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
-	redraw!(hashfn)
+	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
 end
 
 MIPSHash(args...; kws...) =
 	MIPSHash{Float32}(args...; kws...)
 
-#=
+#========================
 Function definitions for the two hash functions used by the approximate MIPS LSH,
 h(P(x)) and h(Q(x)) (where h is an L^2 LSH function).
-=#
+========================#
 
 # Helper functions
-mat(x :: AbstractVector) = reshape(x, length(x), 1)
-mat(x :: AbstractMatrix) = x
+mat(x::AbstractVector) = reshape(x, length(x), 1)
+mat(x::AbstractMatrix) = x
 
-#=
+#=========
 h(P(x)) definitions
-=#
+=========#
 
-MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{<:Real}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+MIPSHash_P(h::MIPSHash{T}, x::AbstractArray{<:Real}; kws...) where {T <: Union{Float32,Float64}} =
 	MIPSHash_P(h, T.(x); kws...)
 
-MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray{T}; kws...) where {T <: Union{Float32,Float64}} =
 	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...)
 
-MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: LSH_FAMILY_DTYPES} =
+MIPSHash_P(h :: MIPSHash{T}, x :: AbstractVector{T}; kws...) where {T <: Union{Float32,Float64}} =
 	invoke(MIPSHash_P, Tuple{MIPSHash{T}, AbstractArray}, h, x; kws...) |> vec
 
 function MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray) where {T}
@@ -90,9 +100,9 @@ MIPSHash_P_update_aTx!(coeff :: Vector{T}, norms :: Vector{T}, aTx :: Array{T}) 
 MIPSHash_P_update_aTx!(coeff, norms, aTx) =
 	(aTx .+= coeff' * norms)
 
-#=
+#==========
 h(Q(x)) definitions
-=#
+===========#
 function MIPSHash_Q(h :: MIPSHash, x :: AbstractArray)
 	# First, perform a matvec on x and the first array of coefficients.
 	# Note: aTx is an n_hashes × n_inputs array
@@ -123,28 +133,20 @@ function MIPSHash_Q(h :: MIPSHash, x :: AbstractArray)
 	return floor.(Int32, aTx)
 end
 
-MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: LSH_FAMILY_DTYPES} =
+MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractArray{<:Real}) where {T <: Union{Float32,Float64}} =
 	MIPSHash_Q(h, T.(x))
 
-MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: LSH_FAMILY_DTYPES} =
+MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractArray{T}) where {T <: Union{Float32,Float64}} =
 	invoke(MIPSHash_Q, Tuple{MIPSHash{T}, AbstractArray}, h, x)
 
-MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: LSH_FAMILY_DTYPES} =
+MIPSHash_Q(h :: MIPSHash{T}, x :: AbstractVector{T}) where {T <: Union{Float32,Float64}} =
 	invoke(MIPSHash_Q, Tuple{MIPSHash{T}, AbstractArray}, h, x) |> vec
 
-#=
+#========================
 LSHFunction and AsymmetricLSHFunction API compliance
-=#
+========================#
 index_hash(h :: MIPSHash, x) = MIPSHash_P(h, x)
 query_hash(h :: MIPSHash, x) = MIPSHash_Q(h, x)
 
 n_hashes(h :: MIPSHash) = length(h.shift)
 hashtype(:: MIPSHash) = Vector{Int32}
-
-function redraw!(h :: MIPSHash{T}) where T
-	redraw!(h.coeff_A, () -> randn(T))
-	redraw!(h.coeff_B, () -> randn(T))
-	redraw!(h.shift, () -> rand(T))
-	h.Qshift .= h.coeff_B * fill(T(1/2), h.m) ./ h.denom .+ h.shift
-	return h
-end

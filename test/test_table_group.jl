@@ -4,7 +4,7 @@ Tests for LSHTableGroup in src/tables/table_group.jl
 
 using Test, Random, LSH
 
-@testset "LSHTableGroup tests" begin
+@test_skip @testset "LSHTableGroup tests" begin
 	Random.seed!(0)
 
 	@testset "Create an LSHTableGroup over SimHash" begin

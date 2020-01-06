@@ -9,23 +9,18 @@ using Test, Random, LSH
 		n_hashes = 8
 		hashfn = SimHash(input_length, n_hashes)
 
-		@test size(hashfn.coeff) == (n_hashes, input_length)
 		@test BitArray{1} == hashtype(hashfn)
-
-		# Test with just one hash
-		hashfn = SimHash(input_length, 1)
-		@test size(hashfn.coeff) == (1, input_length)
 	end
 
 	@testset "Type consistency in SimHash fields" begin
 		hashfn = SimHash{Float32}(1, 1)
 		@test isa(hashfn, SimHash{Float32})
-		@test isa(hashfn, SymmetricLSHFunction{Float32})
+		@test isa(hashfn, SymmetricLSHFunction)
 		@test isa(hashfn.coeff, Matrix{Float32})
 
 		hashfn = SimHash{Float64}(1, 1)
 		@test isa(hashfn, SimHash{Float64})
-		@test isa(hashfn, SymmetricLSHFunction{Float64})
+		@test isa(hashfn, SymmetricLSHFunction)
 		@test isa(hashfn.coeff, Matrix{Float64})
 
 		# The default should be for hashfn to be a SimHash{Float32}
@@ -61,25 +56,29 @@ using Test, Random, LSH
 		@test any(hashes[:,1]) && !all(hashes[:,1])
 	end
 
-	@testset "SimHash computes hashes correctly" begin
-		input_length = 5
-		n_hashes = 128
-		hashfn = SimHash(input_length, n_hashes)
-		coeff = hashfn.coeff
+	@testset "SimHash collision probabilities match expectations" begin
+	    # Test that the collision probability for SimHash is what's
+	    # advertised by constructing a large number of hash functions
+	    # and ensuring that the frequency of collisions is close
+	    # to the computed probability.
+	    input_length = 4
+	    n_hashes = 1024
+	    hashfn = SimHash{Float64}(input_length, n_hashes)
 
-		## Test 1: a single input
-		x = randn(input_length)
-		hashes = hashfn(x)
-		manual_hashes = coeff * x .≥ 0
+	    test_collision_probability(δ) = begin
+	        x, y = rand(input_length), rand(input_length)
+	        sim = CosSim(x,y)
+	        prob = LSH.single_hash_collision_probability(hashfn, sim)
 
-		@test hashes == manual_hashes
+	        hx, hy = hashfn(x), hashfn(y)
+            collision_frequency = mean(hx .== hy)
 
-		## Test 2: multiple inputs
-		x = randn(input_length, 32)
-		hashes = hashfn(x)
-		manual_hashes = coeff * x .≥ 0
+            # Check that the collision frequency is within ±δ of prob
+            prob - δ ≤ collision_frequency ≤ prob + δ
+	    end
 
-		@test hashes == manual_hashes
+	    @test test_collision_probability(0.05)
+	    @test all(test_collision_probability(0.05) for ii = 1:128)
 	end
 
 	@testset "Hashing returns the correct data types" begin
@@ -92,13 +91,5 @@ using Test, Random, LSH
 		## Test 2: Matrix{Float64} -> BitArray{2}
 		hashes = hashfn(randn(5, 10))
 		@test isa(hashes, BitArray{2})
-	end
-
-	@testset "Can re-draw random coefficients" begin
-		hashfn = SimHash(5, 2)
-		initial_coeff = deepcopy(hashfn.coeff)
-
-		redraw!(hashfn)
-		@test all(hashfn.coeff .!= initial_coeff)
 	end
 end

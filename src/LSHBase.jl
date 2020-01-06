@@ -1,36 +1,45 @@
-#=
-Common definitions used throughout the project.
-=#
+#================================================================
 
-#=
-Global constants
-=#
-const LSH_FAMILY_DTYPES = Union{Float32,Float64}
+Common typedefs and functions used throughout the LSH module.
 
-#=
+================================================================#
+
+#========================
 Abstract typedefs
-=#
-abstract type LSHFunction{T <: LSH_FAMILY_DTYPES} end
-abstract type SymmetricLSHFunction{T} <: LSHFunction{T} end
-abstract type AsymmetricLSHFunction{T} <: LSHFunction{T} end
+========================#
+abstract type LSHFunction end
+abstract type SymmetricLSHFunction <: LSHFunction end
+abstract type AsymmetricLSHFunction <: LSHFunction end
+
+#========================
+LSHFunction API
+========================#
 
 #=
-API for LSH families.
+The following functions must be defined for all LSHFunction subtypes
 =#
+function hashtype end
+function n_hashes end
+function similarity end
 
-# General API for all LSHFunction types
-function hashtype(:: LSHFunction) end
-function n_hashes(:: LSHFunction) end
-function redraw!(:: F) :: F where {F <: LSHFunction} end
+#========================
+SymmetricLSHFunction API
+========================#
 
-redraw(h::LSHFunction) =
-	h |> deepcopy |> redraw!
-
-# Symmetric LSH families
-function (:: SymmetricLSHFunction)(x) end
 index_hash(h :: SymmetricLSHFunction, x) = h(x)
 query_hash(h :: SymmetricLSHFunction, x) = h(x)
 
-# Asymmetric LSH families
-function index_hash(:: AsymmetricLSHFunction, x) end
-function query_hash(:: AsymmetricLSHFunction, x) end
+#=
+The following functions must be defined for all SymmetricLSHFunction subtypes
+=#
+function (:: SymmetricLSHFunction) end
+
+#========================
+Abstract typedefs
+========================#
+
+#=
+The following functions must be defined for all AsymmetricLSHFunction subtypes
+=#
+function index_hash end
+function query_hash end

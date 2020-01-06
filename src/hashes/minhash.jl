@@ -1,11 +1,14 @@
+#================================================================
+
+Definition of MinHash, an LSH function for hashing on Jaccard similarity.
+
+================================================================#
+
 using Random: shuffle!
 
-#===================================
-
-MinHash struct definition
-
-====================================#
-
+#========================
+MinHash struct definition and constructors
+========================#
 
 """
 MinHash implementation for Jaccard similarity-based hashing on sets. A `MinHash` struct takes as input a `Set` or `Vector` and computes one or more hashes for it. These hashes are locality-sensitive hashes for Jaccard similarity, defined as
@@ -17,16 +20,10 @@ References:
     [1] Broder, A. "On the resemblance and containment of documents". Compression and Complexity of Sequences: Proceedings, Positano, Amalfitan Coast, Salerno, Italy, June 11-13, 1997. doi:10.1109/SEQUEN.1997.666900. https://www.cs.princeton.edu/courses/archive/spr05/cos598E/bib/broder97resemblance.pdf
     [2] https://en.wikipedia.org/wiki/MinHash
 """
-struct MinHash{T, I <: Union{UInt32,UInt64}}
+struct MinHash{T, I <: Union{UInt32,UInt64}} <: SymmetricLSHFunction
     fixed_symbols :: Bool
     mappings :: Vector{Dict{T,I}}
 end
-
-#===================================
-
-MinHash constructors
-
-====================================#
 
 """
     MinHash(
@@ -93,11 +90,13 @@ Alias for `MinHash(Any, :: Integer)`. Review the documentation for `MinHash(:: D
 """
 MinHash(n_hashes :: Integer) = MinHash(Any, n_hashes)
 
-#===================================
+#========================
+LSHFunction and SymmetricLSHFunction API compliance
+========================#
+n_hashes(hashfn :: MinHash) = length(hashfn.mappings)
+hashtype(:: MinHash{T, I}) where {T, I} = I
 
-Implementation of hash computation
-
-====================================#
+### Hash computation
 
 function (hashfn :: MinHash)(x)
     if hashfn.fixed_symbols
@@ -143,44 +142,4 @@ function _minhash_hash_with_nonfixed_symbols(
     end
 
     return hashes
-end
-
-#===================================
-
-LSHFunction and SymmetricLSHFunction API compliance.
-
-====================================#
-
-n_hashes(hashfn :: MinHash) = length(hashfn.mappings)
-hashtype(:: MinHash{T, I}) where {T, I} = I
-
-function redraw!(hashfn :: MinHash)
-    if hashfn.fixed_symbols
-        _redraw_fixed_symbols!(hashfn)
-    else
-        _redraw_nonfixed_symbols!(hashfn)
-    end
-end
-
-function _redraw_fixed_symbols!(hashfn :: MinHash)
-    # Implementation of redraw! for MinHash when the symbol set is fixed.
-    #
-    # Since the symbol set is fixed, redrawing only amounts to rearranging the
-    # mapping of keys to values. As a result, we can cheaply redraw the hash
-    # function just by shuffling the mapping dictionaries' values.
-    for mapping in hashfn.mappings
-        shuffle!(mapping.vals)
-    end
-end
-
-function _redraw_nonfixed_symbols!(hashfn :: MinHash{T,I}) where {T, I}
-    # Implementation of redraw! for MinHash when the symbol set is non-fixed.
-    #
-    # We assume that we won't see the same set of symbols again (or that we will
-    # see very different symbols) after redrawing. Under that assumption, it makes
-    # more sense to simply clear out all of the mappings, and lazily update them
-    # when we see new symbols.
-    for ii = 1:length(hashfn.mappings)
-        hashfn.mappings[ii] = Dict{T,I}()
-    end
 end

@@ -1,3 +1,25 @@
+#================================================================
+
+Testrunner for the LSH module
+
+================================================================#
+
+#========================
+Global variables
+========================#
+
+const RANDOM_SEED = 0
+
+#========================
+Helper functions
+========================#
+
+mean(x) = sum(x) / length(x)
+
+#========================
+Tests
+========================#
+
 include("test_simhash.jl")
 include("test_minhash.jl")
 include("test_lphash.jl")
