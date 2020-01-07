@@ -118,7 +118,44 @@ end
 push!(available_similarities, ℓ_1)
 push!(available_similarities, ℓ_2)
 
-# TODO: Jaccard similarity
+# Jaccard similarity
+
+@doc raw"""
+    Jaccard(A::Set, B::Set) :: Float64
+
+Computes the Jaccard similarity between sets `A` and `B`, which is defined as
+
+```\math
+J(A,B) = \frac{\left|A \cap B\right|}{\left|A \cup B\right|}
+```
+
+# Arguments
+- `A::Set`, `B::Set`: the two sets with which to compute Jaccard similarity.
+
+# Returns
+`Float64`: the Jaccard similarity between sets `A` and `B`, which is between `0` and `1`.
+
+# Examples
+```jldoctest; setup = :(using LSH)
+julia> A, B = Set([1, 2, 3]), Set([2, 3, 4]);
+
+julia> Jaccard(A,B)
+0.5
+
+julia> Jaccard(A,B) == length(A ∩ B) / length(A ∪ B)
+true
+```
+
+See also: [`MinHash`](@ref)
+"""
+function Jaccard(A::Set, B::Set) :: Float64
+    # To avoid corner cases where A and B are both empty
+    if isempty(A)
+        Float64(0)
+    else
+        length(A ∩ B) / length(A ∪ B)
+    end
+end
 
 # TODO: inner product
 
@@ -138,7 +175,7 @@ Returns the similarity function that the input `AbstractLSHFunction` hashes on.
 - `hashfn::AbstractLSHFunction`: the hash function whose similarity we would like to retrieve.
 
 # Returns
-Returns a similarity function, which is one of the following:
+    Returns a similarity function, which is one of the following:
 
 ```
 $(join(available_similarities_as_strings(), "\n"))

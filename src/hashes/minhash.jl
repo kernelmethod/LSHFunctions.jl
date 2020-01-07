@@ -10,136 +10,163 @@ using Random: shuffle!
 MinHash struct definition and constructors
 ========================#
 
-"""
-MinHash implementation for Jaccard similarity-based hashing on sets. A `MinHash` struct takes as input a `Set` or `Vector` and computes one or more hashes for it. These hashes are locality-sensitive hashes for Jaccard similarity, defined as
-
-    Sim(A, B) = length(A ∩ B) / length(A ∪ B)
-
-References:
-
-    [1] Broder, A. "On the resemblance and containment of documents". Compression and Complexity of Sequences: Proceedings, Positano, Amalfitan Coast, Salerno, Italy, June 11-13, 1997. doi:10.1109/SEQUEN.1997.666900. https://www.cs.princeton.edu/courses/archive/spr05/cos598E/bib/broder97resemblance.pdf
-    [2] https://en.wikipedia.org/wiki/MinHash
-"""
 struct MinHash{T, I <: Union{UInt32,UInt64}} <: SymmetricLSHFunction
+    # Flag that indicates whether or not we were provided all of the symbols
+    # we will possibly see in the MinHash constructor. This is used during
+    # hashing to improve efficiency in the case where we were already provided
+    # all of the symbols.
     fixed_symbols :: Bool
+
+    # A list of dictionaries mapping symbols to integers. To compute a single
+    # hash function, we pass every element of an input set through one of
+    # the dictionaries and use the smallest output as our hash.
     mappings :: Vector{Dict{T,I}}
 end
 
 """
-    MinHash(
-        symbols :: C,
-        n_hashes :: Integer) where {T, C <: Union{Vector{T}, Set{T}}}
+    MinHash(n_hashes::Integer = 1;
+            dtype::DataType = Any,
+            symbols::Union{Vector,Set} = Set())
 
-Sample hash function(s) from the MinHash family over the symbol set `symbols`.
+Construct a locality-sensitive hash function for Jaccard similarity.
 
-## Arguments
-- `symbols :: Union{Vector{T}, Set{T}}`: a `Vector` or `Set` containing all of the possible elements ("symbols") of the sets that you will be hashing.
-- `n_hashes :: Integer`: the number of distinct hash functions that you want to create. The resulting `MinHash` struct will compute `n_hashes` hashes for each input that you provide.
+# Arguments
+- `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
+
+# Keyword parameters
+- `dtype::DataType` (default: `Any`): the type of symbols in the sets you're hashing. This is overriden by the data type contained in `symbols` when `symbols` is non-empty.
+- `symbols::Union{Vector,Set}`: a `Vector` or `Set` containing all of the possible elements ("symbols") of the sets that you will be hashing. If left empty, `MinHash` will instead expand its dictionary when it sees new symbols (at small additional computational expense).
+
+# Examples
+Construct a hash function to hash sets whose elements are integers between `1` and `50`:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash(40; symbols = Set(1:50));
+
+julia> n_hashes(hashfn) == 40 && similarity(hashfn) == Jaccard
+true
+
+julia> hashfn(Set([38, 14, 29, 48, 11]));
+
+julia> hashfn([1, 1, 2, 3, 4]); # You can also hash Vectors
+
+julia> hashfn(Set([100]))
+ERROR: Symbol 100 not found
+```
+
+If you aren't sure ahead of time exactly what kinds of elements will be in the sets you're hashing, you can opt not to specify `symbols`, in which case `MinHash` will lazily update its hash functions as it encounters new symbols:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash();
+
+julia> hashfn(Set([1, 2, 3]));
+
+julia> hashfn(Set(["a", "b", "c"]));
+
+```
+
+If you don't know what elements you'll encounter, but you know that they'll all be of a specific data type, you can specify the `dtype` argument for increased efficiency:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash(10; dtype = String);
+
+julia> hashfn(Set(["a", "b", "c"]));
+
+```
+
+# References
+```
+Broder, A. "On the resemblance and containment of documents". Compression and Complexity of Sequences: Proceedings, Positano, Amalfitan Coast, Salerno, Italy, June 11-13, 1997. doi:10.1109/SEQUEN.1997.666900.
+```
+
+See also: [`Jaccard`](@ref)
 """
-function MinHash(
-        symbols :: C,
-        n_hashes :: Integer) where {T, C <: Union{Vector{T}, Set{T}}}
+function MinHash(args...;
+                 dtype::DataType = Any,
+                 symbols::C = Set{Any}()) where {T, C <: Union{Vector{T},Set{T}}}
 
-    I = length(symbols) ≤ typemax(UInt32) ? UInt32 : UInt64
-    possible_hashes = convert.(I, 1:length(symbols))
-    mappings = Vector{Dict{T,I}}(undef, n_hashes)
+    if length(symbols) > 0
+        MinHash{T}(args...; symbols=symbols)
+    else
+        MinHash{dtype}(args...; symbols=Set{dtype}())
+    end
+end
 
-    for ii = 1:length(mappings)
-        shuffle!(possible_hashes)
-        new_mapping = Dict{T,UInt32}()
+function MinHash{T}(n_hashes::Integer = 1;
+                    symbols::C = Set{T}()) where {T, C <: Union{Vector{<:T},Set{<:T}}}
 
-        for (sym, h) in zip(symbols, possible_hashes)
-            new_mapping[sym] = h
+    fixed_symbols = (length(symbols) > 0)
+
+    # If fixed_symbols is true, and the symbol set is sufficiently small, then
+    # we make our mappings from symbols -> integers map to UInt32 rather than
+    # UInt64.
+    # Note that we shouldn't do this if the symbol set is unspecified, because
+    # in that case new mappings are determined randomly. With only 32  bits of
+    # randomness, the probability that two symbols map to the same integer gets
+    # high relatively quickly.
+    hash_type =
+        (fixed_symbols && length(symbols) ≤ typemax(UInt32)) ?
+        UInt32 : UInt64
+
+    mappings = Vector{Dict{T, hash_type}}(undef, n_hashes)
+
+    if !fixed_symbols
+        for ii = 1:length(mappings)
+            mappings[ii] = Dict{T,hash_type}()
         end
+    else
+        # Create a new random mapping (i.e. a new Dict) that maps symbols to
+        # integers in the range 1:length(symbols).
+        mapping_range = convert.(hash_type, 1:length(symbols))
 
-        mappings[ii] = new_mapping
+        for ii = 1:length(mappings)
+            new_mapping = Dict{T,hash_type}()
+            shuffle!(mapping_range)
+
+            for (sym,h) in zip(symbols, mapping_range)
+                new_mapping[sym] = h
+            end
+
+            mappings[ii] = new_mapping
+        end
     end
 
-    MinHash{T, I}(true, mappings)
+    MinHash{T, hash_type}(fixed_symbols, mappings)
 end
-
-"""
-    MinHash(
-        dtype :: DataType,
-        n_hashes :: Integer)
-
-Sample some new MinHash hash functions, where elements of the sets that you'll be hashing have type `dtype`. The `MinHash` struct returned by this constructor is lazily updated whenever it hashes a set with an element it's never seen before. Use this constructor for `MinHash` when you don't know ahead of time all of the possible elements of the sets that you'll be hashing.
-
-Note that the `MinHash` struct returned by the `MinHash(::C, ::Integer) where {T, C <: Union{Vector{T}, Set{T}}}` constructor is generally more efficient. If you know in advance all of the possible elements of the sets that you'll be hashing, you should probably go with that constructor instead.
-
-## Arguments
-- `dtype :: DataType`: the type elements in the sets that you'll be hashing.
-- `n_hashes :: Integer`: the number of distinct hash functions that you want to create. The resulting `MinHash` struct will compute `n_hashes` hashes for each input that you provide.
-"""
-function MinHash(
-        dtype :: DataType,
-        n_hashes :: Integer)
-
-    mappings = Vector{Dict{dtype, UInt64}}(undef, n_hashes)
-    for ii = 1:length(mappings)
-        mappings[ii] = Dict{dtype, UInt64}()
-    end
-
-    MinHash{dtype, UInt64}(false, mappings)
-end
-
-"""
-    MinHash(n_hashes :: Integer)
-
-Alias for `MinHash(Any, :: Integer)`. Review the documentation for `MinHash(:: DataType, :: Integer)` for more information.
-"""
-MinHash(n_hashes :: Integer) = MinHash(Any, n_hashes)
 
 #========================
 LSHFunction and SymmetricLSHFunction API compliance
 ========================#
 n_hashes(hashfn :: MinHash) = length(hashfn.mappings)
 hashtype(:: MinHash{T, I}) where {T, I} = I
+similarity(::MinHash) = Jaccard
+
+single_hash_collision_probability(::MinHash, sim) = sim
 
 ### Hash computation
 
-function (hashfn :: MinHash)(x)
+function (hashfn :: MinHash{T,I})(x) where {T,I}
+    # The iith hash is the smallest output of hashfn.mappings[ii] for all
+    # inputs in the set x.
     if hashfn.fixed_symbols
-        _minhash_hash_with_fixed_symbols(hashfn, x)
+        # If the symbols are fixed, throw an error whenever we encounter
+        # a symbol we don't recognize.
+        map(mapping ->
+            minimum(get(mapping, xjj) do
+                        "Symbol $(xjj) not found" |>
+                        ErrorException |>
+                        throw
+                    end
+                    for xjj in x),
+            hashfn.mappings)
     else
-        _minhash_hash_with_nonfixed_symbols(hashfn, x)
+        # If the symbols are non-fixed, assign new integer labels to
+        # new symbols.
+        map(mapping ->
+            minimum(get!(mapping, xjj) do
+                        rand(I)
+                    end
+                    for xjj in x),
+            hashfn.mappings)
     end
-end
-
-function _minhash_hash_with_fixed_symbols(
-        hashfn :: MinHash{T,I},
-        x :: C) where {T, I, C <: Union{Set{T}, Vector{T}}}
-
-    hashes = Vector{I}(undef, n_hashes(hashfn))
-
-    for (ii, mapping) in enumerate(hashfn.mappings)
-        # The value of the hash function corresponding to `mapping` is just the
-        # element of `x` that has the smallest output under `mapping`.
-        hashes[ii] = minimum(mapping[xjj] for xjj in x)
-    end
-
-    return hashes
-end
-
-function _minhash_hash_with_nonfixed_symbols(
-        hashfn :: MinHash{T,I},
-        x :: C) where {T, I, C <: Union{Set{<:T}, Vector{<:T}}}
-
-    hashes = Vector{I}(undef, n_hashes(hashfn))
-
-    for (ii, mapping) in enumerate(hashfn.mappings)
-        # We compute the hash function the same way as we did in
-        # _minhash_hash_with_fixed_symbols. However, we have to account for the
-        # fact that the Set/Vector `x` may contain symbols that we've never seen
-        # before. When that's the case, we have to assign a new integer to that
-        # symbol, and update the `mapping` Dict.
-        hashes[ii] = 
-            minimum(
-                get!(mapping, xjj) do 
-                    rand(I)
-                end 
-                for xjj in x)
-    end
-
-    return hashes
 end

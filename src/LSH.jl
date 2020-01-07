@@ -29,7 +29,7 @@ Exports
 =#
 
 # Similarity functions
-export CosSim, ℓ_1, ℓ_2, ℓ_p
+export CosSim, ℓ_1, ℓ_2, ℓ_p, Jaccard
 
 # Hash functions
 export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash

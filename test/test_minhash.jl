@@ -12,7 +12,7 @@ using Test, Random, LSH
         n_hashes = [1, 8, 4]
 
         for (symbols, nh) in zip(symbol_collections, n_hashes)
-            hashfn = MinHash(symbols, nh)
+            hashfn = MinHash(nh; symbols=symbols)
 
             @test isa(hashfn, MinHash{eltype(symbols)})
             @test LSH.n_hashes(hashfn) == nh
@@ -21,7 +21,7 @@ using Test, Random, LSH
 
     @testset "MinHash range is 1:length(symbols)" begin
         symbols = collect(1:10)
-        hashfn = MinHash(symbols, 1000)
+        hashfn = MinHash(1000; symbols = symbols)
 
         # Verify that all hashes computed by hashfn are in the appropriate range
         has_correct_output_types = true
@@ -46,7 +46,7 @@ using Test, Random, LSH
     
     @testset "Hashes are correctly computed" begin
         symbols = collect(50:100)
-        hashfn = MinHash(symbols, 10)
+        hashfn = MinHash(10; symbols = symbols)
 
         dataset = shuffle(symbols)[1:10]
         hashes = hashfn(dataset)
@@ -72,7 +72,7 @@ using Test, Random, LSH
         # two sets with high similarity than the two sets with low similarity.
         symbols = collect(1:200)
         n_hashes = 100
-        hashfn = MinHash(symbols, n_hashes)
+        hashfn = MinHash(n_hashes; symbols=symbols)
 
         shuffle!(symbols)
         dataset_1 = symbols[1:100]
@@ -91,7 +91,7 @@ using Test, Random, LSH
         # roughly equal to the Jaccard similarity between those datasets
         symbols = collect(1:200)
         n_hashes = 10_000
-        hashfn = MinHash(symbols, n_hashes)
+        hashfn = MinHash(n_hashes; symbols=symbols)
 
         shuffle!(symbols)
         dataset_1 = Set(symbols[1:100])
@@ -102,11 +102,8 @@ using Test, Random, LSH
         hashes_2 = hashfn(dataset_2)
         hashes_3 = hashfn(dataset_3)
 
-        sim_12 = length(Set(dataset_1) ∩ Set(dataset_2)) / 
-                 length(Set(dataset_1) ∪ Set(dataset_2))
-
-        sim_13 = length(Set(dataset_1) ∩ Set(dataset_3)) /
-                 length(Set(dataset_1) ∪ Set(dataset_3))
+        sim_12 = Jaccard(Set(dataset_1), Set(dataset_2))
+        sim_13 = Jaccard(Set(dataset_1), Set(dataset_3))
 
         mean(x) = sum(x) / length(x)
 
@@ -139,11 +136,10 @@ using Test, Random, LSH
         symbols = collect(1:1_000)
         dataset_1 = Set(shuffle(symbols)[1:500])
         dataset_2 = Set(shuffle(symbols)[1:500])
-        similarity = length(dataset_1 ∩ dataset_2) /
-                     length(dataset_1 ∪ dataset_2)
+        similarity = Jaccard(dataset_1, dataset_2)
 
         n_hashes = 10_000
-        hashfn = MinHash(Int64, n_hashes)
+        hashfn = MinHash(n_hashes; dtype=Int64)
         hashes_1 = hashfn(dataset_1)
         hashes_2 = hashfn(dataset_2)
 
