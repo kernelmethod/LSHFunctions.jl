@@ -78,8 +78,10 @@ julia> hashes = hashfn(x);
 # References
 
 ```
-Charikar, Moses. (2002). Similarity estimation techniques from rounding algorithms. 380-388. 10.1145/509907.509965. 
+Charikar, Moses. (2002). Similarity estimation techniques from rounding algorithms. 380-388. 10.1145/509907.509965.
 ```
+
+See also: [`CosSim`](@ref)
 """
 
 #========================
