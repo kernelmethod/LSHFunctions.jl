@@ -10,22 +10,12 @@ So far, there are hash functions for the following measures of similarity:
 - Jaccard similarity
   - `MinHash`
 - `L^1` (Manhattan / "taxicab") and `L^2` (Euclidean) distance
-  - `LpDistanceHash`
   - `L1Hash`
   - `L2Hash`
-- Inner product magnitude (for maximum inner product search)
-  - `MIPSHash`
-  - `SignALSH` (recommended)
-
-In addition, this module provides `LSHTable` and `LSHTableGroup` composite types to make it easier to build hash tables and groups of hash tables for use with LSH.
 
 This package still needs a lot of work, including improvement to the documentation and API. In general, if you want to draw one or more new hash functions, you can use the following syntax:
 
 ```julia
-hashfn = HashFunctionFamily(input dimension,
-                            number of hash functions,
-                            [required, family-specific params];
-                            [unrequired, family-spefic keyword params])
+hashfn = HashFunctionFamily(number of hash functions;
+                            [family-specific keyword params])
 ```
-
-This is liable to change in the future.
