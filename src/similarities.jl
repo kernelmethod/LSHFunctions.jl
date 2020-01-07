@@ -52,6 +52,8 @@ julia> z = rand(5);
 julia> CosSim(x,z)
 ERROR: DimensionMismatch("dot product arguments have lengths 4 and 5")
 ```
+
+See also: [`SimHash`](@ref)
 """
 CosSim(x,y) = dot(x,y) / (norm(x) * norm(y))
 

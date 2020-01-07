@@ -24,8 +24,8 @@ mutable struct LpHash{T <: Union{Float32,Float64}, D} <: SymmetricLSHFunction
     # Coefficient matrix with which we multiply the input to the hash function
 	coeff :: Matrix{T}
 
-	# "Denominator" parameter r. Higher values of r lead to higher collision rates.
-	# This parameter is user-specified
+	# "Denominator" parameter r. Higher values of r lead to higher collision
+	# rates. This parameter is user-specified
 	r :: T
 
 	# "Shift" parameter (referred to as 'b' in the 'p-stable distributions' paper.
@@ -77,7 +77,8 @@ L1Hash(args...; kws...) where {T} = LpHash(args...; power = 1, kws...)
 
 L2Hash(args...; kws...) where {T} = LpHash(args...; power = 2, kws...)
 
-LpHash(args...; dtype = Float32, kws...) = LpHash{dtype}(args...; kws...)
+LpHash(args...; dtype::DataType = Float32, kws...) =
+    LpHash{dtype}(args...; kws...)
 
 # Documentation for L1Hash and L2Hash
 @doc raw"""
@@ -90,19 +91,13 @@ LpHash(args...; dtype = Float32, kws...) = LpHash{dtype}(args...; kws...)
            r::Real = 1.0,
            resize_pow2::Bool = false)
 
-Constructs a locality-sensitive hash for ``\ell^p`` distance, defined as
-
-```\math
-\ell^p(x,y) \coloneqq \|x - y\|_p = \sum \left|x_i - y_i\right|^p
-```
-
-The resulting hash function generates collisions with high probability between nearby pairs of points (those for which ``\|x - y\|_p`` is small). `L1Hash` constructs a hash function for ``\ell^1`` distance, and `L2Hash` constructs a hash function for ``\ell^2`` distance.
+Constructs a locality-sensitive hash for ``\ell^p`` distance (``\|x - y\|_p``). `L1Hash` constructs a hash function for ``\ell^1`` distance, and `L2Hash` constructs a hash function for ``\ell^2`` distance.
 
 # Arguments
 - `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
 
 # Keyword parameters
-- `dtype::DataType` (default: `Float32`): the type to use for the resulting `LSH.LpHash`'s coefficients. Can be either `Float32` or `Float64`. You generally want to pick `dtype` to be the same as the type of the data you're hashing.
+- `dtype::DataType` (default: `Float32`): the type to use for the resulting `LSH.LpHash`'s coefficients. Can be either `Float32` or `Float64`. You generally want to pick `dtype` to match the type of the data you're hashing.
 - `r::Real` (default: `1.0`): a positive coefficient whose magnitude influences the collision rate. Larger values of `r` will increase the collision rate, even for distant points. See references for more information.
 - `resize_pow2::Bool` (default: `false`): affects the way in which the `LSH.LpHash` struct resizes to hash inputs of different sizes. If you think you'll be hashing inputs of many different sizes, it's more efficient to set `resize_pow2 = true`.
 
@@ -112,14 +107,17 @@ Construct an `LSH.LpHash` by calling `L1Hash` or `L2Hash` with the number of has
 ```jldoctest; setup = :(using LSH)
 julia> hashfn = L1Hash();
 
-julia> hashfn.power == 1 && n_hashes(hashfn) == 1
+julia> hashfn.power == 1 &&
+       n_hashes(hashfn) == 1 &&
+       similarity(hashfn) == ℓ_1
 true
 
 julia> hashfn = L2Hash(128);
 
-julia> hashfn.power == 2 && n_hashes(hashfn) == 128
+julia> hashfn.power == 2 &&
+       n_hashes(hashfn) == 128 &&
+       similarity(hashfn) == ℓ_2
 true
-
 ```
 
 After creating a hash function, you can compute hashes with `hashfn(x)`:
@@ -133,7 +131,7 @@ julia> hashes = hashfn(x);
 
 ```
 
-# Reference:
+# References
 
 ```
 Datar, Mayur & Indyk, Piotr & Immorlica, Nicole & Mirrokni, Vahab. (2004). Locality-sensitive hashing scheme based on p-stable distributions. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.

@@ -8,9 +8,6 @@ Definition of SimHash, an LSH function for hashing on cosine similarity.
 Typedefs
 ========================#
 
-"""
-Cosine similarity LSH function.
-"""
 mutable struct SimHash{T <: Union{Float32,Float64}} <: SymmetricLSHFunction
     # Random coefficients sampled for SimHash. Each column of coefficients
     # corresponds to another hash function.
@@ -35,8 +32,55 @@ function SimHash{T}(n_hashes::Integer = 1;
     SimHash{T}(coeff, resize_pow2)
 end
 
-SimHash(args...; kws...) =
-	SimHash{Float32}(args...; kws...)
+SimHash(args...; dtype = Float32, kws...) =
+    SimHash{dtype}(args...; kws...)
+
+@doc """
+    SimHash(
+        n_hashes::Integer = 1;
+        dtype::DataType = Float32,
+        resize_pow2::Bool = false)
+    SimHash{dtype}(
+        n_hashes::Integer = 1;
+        resize_pow2::Bool = false) where {dtype <: Union{Float32,Float64}}
+
+Creates a locality-sensitive hash function for cosine similarity.
+
+# Arguments
+- `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
+
+# Keyword parameters
+- `dtype::DataType` (default: `Float32`): the data type to use for the fields of the resulting `SimHash` struct. You generally want to pick `dtype` to match the type of the data you're hashing.
+- `resize_pow2::Bool` (default: `false`): affects the way in which the `SimHash` struct resizes to hash inputs of different sizes. If you think you'll be hashing inputs of many different sizes, it's more efficient to set `resize_pow2 = true`.
+
+# Examples
+Construct a hash function by calling `SimHash` with the number of hash functions you want to generate:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = SimHash(24);
+
+julia> n_hashes(hashfn) == 24 &&
+       similarity(hashfn) == CosSim
+true
+```
+
+You can then call `hashfn(x)` in order to compute hashes:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = SimHash(32);
+
+julia> x = randn(30);
+
+julia> hashes = hashfn(x);
+
+```
+
+# References
+
+```
+Charikar, Moses. (2002). Similarity estimation techniques from rounding algorithms. 380-388. 10.1145/509907.509965. 
+```
+"""
 
 #========================
 SimHash helper functions
