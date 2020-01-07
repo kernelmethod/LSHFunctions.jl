@@ -1,7 +1,12 @@
 using Test, Random, LSH, LinearAlgebra, SparseArrays
 
+include(joinpath("..", "test_utils.jl"))
+
+#==================
+Tests
+==================#
 @testset "SignALSH tests" begin
-	Random.seed!(0)
+	Random.seed!(RANDOM_SEED)
 
 	@test_skip @testset "Can hash inputs correctly with SignALSH" begin
 		input_length = 5

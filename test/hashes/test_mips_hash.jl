@@ -1,7 +1,12 @@
 using Test, Random, LSH
 
+include(joinpath("..", "test_utils.jl"))
+
+#==================
+Tests
+==================#
 @testset "MIPSHash tests" begin
-	Random.seed!(0)
+	Random.seed!(RANDOM_SEED)
 	import LinearAlgebra: norm
 	import Base.Iterators: product
 	import SparseArrays: sprandn

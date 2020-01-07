@@ -1,7 +1,12 @@
 using Test, Random, LSH
 
+include(joinpath("..", "test_utils.jl"))
+
+#==================
+Tests
+==================#
 @testset "LpHash tests" begin
-    Random.seed!(0)
+    Random.seed!(RANDOM_SEED)
     import LSH: SymmetricLSHFunction
 
     @testset "Can construct an ℓ^p distance hash function" begin

@@ -1,10 +1,12 @@
 using Test, Random, LSH
 
+include(joinpath("..", "test_utils.jl"))
+
 #==================
 Tests
 ==================#
 @testset "SimHash tests" begin
-    Random.seed!(0)
+    Random.seed!(RANDOM_SEED)
     import LSH: SymmetricLSHFunction
 
     @testset "Construct SimHash" begin

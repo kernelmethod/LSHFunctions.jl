@@ -1,7 +1,12 @@
 using Test, Random, LSH
 
+include(joinpath("..", "test_utils.jl"))
+
+#==================
+Tests
+==================#
 @testset "MinHash tests" begin
-    Random.seed!(0)
+    Random.seed!(RANDOM_SEED)
 
     @testset "Can construct a MinHash hash function" begin
         symbol_collections = [
