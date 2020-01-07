@@ -95,6 +95,4 @@ Tests
             @test LSH.current_max_input_size(hashfn) == next_pow_2
         end
     end
-
-
 end
