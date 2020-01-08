@@ -16,6 +16,7 @@ end
 
 ### External MonteCarloHash constructors
 
+# TODO: restrict similarities. E.g. Jaccard should not be an available similarity
 function MonteCarloHash(similarity, μ, args...; n_samples=1024, kws...)
     discrete_hashfn = LSHFunction(similarity, args...; kws...)
     sample_points = [μ() for ii = 1:n_samples]
@@ -42,12 +43,16 @@ similarity(hashfn::MonteCarloHash) =
 n_hashes(hashfn::MonteCarloHash) =
     n_hashes(hashfn.discrete_hashfn)
 
+# TODO: this may not be true
+single_hash_collision_probability(hashfn::MonteCarloHash, args...; kws...) =
+    single_hash_collision_probability(hashfn.discrete_hashfn, args...; kws...)
+
 #========================
 SymmetricLSHFunction API compliance
 ========================#
 
 (hashfn::MonteCarloHash{<:SymmetricLSHFunction})(f) =
-    index_hash(hashfn, x)
+    index_hash(hashfn, f)
 
 #========================
 AsymmetricLSHFunction API compliance
