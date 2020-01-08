@@ -46,24 +46,28 @@ Tests
         # over [0,N]. The functions are piecewise constant on the intervals
         # [i,i+1], i = 1, ..., N.
         N = 10
-        f, f_steps = create_step_function(N)
-        g, g_steps = create_step_function(N)
-
         μ() = N * rand()
         hashfn = MonteCarloHash(CosSim, μ, 1024)
 
-        # The "embedded similarity" (effectively a Monte Carlo estimate of the
-        # true similarity) should be close to the true cosine similarity between
-        # f and g.
-        true_sim = CosSim(f_steps, g_steps)
-        embedded = embedded_similarity(hashfn, f, g)
-        @test true_sim-0.05 ≤ embedded ≤ true_sim+0.05
+        @test let success = true
+            # Perform multiple iterations of tests to ensure that we consistently get a
+            # collision probability close to the expected probability.
+            for ii = 1:128
+                f, f_steps = create_step_function(N)
+                g, g_steps = create_step_function(N)
 
-        # Hash collision rate should be close to the probability of collision
-        prob = LSH.single_hash_collision_probability(hashfn, true_sim)
-        hf, hg = hashfn(f), hashfn(g)
+                # Hash collision rate should be close to the probability of collision
+                prob = LSH.single_hash_collision_probability(hashfn, CosSim(f_steps, g_steps))
+                hf, hg = hashfn(f), hashfn(g)
 
-        @test prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05
+                success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
+
+                if !success
+                    break
+                end
+            end
+            success
+        end
     end
 end
 
