@@ -28,7 +28,20 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(ℓ_1))
     end
 
-    @testset "Hash over cosine similarity with MonteCarloHash" begin
+    @testset "Hash cosine similarity with trivial inputs" begin
+        # Hash over cosine similarity between two functions with cosine similarity
+        # zero. The collision rate should be close to 50%.
+        f(x) = (0.0 ≤ x ≤ 0.5) ? 1.0 : 0.0;
+        g(x) = (0.0 ≤ x ≤ 0.5) ? 0.0 : 1.0;
+        hashfn = MonteCarloHash(CosSim, rand, 1024)
+
+        @test embedded_similarity(hashfn, f, g) == 0.0
+
+        hf, hg = hashfn(f), hashfn(g)
+        @test 0.45 ≤ mean(hf .== hg) ≤ 0.55
+    end
+
+    @testset "Hash cosine similarity with nontrivial inputs" begin
         # Test hashing on cosine similarity using step functions defined
         # over [0,N]. The functions are piecewise constant on the intervals
         # [i,i+1], i = 1, ..., N.
@@ -45,6 +58,12 @@ Tests
         true_sim = CosSim(f_steps, g_steps)
         embedded = embedded_similarity(hashfn, f, g)
         @test true_sim-0.05 ≤ embedded ≤ true_sim+0.05
+
+        # Hash collision rate should be close to the probability of collision
+        prob = LSH.single_hash_collision_probability(hashfn, true_sim)
+        hf, hg = hashfn(f), hashfn(g)
+
+        @test prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05
     end
 end
 
