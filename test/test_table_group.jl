@@ -4,7 +4,7 @@ Tests for LSHTableGroup in src/tables/table_group.jl
 
 using Test, Random, LSH
 
-@test_skip @testset "LSHTableGroup tests" begin
+@testset "LSHTableGroup tests" begin
 	Random.seed!(0)
 
 	@testset "Create an LSHTableGroup over SimHash" begin
@@ -12,8 +12,7 @@ using Test, Random, LSH
 		n_hashes = 64
 		n_tables = 3
 
-		hashfn = SimHash(input_size, n_hashes)
-		tables = LSHTableGroup(hashfn, n_tables; valtype=String)
+		tables = LSHTableGroup(() -> SimHash(n_hashes), n_tables; valtype=String)
 
 		# Insert a vector x into the table, and then retrieve it
 		x = rand(input_size)
@@ -51,7 +50,7 @@ using Test, Random, LSH
 		n_tables = 256
 		n_inputs = 32
 
-		tables = LSHTableGroup(() -> SimHash(input_size, n_hashes), n_tables; valtype=Int64)
+		tables = LSHTableGroup(() -> SimHash(n_hashes), n_tables; valtype=Int64)
 
 		X = randn(input_size, n_inputs)
 		insert!(tables, X, 1:n_inputs)

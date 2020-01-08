@@ -19,10 +19,8 @@ include(joinpath("hashes", "sign_alsh.jl"))
 #=
 Hash tables for LSHFunctions
 =#
-#=
 include(joinpath("tables", "table.jl"))
 include(joinpath("tables", "table_group.jl"))
-=#
 
 #=
 Exports
@@ -39,8 +37,6 @@ export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
 export index_hash, query_hash, n_hashes, hashtype, similarity
 
 # Hash tables and related functions
-#=
 export LSHTable, LSHTableGroup, insert!, reset!
-=#
 
 end # module
