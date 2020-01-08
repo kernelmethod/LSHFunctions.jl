@@ -4,18 +4,17 @@ Tests for the LSHTable API
 
 using Test, Random, LSH
 
-@test_skip @testset "LSHTable tests" begin
+@testset "LSHTable tests" begin
 	Random.seed!(0)
 
 	@testset "Can construct an LSHTable over SimHash" begin
-		n_inputs = 16
 		n_hashes = 5
 
-		hashfn = SimHash(n_inputs, n_hashes)
+		hashfn = SimHash(n_hashes)
 		table = LSHTable(hashfn)
 
 		# Insert a random vector into the table
-		x = rand(n_inputs)
+		x = rand(20)
 		h = hashfn(x)
 		insert!(table, x, "hello, world")
 
@@ -31,7 +30,7 @@ using Test, Random, LSH
 	end
 
 	@testset "Can reset the table with reset!" begin
-		hashfn = SimHash(16, 64)
+		hashfn = SimHash(64)
 		table = LSHTable(hashfn; unique_values=true)
 
 		# Insert a few random vectors into the table that should have
@@ -56,7 +55,7 @@ using Test, Random, LSH
 	end
 
 	@testset "Can specify value type with the 'valtype' keyword" begin
-		hashfn = SimHash(16, 5)
+		hashfn = SimHash(5)
 		table = LSHTable(hashfn; valtype=String)
 
 		# Insertion should work correctly when the values have the correct type
@@ -75,7 +74,7 @@ using Test, Random, LSH
 	end
 
 	@testset "Values are unique when unique_values == true" begin
-		hashfn = SimHash(16, 64)
+		hashfn = SimHash(64)
 		table = LSHTable(hashfn; unique_values=true)
 
 		x = randn(16)
@@ -151,10 +150,8 @@ using Test, Random, LSH
 	end
 
 	@testset "Create an LSHTable that uses Sets for entries" begin
-		input_size = 16
-		n_hashes = 64
-
-		hashfn = SimHash(input_size, n_hashes)
+	    input_size = 16
+		hashfn = SimHash(64)
 		table = LSHTable(hashfn; valtype=Int64, entrytype=Set)
 
 		X = rand(input_size, 128)
@@ -178,7 +175,7 @@ using Test, Random, LSH
 	end
 
 	@testset "Get an empty set/empty vector when no collisions are found" begin
-		hashfn = SimHash(16, 5)
+		hashfn = SimHash(5)
 
 		table = LSHTable(hashfn; valtype=Integer, entrytype=Vector)
 		@test table[rand(16)] == Vector{Integer}(undef, 0)

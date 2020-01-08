@@ -8,9 +8,6 @@ struct LSHTableGroup{T<:LSHTable}
 end
 
 # Outer constructors
-LSHTableGroup(h :: LSHFunction, args...; kws...) =
-	LSHTableGroup(() -> redraw(h), args...; kws...)
-
 LSHTableGroup(hfn_generator, n_tables=1; valtype=Any, unique_values=false) =
 	(LSHTable(
 		hfn_generator();
