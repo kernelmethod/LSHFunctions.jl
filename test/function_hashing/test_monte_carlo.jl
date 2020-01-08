@@ -28,6 +28,25 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(ℓ_1))
     end
 
-    @testset "Hash functions with MonteCarloHash" begin
+    @testset "Hash over cosine similarity with MonteCarloHash" begin
+        # Test hashing on cosine similarity using step functions defined
+        # over [0,N]. The functions are piecewise constant on the intervals
+        # [i,i+1], i = 1, ..., N.
+        N = 10
+        f, f_steps = create_step_function(N)
+        g, g_steps = create_step_function(N)
+
+        μ() = N * rand()
+        hashfn = MonteCarloHash(CosSim, μ, 1024)
+
+        # The "embedded similarity" (effectively a Monte Carlo estimate of the
+        # true similarity) should be close to the true cosine similarity between
+        # f and g.
+        true_sim = CosSim(f_steps, g_steps)
+        embedded = embedded_similarity(hashfn, f, g)
+        @test true_sim-0.05 ≤ embedded ≤ true_sim+0.05
     end
 end
+
+
+
