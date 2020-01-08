@@ -28,6 +28,9 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(ℓ_1))
     end
 
+    #==========
+    Cosine similarity hashing
+    ==========#
     @testset "Hash cosine similarity with trivial inputs" begin
         # Hash over cosine similarity between two functions with cosine similarity
         # zero. The collision rate should be close to 50%.
@@ -69,7 +72,35 @@ Tests
             success
         end
     end
+
+    #==========
+    L^p distance hashing
+    ==========#
+    @testset "Hash L^p distance" begin
+        # Use step functions to test distances between functions again, since
+        # you can map them into R^N isomorphically
+        N = 4
+        μ() = N * rand()
+        hashfn = MonteCarloHash(ℓ_1, μ, 1024)
+
+        @test let success = true
+            for ii = 1:128
+                f, f_steps = create_step_function(N)
+                g, g_steps = create_step_function(N)
+
+                # Hash collision rate should be close to the probability of collision
+                prob = LSH.single_hash_collision_probability(hashfn, ℓ_1(f_steps, g_steps))
+                hf, hg = hashfn(f), hashfn(g)
+
+                println(mean(hf .== hg), " ", prob)
+
+                success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
+
+                if !success
+                    break
+                end
+            end
+            success
+        end
+    end
 end
-
-
-
