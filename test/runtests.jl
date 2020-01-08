@@ -25,5 +25,7 @@ include(joinpath("hashes", "test_sign_alsh.jl"))
 include("test_similarities.jl")
 include("test_lshfunction.jl")
 
+include(joinpath("function_hashing", "test_monte_carlo.jl"))
+
 include("test_table.jl")
 include("test_table_group.jl")
