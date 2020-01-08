@@ -19,5 +19,15 @@ Tests
         @test hashfn.μ == μ
         @test similarity(hashfn) == CosSim
         @test hashtype(hashfn) == hashtype(LSHFunction(CosSim))
+
+        # Hash L^1([0,1]) over L^1 distance
+        hashfn = MonteCarloHash(ℓ_1, μ, 10)
+
+        @test n_hashes(hashfn) == 10
+        @test similarity(hashfn) == ℓ_1
+        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ_1))
+    end
+
+    @testset "Hash functions with MonteCarloHash" begin
     end
 end
