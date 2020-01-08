@@ -22,21 +22,21 @@ Typedefs
 
 mutable struct LpHash{T <: Union{Float32,Float64}, D} <: SymmetricLSHFunction
     # Coefficient matrix with which we multiply the input to the hash function
-	coeff :: Matrix{T}
+    coeff :: Matrix{T}
 
-	# "Denominator" parameter r. Higher values of r lead to higher collision
-	# rates. This parameter is user-specified
-	r :: T
+    # "Denominator" parameter r. Higher values of r lead to higher collision
+    # rates. This parameter is user-specified
+    r :: T
 
-	# "Shift" parameter (referred to as 'b' in the 'p-stable distributions' paper.
-	# There's one shift parameter for every hash function; each parameter is
-	# randomly sampled from [0,1].
-	shift :: Vector{T}
+    # "Shift" parameter (referred to as 'b' in the 'p-stable distributions' paper.
+    # There's one shift parameter for every hash function; each parameter is
+    # randomly sampled from [0,1].
+    shift :: Vector{T}
 
     # The parameter p specifying the order of L^p distance we're using.
-	power :: Int64
+    power :: Int64
 
-	# Distribution from which new coefficients are sampled.
+    # Distribution from which new coefficients are sampled.
     distr :: D
 
     # Whether or not LpHash should round up to the next power of 2 when
@@ -70,7 +70,7 @@ function LpHash{T}(n_hashes::Integer = 1;
         end
     end
 
-	LpHash(coeff, T(r), shift, Int64(power), distr, resize_pow2)
+    LpHash(coeff, T(r), shift, Int64(power), distr, resize_pow2)
 end
 
 L1Hash(args...; kws...) where {T} = LpHash(args...; power = 1, kws...)
@@ -192,8 +192,8 @@ function single_hash_collision_probability(hashfn::LpHash, sim::Real)
     integral /= sim
 
     # Note that from the reference for the L^p LSH family, we're supposed to integrate
-    # over the PDF for the _absolute value_ of the underlying random variable, rather
-    # than the raw PDF. Luckily, all of the distributions we have to deal with here
+    # over the p.d.f. for the _absolute value_ of the underlying random variable, rather
+    # than the raw p.d.f.. Luckily, all of the distributions we have to deal with here
     # are symmetric and centered at zero, so all we have to do is multiply the
     # integral by two.
     integral *= 2
