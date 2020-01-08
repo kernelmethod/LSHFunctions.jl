@@ -1,6 +1,6 @@
 using Test, Random, LSH
 
-include(joinpath("..", "test_utils.jl"))
+include(joinpath("..", "utils.jl"))
 
 #==================
 Tests

@@ -125,6 +125,8 @@ n_hashes(hashfn::SimHash) = size(hashfn.coeff, 2)
 similarity(::SimHash) = CosSim
 single_hash_collision_probability(::SimHash, sim::Real) = (1 - acos(sim) / π)
 
+LSH.@register_similarity!(CosSim, SimHash)
+
 ### Hash computation
 
 # Perform type conversion to hit BLAS when the input array has a different

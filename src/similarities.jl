@@ -8,15 +8,6 @@ using LinearAlgebra: dot, norm
 using Markdown
 
 #====================
-A list of all of the available similarity functions that can be used for hashing
-====================#
-
-const available_similarities = Vector()
-
-# Get a Vector of all of the available similarity functions as Strings
-available_similarities_as_strings() = available_similarities .|> string |> sort
-
-#====================
 Definitions of built-in similarity functions
 ====================#
 
@@ -56,8 +47,6 @@ ERROR: DimensionMismatch("dot product arguments have lengths 4 and 5")
 See also: [`SimHash`](@ref)
 """
 CosSim(x,y) = dot(x,y) / (norm(x) * norm(y))
-
-push!(available_similarities, CosSim)
 
 #=
 L^p distance
@@ -114,9 +103,6 @@ function ℓ_2(x::Vector{T}, y::Vector{T}) where {T}
 
     return √result
 end
-
-push!(available_similarities, ℓ_1)
-push!(available_similarities, ℓ_2)
 
 # Jaccard similarity
 

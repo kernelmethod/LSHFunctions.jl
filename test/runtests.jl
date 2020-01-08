@@ -8,7 +8,7 @@ Testrunner for the LSH module
 Helper functions and constants for LSH
 ==============#
 
-include("test_utils.jl")
+include("utils.jl")
 
 #========================
 Tests
@@ -21,5 +21,9 @@ include(joinpath("hashes", "test_minhash.jl"))
 include(joinpath("hashes", "test_lphash.jl"))
 include(joinpath("hashes", "test_mips_hash.jl"))
 include(joinpath("hashes", "test_sign_alsh.jl"))
+
+include("test_similarities.jl")
+include("test_lshfunction.jl")
+
 include("test_table.jl")
 include("test_table_group.jl")

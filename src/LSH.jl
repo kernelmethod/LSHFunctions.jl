@@ -32,7 +32,8 @@ Exports
 export CosSim, ℓ_1, ℓ_2, ℓ_p, Jaccard
 
 # Hash functions
-export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash
+export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
+       LSHFunction
 
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity

@@ -182,6 +182,9 @@ LSHFunction and SymmetricLSHFunction API compliance
 n_hashes(h::LpHash) = length(h.shift)
 hashtype(::LpHash) = Vector{Int32}
 
+LSH.@register_similarity!(ℓ_1, L1Hash)
+LSH.@register_similarity!(ℓ_2, L2Hash)
+
 # See Section 3.2 of the reference
 function single_hash_collision_probability(hashfn::LpHash, sim::Real)
     distr, r = hashfn.distr, hashfn.r

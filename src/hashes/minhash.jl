@@ -143,6 +143,8 @@ similarity(::MinHash) = Jaccard
 
 single_hash_collision_probability(::MinHash, sim) = sim
 
+LSH.@register_similarity!(Jaccard, MinHash)
+
 ### Hash computation
 
 function (hashfn :: MinHash{T,I})(x) where {T,I}
