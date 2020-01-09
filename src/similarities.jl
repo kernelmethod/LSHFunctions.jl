@@ -104,22 +104,22 @@ function ℓ_2(x::Vector{T}, y::Vector{T}) where {T}
     return √result
 end
 
-# jaccard similarity
+# Jaccard similarity
 
 @doc raw"""
     jaccard(A::Set, B::Set) :: Float64
 
-Computes the jaccard similarity between sets `A` and `B`, which is defined as
+Computes the Jaccard similarity between sets `A` and `B`, which is defined as
 
 ```\math
 J(A,B) = \frac{\left|A \cap B\right|}{\left|A \cup B\right|}
 ```
 
 # Arguments
-- `A::Set`, `B::Set`: the two sets with which to compute jaccard similarity.
+- `A::Set`, `B::Set`: the two sets with which to compute Jaccard similarity.
 
 # Returns
-`Float64`: the jaccard similarity between sets `A` and `B`, which is between `0` and `1`.
+`Float64`: the Jaccard similarity between sets `A` and `B`, which is between `0` and `1`.
 
 # Examples
 ```jldoctest; setup = :(using LSH)

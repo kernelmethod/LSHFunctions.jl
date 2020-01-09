@@ -1,6 +1,6 @@
 #================================================================
 
-Definition of MinHash, an LSH function for hashing on jaccard similarity.
+Definition of MinHash, an LSH function for hashing on Jaccard similarity.
 
 ================================================================#
 
@@ -28,7 +28,7 @@ end
             dtype::DataType = Any,
             symbols::Union{Vector,Set} = Set())
 
-Construct a locality-sensitive hash function for jaccard similarity.
+Construct a locality-sensitive hash function for Jaccard similarity.
 
 # Arguments
 - `n_hashes::Integer` (default: `1`): the number of hash functions to generate.

@@ -32,7 +32,7 @@ Tests
         @test hashfn.r == 4.0
     end
 
-    @testset "Create jaccard similarity hash function" begin
+    @testset "Create Jaccard similarity hash function" begin
         hashfn = LSHFunction(jaccard, 64)
 
         @test similarity(hashfn) == jaccard

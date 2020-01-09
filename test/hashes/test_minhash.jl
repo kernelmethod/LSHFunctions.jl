@@ -70,9 +70,9 @@ Tests
         @test hashes_match
     end
 
-    @testset "Collision probabilities correlated with jaccard similarity" begin
+    @testset "Collision probabilities correlated with Jaccard similarity" begin
         # Create three different datasets, such that the first and second datasets
-        # have high jaccard similarity while the first and third have low jaccard
+        # have high Jaccard similarity while the first and third have low Jaccard
         # similarity. Test whether we in fact get higher collision rates for the
         # two sets with high similarity than the two sets with low similarity.
         symbols = collect(1:200)
@@ -91,9 +91,9 @@ Tests
         @test sum(hashes_1 .== hashes_2) > sum(hashes_1 .== hashes_3)
     end
 
-    @testset "Collision probability approx. equals jaccard similarity" begin
+    @testset "Collision probability approx. equals Jaccard similarity" begin
         # In theory, the probability of collision for two datasets should be
-        # roughly equal to the jaccard similarity between those datasets
+        # roughly equal to the Jaccard similarity between those datasets
         symbols = collect(1:200)
         n_hashes = 10_000
         hashfn = MinHash(n_hashes; symbols=symbols)
