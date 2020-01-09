@@ -182,20 +182,17 @@ LSHFunction and SymmetricLSHFunction API compliance
 n_hashes(h::LpHash) = length(h.shift)
 hashtype(::LpHash) = Vector{Int32}
 
-LSH.@register_similarity!(ℓ_1, L1Hash)
-LSH.@register_similarity!(ℓ_2, L2Hash)
-
 # See Section 3.2 of the reference
 function single_hash_collision_probability(hashfn::LpHash, sim::Real)
     distr, r = hashfn.distr, hashfn.r
     integral, err = quadgk(x -> pdf(distr, x/sim) * (1 - x/r), 0, r, rtol=1e-5)
     integral /= sim
 
-    # Note that from the reference for the L^p LSH family, we're supposed to integrate
-    # over the p.d.f. for the _absolute value_ of the underlying random variable, rather
-    # than the raw p.d.f.. Luckily, all of the distributions we have to deal with here
-    # are symmetric and centered at zero, so all we have to do is multiply the
-    # integral by two.
+    # Note that from the reference for the L^p LSH family, we're supposed to
+    # integrate over the p.d.f. for the _absolute value_ of the underlying random
+    # variable, rather than the raw p.d.f.. Luckily, all of the distributions we
+    # have to deal with here are symmetric and centered at zero, so all we have
+    # to do is multiply the integral by two.
     integral *= 2
 end
 
