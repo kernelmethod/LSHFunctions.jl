@@ -107,8 +107,8 @@ Tests
         hashes_2 = hashfn(dataset_2)
         hashes_3 = hashfn(dataset_3)
 
-        sim_12 = Jaccard(Set(dataset_1), Set(dataset_2))
-        sim_13 = Jaccard(Set(dataset_1), Set(dataset_3))
+        sim_12 = jaccard(Set(dataset_1), Set(dataset_2))
+        sim_13 = jaccard(Set(dataset_1), Set(dataset_3))
 
         mean(x) = sum(x) / length(x)
 
@@ -141,7 +141,7 @@ Tests
         symbols = collect(1:1_000)
         dataset_1 = Set(shuffle(symbols)[1:500])
         dataset_2 = Set(shuffle(symbols)[1:500])
-        similarity = Jaccard(dataset_1, dataset_2)
+        similarity = jaccard(dataset_1, dataset_2)
 
         n_hashes = 10_000
         hashfn = MinHash(n_hashes; dtype=Int64)

@@ -15,7 +15,7 @@ Tests
 
         @test n_hashes(hashfn) == 128
         @test hashtype(hashfn) == BitArray{1}
-        @test similarity(hashfn) == CosSim
+        @test similarity(hashfn) == cossim
 
         # By default, SimHash should start off unable to hash inputs of any
         # size, and should not resize in powers of 2.
