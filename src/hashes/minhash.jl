@@ -1,6 +1,6 @@
 #================================================================
 
-Definition of MinHash, an LSH function for hashing on Jaccard similarity.
+Definition of MinHash, an LSH function for hashing on jaccard similarity.
 
 ================================================================#
 
@@ -28,7 +28,7 @@ end
             dtype::DataType = Any,
             symbols::Union{Vector,Set} = Set())
 
-Construct a locality-sensitive hash function for Jaccard similarity.
+Construct a locality-sensitive hash function for jaccard similarity.
 
 # Arguments
 - `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
@@ -43,7 +43,7 @@ Construct a hash function to hash sets whose elements are integers between `1` a
 ```jldoctest; setup = :(using LSH)
 julia> hashfn = MinHash(40; symbols = Set(1:50));
 
-julia> n_hashes(hashfn) == 40 && similarity(hashfn) == Jaccard
+julia> n_hashes(hashfn) == 40 && similarity(hashfn) == jaccard
 true
 
 julia> hashfn(Set([38, 14, 29, 48, 11]));
@@ -79,7 +79,7 @@ julia> hashfn(Set(["a", "b", "c"]));
 Broder, A. "On the resemblance and containment of documents". Compression and Complexity of Sequences: Proceedings, Positano, Amalfitan Coast, Salerno, Italy, June 11-13, 1997. doi:10.1109/SEQUEN.1997.666900.
 ```
 
-See also: [`Jaccard`](@ref)
+See also: [`jaccard`](@ref)
 """
 function MinHash(args...;
                  dtype::DataType = Any,
@@ -139,11 +139,11 @@ LSHFunction and SymmetricLSHFunction API compliance
 ========================#
 n_hashes(hashfn :: MinHash) = length(hashfn.mappings)
 hashtype(:: MinHash{T, I}) where {T, I} = I
-similarity(::MinHash) = Jaccard
+similarity(::MinHash) = jaccard
 
 single_hash_collision_probability(::MinHash, sim) = sim
 
-LSH.@register_similarity!(Jaccard, MinHash)
+LSH.@register_similarity!(jaccard, MinHash)
 
 ### Hash computation
 
