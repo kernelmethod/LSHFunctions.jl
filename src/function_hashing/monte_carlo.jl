@@ -43,27 +43,20 @@ end
 ### External MonteCarloHash constructors
 
 # TODO: restrict similarities. E.g. Jaccard should not be an available similarity
-@generated function MonteCarloHash(similarity, μ, args...;
-                                   n_samples::Int64 = 1024, volume=1.0, kws...)
-    p_assign = begin
-        if similarity <: Union{typeof(cossim),typeof(ℓ_2)}
-            :(p = 2.0)
-        elseif similarity <: typeof(ℓ_1)
-            :(p = 1.0)
-        else
-            quote
-                "similarity must be cossim, ℓ_1, or ℓ_2" |>
-                ErrorException |>
-                throw
-            end
-        end
-    end
+MonteCarloHash(similarity, args...; kws...) =
+    MonteCarloHash(SimilarityFunction(similarity), args...; kws...)
 
+for (simfn,p) in zip([ℓ_1,ℓ_2,cossim], [1,2,2])
     quote
-        $p_assign
-        discrete_hashfn = LSHFunction(similarity, args...; kws...)
-        MonteCarloHash(discrete_hashfn, μ, volume, p, n_samples)
-    end
+        # Create implementation of MonteCarloHash for current similarity function
+        # and order of L^p space
+        function MonteCarloHash(sim::SimilarityFunction{$simfn}, μ, args...;
+                                n_samples::Int64=1024, volume=1.0, kws...)
+
+            discrete_hashfn = LSHFunction($simfn, args...; kws...)
+            MonteCarloHash(discrete_hashfn, μ, volume, $p, n_samples)
+        end
+    end |> eval
 end
 
 #========================
