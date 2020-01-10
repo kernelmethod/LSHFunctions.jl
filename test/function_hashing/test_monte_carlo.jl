@@ -81,7 +81,7 @@ Tests
         # you can map them into R^N isomorphically
         N = 4
         μ() = N * rand()
-        hashfn = MonteCarloHash(ℓ_1, μ, 1024)
+        hashfn = MonteCarloHash(ℓ_1, μ, 1024; volume = N, p=1.0)
 
         @test let success = true
             for ii = 1:128

@@ -8,27 +8,54 @@ MonteCarloHash for hashing function spaces.
 Typedefs
 ========================#
 
-struct MonteCarloHash{H <: Union{SymmetricLSHFunction,AsymmetricLSHFunction}, D, T} <: LSHFunction
+struct MonteCarloHash{H <: Union{SymmetricLSHFunction,AsymmetricLSHFunction},
+                      D, T, S} <: LSHFunction
     discrete_hashfn :: H
     μ :: D
-    sample_points :: Vector{T}
+
+    # TODO: make typeof(volume) and typeof(p) match the element type
+    # returned by the sampler μ.
+
+    # The volume of the L^p space we're embedding, defined as
+    #
+    #   volume = ∫_Ω dx
+    #
+    volume :: T
+
+    # The order of the L^p space that we're embedding
+    p :: T
+
+    n_samples :: Int64
+    sample_points :: Vector{S}
 end
 
 ### External MonteCarloHash constructors
 
 # TODO: restrict similarities. E.g. Jaccard should not be an available similarity
-function MonteCarloHash(similarity, μ, args...; n_samples=1024, kws...)
+function MonteCarloHash(similarity, μ, args...;
+                        n_samples::Int64=1024, volume=1.0, p=2.0, kws...)
+
+    # TODO: make p dependent on the input similarity?
+
     discrete_hashfn = LSHFunction(similarity, args...; kws...)
     sample_points = [μ() for ii = 1:n_samples]
 
-    MonteCarloHash(discrete_hashfn, μ, sample_points)
+    T = eltype(μ())
+    volume = T(volume)
+    p = T(p)
+
+    MonteCarloHash(discrete_hashfn, μ, volume, p, n_samples, sample_points)
 end
 
 #========================
 MonteCarloHash helper functions
 ========================#
 
-get_samples(hashfn::MonteCarloHash, f) = f.(hashfn.sample_points)
+# Embed an input function f in the discrete space
+function get_samples(hashfn::MonteCarloHash, f)
+    α = (hashfn.volume / hashfn.n_samples)^(1/hashfn.p)
+    α * f.(hashfn.sample_points)
+end
 
 #========================
 LSHFunction API compliance
