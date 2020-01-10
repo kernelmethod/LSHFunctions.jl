@@ -11,11 +11,11 @@ Tests
 
     @testset "Construct ChebHash" begin
         # Hash L^2([-1,1]) over cosine similarity.
-        hashfn = ChebHash(CosSim, 5)
+        hashfn = ChebHash(cossim, 5)
 
-        @test similarity(hashfn) == CosSim
+        @test similarity(hashfn) == cossim
         @test n_hashes(hashfn) == 5
-        @test hashtype(hashfn) == hashtype(LSHFunction(CosSim))
+        @test hashtype(hashfn) == hashtype(LSHFunction(cossim))
 
         # Hash L^2([-1,1]) over L^p distance
         hashfn = ChebHash(ℓ_1)

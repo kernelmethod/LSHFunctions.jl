@@ -60,7 +60,7 @@ Construct a hash function by calling `SimHash` with the number of hash functions
 julia> hashfn = SimHash(24);
 
 julia> n_hashes(hashfn) == 24 &&
-       similarity(hashfn) == CosSim
+       similarity(hashfn) == cossim
 true
 ```
 
@@ -81,7 +81,7 @@ julia> hashes = hashfn(x);
 Charikar, Moses. (2002). Similarity estimation techniques from rounding algorithms. 380-388. 10.1145/509907.509965.
 ```
 
-See also: [`CosSim`](@ref)
+See also: [`cossim`](@ref)
 """
 
 #========================
@@ -122,7 +122,7 @@ LSHFunction and SymmetricLSHFunction API compliance
 
 hashtype(::SimHash) = BitArray{1}
 n_hashes(hashfn::SimHash) = size(hashfn.coeff, 2)
-similarity(::SimHash) = CosSim
+similarity(::SimHash) = cossim
 single_hash_collision_probability(::SimHash, sim::Real) = (1 - acos(sim) / π)
 
 ### Hash computation

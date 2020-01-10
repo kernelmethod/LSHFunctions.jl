@@ -13,12 +13,12 @@ Tests
         # Hash L^2([0,1]) over cosine similarity
         # Sampler μ() chooses a point in [0,1] uniformly at random
         μ() = rand()
-        hashfn = MonteCarloHash(CosSim, μ)
+        hashfn = MonteCarloHash(cossim, μ)
 
         @test n_hashes(hashfn) == 1
         @test hashfn.μ == μ
-        @test similarity(hashfn) == CosSim
-        @test hashtype(hashfn) == hashtype(LSHFunction(CosSim))
+        @test similarity(hashfn) == cossim
+        @test hashtype(hashfn) == hashtype(LSHFunction(cossim))
 
         # Hash L^1([0,1]) over L^1 distance
         hashfn = MonteCarloHash(ℓ_1, μ, 10)
@@ -36,7 +36,7 @@ Tests
         # zero. The collision rate should be close to 50%.
         f(x) = (0.0 ≤ x ≤ 0.5) ? 1.0 : 0.0;
         g(x) = (0.0 ≤ x ≤ 0.5) ? 0.0 : 1.0;
-        hashfn = MonteCarloHash(CosSim, rand, 1024)
+        hashfn = MonteCarloHash(cossim, rand, 1024)
 
         @test embedded_similarity(hashfn, f, g) == 0.0
 
@@ -50,7 +50,7 @@ Tests
         # [i,i+1], i = 1, ..., N.
         N = 10
         μ() = N * rand()
-        hashfn = MonteCarloHash(CosSim, μ, 1024)
+        hashfn = MonteCarloHash(cossim, μ, 1024)
 
         @test let success = true
             # Perform multiple iterations of tests to ensure that we consistently get a
@@ -60,7 +60,7 @@ Tests
                 g, g_steps = create_step_function(N)
 
                 # Hash collision rate should be close to the probability of collision
-                prob = LSH.single_hash_collision_probability(hashfn, CosSim(f_steps, g_steps))
+                prob = LSH.single_hash_collision_probability(hashfn, cossim(f_steps, g_steps))
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)

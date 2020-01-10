@@ -27,24 +27,44 @@ struct MonteCarloHash{H <: Union{SymmetricLSHFunction,AsymmetricLSHFunction},
 
     n_samples :: Int64
     sample_points :: Vector{S}
+
+    ### Internal constructors
+    function MonteCarloHash(discrete_hashfn::H, μ, volume, p, n_samples) where {H<:LSHFunction}
+        sample_points = [μ() for ii = 1:n_samples]
+
+        T = eltype(μ())
+        volume = T(volume)
+        p = T(p)
+
+        new{H,typeof(μ),T,eltype(sample_points)}(discrete_hashfn, μ, volume, p, n_samples, sample_points)
+    end
 end
 
 ### External MonteCarloHash constructors
 
 # TODO: restrict similarities. E.g. Jaccard should not be an available similarity
-function MonteCarloHash(similarity, μ, args...;
-                        n_samples::Int64=1024, volume=1.0, p=2.0, kws...)
+@generated function MonteCarloHash(similarity, μ, args...;
+                                   n_samples::Int64 = 1024, volume=1.0, kws...)
 
-    # TODO: make p dependent on the input similarity?
+    p = begin
+        if similarity <: Union{typeof(cossim),typeof(ℓ_2)}
+            :(p = 2.0)
+        elseif similarity <: typeof(ℓ_1)
+            :(p = 1.0)
+        else
+            quote
+                "similarity must be cossim, ℓ_1, or ℓ_2" |>
+                ErrorException |>
+                throw
+            end
+        end
+    end
 
-    discrete_hashfn = LSHFunction(similarity, args...; kws...)
-    sample_points = [μ() for ii = 1:n_samples]
-
-    T = eltype(μ())
-    volume = T(volume)
-    p = T(p)
-
-    MonteCarloHash(discrete_hashfn, μ, volume, p, n_samples, sample_points)
+    quote
+        discrete_hashfn = LSHFunction(similarity, args...; kws...)
+        p = $(esc(p))
+        MonteCarloHash(discrete_hashfn, μ, volume, p, n_samples)
+    end
 end
 
 #========================

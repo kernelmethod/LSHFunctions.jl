@@ -16,9 +16,9 @@ Tests
     Random.seed!(RANDOM_SEED)
 
     @testset "Create cosine similarity hash function" begin
-        hashfn = LSHFunction(CosSim)
+        hashfn = LSHFunction(cossim)
 
-        @test similarity(hashfn) == CosSim
+        @test similarity(hashfn) == cossim
         @test n_hashes(hashfn) == 1
         @test isa(hashfn, SimHash)
     end
@@ -42,8 +42,8 @@ Tests
 
     @testset "Call LSHFunction() with invalid similarity function" begin
         import LinearAlgebra: dot, norm
-        my_CosSim(x,y) = dot(x,y) / (norm(x) * norm(y))
+        my_cossim(x,y) = dot(x,y) / (norm(x) * norm(y))
 
-        @test_throws(MethodError, LSHFunction(my_CosSim))
+        @test_throws(MethodError, LSHFunction(my_cossim))
     end
 end
