@@ -17,19 +17,19 @@ Register `hashfn` to the `LSH` module as the default locality-sensitive hash fun
 - `hashfn`: the default locality-sensitive hash function that `similarity` should be associated with.
 
 # Examples
-Create a custom implementation of cosine similarity called `my_cossim`, and associate it with `SimHash`:
+Create a custom implementation of cosine similarity called `my_CosSim`, and associate it with `SimHash`:
 
 ```jldoctest; setup = :(using LSH)
 julia> using LinearAlgebra: dot, norm
 
-julia> my_cossim(x,y) = dot(x,y) / (norm(x) * norm(y));
+julia> my_CosSim(x,y) = dot(x,y) / (norm(x) * norm(y));
 
-julia> hashfn = LSHFunction(my_cossim);
-ERROR: MethodError: no method matching LSHFunction(::typeof(my_cossim))
+julia> hashfn = LSHFunction(my_CosSim);
+ERROR: MethodError: no method matching LSHFunction(::typeof(my_CosSim))
 
-julia> LSH.@register_similarity!(my_cossim, SimHash);
+julia> LSH.@register_similarity!(my_CosSim, SimHash);
 
-julia> hashfn = LSHFunction(my_cossim);
+julia> hashfn = LSHFunction(my_CosSim);
 
 julia> isa(hashfn, SimHash)
 true
@@ -66,7 +66,7 @@ end
 Associate similarity functions with LSHFunction subtypes
 ========================#
 
-@register_similarity!(cossim, SimHash)
+@register_similarity!(CosSim, SimHash)
 @register_similarity!(ℓ_1, L1Hash)
 @register_similarity!(ℓ_2, L2Hash)
 @register_similarity!(jaccard, MinHash)

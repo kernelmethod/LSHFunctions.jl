@@ -42,7 +42,7 @@ Hash tables for LSHFunctions
 ========================#
 
 # Similarity functions
-export cossim, ℓ_1, ℓ_2, ℓ_p, jaccard
+export CosSim, ℓ_1, ℓ_2, ℓ_p, jaccard
 
 # Hash functions
 export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,

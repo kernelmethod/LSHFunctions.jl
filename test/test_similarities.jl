@@ -27,7 +27,7 @@ Tests
         @test_throws(MethodError, LSH.LSHFunction(mytype()))
         @test_throws(ErrorException, LSH.@register_similarity!(mytype(), SimHash))
 
-        (::mytype)(x,y) = cossim(x,y)
+        (::mytype)(x,y) = CosSim(x,y)
 
         LSH.@register_similarity!(mytype(), SimHash)
         hashfn = LSH.LSHFunction(mytype())

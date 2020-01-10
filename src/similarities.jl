@@ -16,15 +16,15 @@ Cosine similarity
 =#
 
 @doc raw"""
-    cossim(x,y)
+    CosSim(x,y)
 
 Computes the cosine similarity between two inputs, `x` and `y`. Cosine similarity is defined as
 
 ```\math
-cossim(x,y) = \frac{\left\langle x,y\right\rangle}{\|x\|\cdot\|y\|}
+CosSim(x,y) = \frac{\left\langle x,y\right\rangle}{\|x\|\cdot\|y\|}
 ```
 
-where ``\left\langle\cdot,\cdot\right\rangle`` is an inner product (e.g. dot product) and ``\|\cdot\|`` is its derived norm. This is roughly interpreted as being related to the angle between the inputs `x` and `y`: when `x` and `y` have low angle between them, `cossim(x,y)` is high (close to `1`). Meanwhile, when `x` and `y` have large angle between them, `cossim(x,y)` is low (close to `-1`).
+where ``\left\langle\cdot,\cdot\right\rangle`` is an inner product (e.g. dot product) and ``\|\cdot\|`` is its derived norm. This is roughly interpreted as being related to the angle between the inputs `x` and `y`: when `x` and `y` have low angle between them, `CosSim(x,y)` is high (close to `1`). Meanwhile, when `x` and `y` have large angle between them, `CosSim(x,y)` is low (close to `-1`).
 
 # Arguments
 - `x` and `y`: two inputs for which `dot(x,y)`, `norm(x)`, and `norm(y)` are defined.
@@ -35,18 +35,18 @@ julia> using LinearAlgebra: dot, norm;
 
 julia> x, y = rand(4), rand(4);
 
-julia> cossim(x,y) == dot(x,y) / (norm(x) * norm(y))
+julia> CosSim(x,y) == dot(x,y) / (norm(x) * norm(y))
 true
 
 julia> z = rand(5);
 
-julia> cossim(x,z)
+julia> CosSim(x,z)
 ERROR: DimensionMismatch("dot product arguments have lengths 4 and 5")
 ```
 
 See also: [`SimHash`](@ref)
 """
-cossim(x,y) = dot(x,y) / (norm(x) * norm(y))
+CosSim(x,y) = dot(x,y) / (norm(x) * norm(y))
 
 #=
 L^p distance
