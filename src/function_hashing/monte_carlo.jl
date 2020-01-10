@@ -45,8 +45,7 @@ end
 # TODO: restrict similarities. E.g. Jaccard should not be an available similarity
 @generated function MonteCarloHash(similarity, μ, args...;
                                    n_samples::Int64 = 1024, volume=1.0, kws...)
-
-    p = begin
+    p_assign = begin
         if similarity <: Union{typeof(cossim),typeof(ℓ_2)}
             :(p = 2.0)
         elseif similarity <: typeof(ℓ_1)
@@ -61,8 +60,8 @@ end
     end
 
     quote
+        $p_assign
         discrete_hashfn = LSHFunction(similarity, args...; kws...)
-        p = $(esc(p))
         MonteCarloHash(discrete_hashfn, μ, volume, p, n_samples)
     end
 end
