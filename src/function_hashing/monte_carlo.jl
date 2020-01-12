@@ -8,8 +8,7 @@ MonteCarloHash for hashing function spaces.
 Typedefs
 ========================#
 
-struct MonteCarloHash{H <: Union{SymmetricLSHFunction,AsymmetricLSHFunction},
-                      D, T, S} <: LSHFunction
+struct MonteCarloHash{H <: LSHFunction, D, T, S} <: LSHFunction
     discrete_hashfn :: H
     μ :: D
 
@@ -90,8 +89,7 @@ single_hash_collision_probability(hashfn::MonteCarloHash, args...; kws...) =
 SymmetricLSHFunction API compliance
 ========================#
 
-(hashfn::MonteCarloHash{<:SymmetricLSHFunction})(f) =
-    index_hash(hashfn, f)
+(hashfn::MonteCarloHash)(f) = index_hash(hashfn, f)
 
 #========================
 AsymmetricLSHFunction API compliance
