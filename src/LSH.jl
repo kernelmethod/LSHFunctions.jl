@@ -28,6 +28,7 @@ include(joinpath("hashes", "lshfunction.jl"))
 Function hashing
 ========================#
 
+include(joinpath("function_hashing", "chebhash.jl"))
 include(joinpath("function_hashing", "monte_carlo.jl"))
 
 #========================
@@ -46,7 +47,7 @@ export cossim, ℓ_1, ℓ_2, ℓ_p, jaccard
 
 # Hash functions
 export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
-       LSHFunction, MonteCarloHash
+       LSHFunction, MonteCarloHash, ChebHash
 
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity,
