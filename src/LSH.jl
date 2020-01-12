@@ -9,6 +9,7 @@ Common types/utilities used through the LSH module
 include("utils.jl")
 include("LSHBase.jl")
 include("similarities.jl")
+include("intervals.jl")
 
 #========================
 Hash functions

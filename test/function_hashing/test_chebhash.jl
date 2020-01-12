@@ -46,7 +46,7 @@ Tests
         # over [0,N].
         N = 10
         interval = LSH.@interval(0.0 ≤ x ≤ N)
-        hashfn = ChebHash(cossim, 1024; interval = LSH.@interval)
+        hashfn = ChebHash(cossim, 1024; interval=interval)
 
         @test let success = true
             for ii = 1:128
