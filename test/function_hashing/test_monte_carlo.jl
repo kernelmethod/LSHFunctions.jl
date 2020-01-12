@@ -53,13 +53,10 @@ Tests
         hashfn = MonteCarloHash(cossim, μ, 2048)
 
         @test let success = true
-            # Perform multiple iterations of tests to ensure that we consistently get a
-            # collision probability close to the expected probability.
             for ii = 1:128
                 f, f_steps = create_step_function(N)
                 g, g_steps = create_step_function(N)
 
-                # Hash collision rate should be close to the probability of collision
                 prob = LSH.single_hash_collision_probability(hashfn, cossim(f_steps, g_steps))
                 hf, hg = hashfn(f), hashfn(g)
 
