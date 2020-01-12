@@ -11,9 +11,9 @@ using Markdown
 Definitions of built-in similarity functions
 ====================#
 
-#=
+#====================
 Cosine similarity
-=#
+====================#
 
 @doc raw"""
     cossim(x,y)
@@ -48,9 +48,9 @@ See also: [`SimHash`](@ref)
 """
 cossim(x,y) = dot(x,y) / (norm(x) * norm(y))
 
-#=
+#====================
 L^p distance
-=#
+====================#
 
 @doc raw"""
     ℓ_p(p, x, y)
@@ -104,7 +104,9 @@ function ℓ_2(x::Vector{T}, y::Vector{T}) where {T}
     return √result
 end
 
-# Jaccard similarity
+#====================
+Jaccard similarity
+====================#
 
 @doc raw"""
     jaccard(A::Set, B::Set) :: Float64
@@ -144,6 +146,42 @@ function jaccard(A::Set, B::Set) :: Float64
 end
 
 # TODO: inner product
+
+#====================
+1D Wasserstein distance
+====================#
+
+@doc raw"""
+    wasserstein_1d(f, g, p)
+    wasserstein1_1d(f, g)
+    wasserstein2_1d(f, g)
+    emd(f, g)
+
+Compute the order-``p`` Wasserstein distance between two probability distributions defined on the interval ``[-1,1]``.
+- `wasserstein1_1d(f,g) == emd(f,g) == wasserstein_1d(f, g, 1)`
+- `wasserstein2_1d(f,g) == wasserstein_1d(f, g, 2)`
+
+# Arguments
+- `f` and `g`: two probability distributions defined on ``[-1,1]``.
+- `p::AbstractFloat`: the order of Wasserstein distance to compute.
+
+# Returns
+The order-``p`` Wasserstein distance between `f` and `g` (an `AbstractFloat`).
+"""
+function wasserstein_1d(f, g, p::AbstractFloat)
+    # For one-dimensional probability distributions, the Wasserstein distance has the
+    # closed form
+    #
+    #       ∫_0^1 |F^{-1}(x) - G^{-1}(x)|^p dx
+    #
+    # where F^{-1} and G^{-1} are the inverse c.d.f.s of f and g. We use this
+    # formula to compute the distance between f and g.
+    error("TODO")
+end
+
+wasserstein1_1d(f, g) = wasserstein_1d(f, g, 1)
+wasserstein2_2d(f, g) = wasserstein_1d(f, g, 2)
+emd(f, g)             = wasserstein1_1d(f, g)
 
 #====================
 Definitions for similarity function-related components of the AbstractLSHFunction
