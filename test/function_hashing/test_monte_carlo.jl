@@ -50,7 +50,7 @@ Tests
         # [i,i+1], i = 1, ..., N.
         N = 10
         μ() = N * rand()
-        hashfn = MonteCarloHash(cossim, μ, 1024)
+        hashfn = MonteCarloHash(cossim, μ, 2048)
 
         @test let success = true
             # Perform multiple iterations of tests to ensure that we consistently get a
@@ -91,8 +91,6 @@ Tests
                 # Hash collision rate should be close to the probability of collision
                 prob = LSH.single_hash_collision_probability(hashfn, ℓ_1(f_steps, g_steps))
                 hf, hg = hashfn(f), hashfn(g)
-
-                println(mean(hf .== hg), " ", prob)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
 
