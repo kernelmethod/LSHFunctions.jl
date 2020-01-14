@@ -49,8 +49,8 @@ See also: [`SimHash`](@ref)
 cossim(x::AbstractVector, y::AbstractVector) = dot(x,y) / (norm(x) * norm(y))
 
 function cossim(f, g, interval::LSH.RealInterval)
-    norm_f = L2_norm(f, interval.lower, interval.upper)
-    norm_g = L2_norm(g, interval.lower, interval.upper)
+    norm_f = L2_norm(f, interval)
+    norm_g = L2_norm(g, interval)
     inner_prod(f, g, interval) / (norm_f * norm_g)
 end
 
@@ -172,7 +172,7 @@ inner_prod(x::AbstractVector, y::AbstractVector) = dot(x,y)
 
 # 1-dimensional inner product between L^2 functions
 inner_prod(f, g, interval::LSH.RealInterval) =
-    quadgk(x -> f(x)g(x), interval.lower, interval.upper)
+    quadgk(x -> f(x)g(x), interval.lower, interval.upper)[1]
 
 ### L^p norms
 Lp_norm(x::AbstractVector, p::Real = 2) = norm(x,p)
@@ -184,9 +184,9 @@ L2_norm(x::AbstractVector)              = norm(x)
 ℓ2_norm(x::AbstractVector)              = L2_norm(x)
 
 # 1-dimensional L^p norms
-Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)
-L1_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs(f(x)),    interval.lower, interval.upper)
-L2_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs2(f(x)),   interval.lower, interval.upper)
+Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)[1]
+L1_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs(f(x)),    interval.lower, interval.upper)[1]
+L2_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs2(f(x)),   interval.lower, interval.upper)[1]
 
 #====================
 1D Wasserstein distance
