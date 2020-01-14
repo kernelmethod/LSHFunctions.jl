@@ -7,6 +7,22 @@ Global variables
 const RANDOM_SEED = 0
 
 #========================
+Helper types
+========================#
+
+# ShiftedSine so that we can quickly generate functions of the form
+# f(x) = sin(αx+δ) without having to use closures, which can be relatively more
+# time-intensive.
+struct ShiftedSine{S <: Real, T <: Real}
+    α :: T
+    δ :: T
+end
+
+ShiftedSine(α::S, δ::T) where {S,T} = ShiftedSine{S,T}(α,δ)
+
+(f::ShiftedSine)(x) = sin(f.α * x + f.δ)
+
+#========================
 Helper functions
 ========================#
 

@@ -3,29 +3,6 @@ using Test, Random, LSH
 include(joinpath("..", "utils.jl"))
 
 #========================
-Helper functions and types
-========================#
-
-# ShiftedSine and ShiftedCosine so that we can quickly construct functions of
-# the form f(x) = cos(αx+δ) and g(x) = sin(αx+δ) without having to constantly
-# generate new functions, which is fairly time-intensive.
-struct ShiftedSine{S <: Real, T <: Real}
-    α :: T
-    δ :: T
-end
-
-struct ShiftedCosine{S <: Real, T <: Real}
-    α :: T
-    δ :: T
-end
-
-ShiftedSine(α::S, δ::T) where {S,T} = ShiftedSine{S,T}(α,δ)
-ShiftedCosine(α::S, δ::T) where {S,T} = ShiftedCosine{S,T}(α,δ)
-
-(f::ShiftedSine)(x)   = @. sin(f.α * x + f.δ)
-(f::ShiftedCosine)(x) = @. cos(f.α * x + f.δ)
-
-#========================
 Tests
 ========================#
 
@@ -92,8 +69,8 @@ Tests
         hashfn = ChebHash(cossim, 1024; interval=interval)
 
         trig_function_test() = begin
-            f = ShiftedSine(π, randn())
-            g = ShiftedCosine(π, randn())
+            f = ShiftedSine(π, π * rand())
+            g = ShiftedSine(π, π * rand())
 
             sim = cossim(f, g, interval)
             hx, hy = hashfn(f), hashfn(g)
