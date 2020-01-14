@@ -3,6 +3,29 @@ using Test, Random, LSH
 include(joinpath("..", "utils.jl"))
 
 #========================
+Helper functions and types
+========================#
+
+# ShiftedSine and ShiftedCosine so that we can quickly construct functions of
+# the form f(x) = cos(αx+δ) and g(x) = sin(αx+δ) without having to constantly
+# generate new functions, which is fairly time-intensive.
+struct ShiftedSine{S <: Real, T <: Real}
+    α :: T
+    δ :: T
+end
+
+struct ShiftedCosine{S <: Real, T <: Real}
+    α :: T
+    δ :: T
+end
+
+ShiftedSine(α::S, δ::T) where {S,T} = ShiftedSine{S,T}(α,δ)
+ShiftedCosine(α::S, δ::T) where {S,T} = ShiftedCosine{S,T}(α,δ)
+
+(f::ShiftedSine)(x)   = @. sin(f.α * x + f.δ)
+(f::ShiftedCosine)(x) = @. cos(f.α * x + f.δ)
+
+#========================
 Tests
 ========================#
 
@@ -58,5 +81,37 @@ Tests
 
         hf, hg = hashfn(f), hashfn(g)
         @test mean(hf .== hg) == 1
+    end
+
+    @testset "Hash cosine similarity with nontrivial inputs" begin
+        # Construct pairs of trig functions f(x) = sin(πx+δx) and
+        # g(y) = cos(πy+δy) and hash them on cosine similarity.
+        # Note: use trig functions since they're fairly cheap to represent with
+        # Chebyshev series.
+        interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
+        hashfn = ChebHash(cossim, 1024; interval=interval)
+
+        trig_function_test() = begin
+            f = ShiftedSine(π, randn())
+            g = ShiftedCosine(π, randn())
+
+            sim = cossim(f, g, interval)
+            hx, hy = hashfn(f), hashfn(g)
+            prob = LSH.single_hash_collision_probability(hashfn, sim)
+
+            prob - 0.05 ≤ mean(hx .== hy) ≤ prob + 0.05
+        end
+
+        # Dry-run: test on a single pair of inputs
+        @test trig_function_test()
+
+        # Full test: run across many pairs of inputs
+        @test let success = true, ii = 1
+            while ii ≤ 128 && success
+                success = success && trig_function_test()
+                ii += 1
+            end
+            success
+        end
     end
 end
