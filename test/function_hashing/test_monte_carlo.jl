@@ -61,6 +61,7 @@ Tests
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
+                ii += 1
             end
             success
         end
@@ -88,6 +89,7 @@ Tests
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
+                ii += 1
             end
             success
         end
