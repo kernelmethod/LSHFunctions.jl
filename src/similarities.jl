@@ -46,7 +46,13 @@ ERROR: DimensionMismatch("dot product arguments have lengths 4 and 5")
 
 See also: [`SimHash`](@ref)
 """
-cossim(x,y) = dot(x,y) / (norm(x) * norm(y))
+cossim(x::AbstractVector, y::AbstractVector) = dot(x,y) / (norm(x) * norm(y))
+
+function cossim(f, g, interval::LSH.RealInterval)
+    norm_f = L2_norm(f, interval.lower, interval.upper)
+    norm_g = L2_norm(g, interval.lower, interval.upper)
+    inner_prod(f, g, interval) / (norm_f * norm_g)
+end
 
 #====================
 L^p distance
@@ -65,10 +71,18 @@ Computes the ``\ell^p`` distance between a pair of vectors, given by
 
 Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, they are given unique function names `ℓ_1` and `ℓ_2` that you can use to call them.
 """
-function ℓ_p(p::Integer, x::Vector{T}, y::Vector{T}) where {T}
+ℓ_p(x::AbstractVector, y::AbstractVector, p::Real=2) = Lp(x, y, p)
+
+@doc (@doc ℓ_p)
+ℓ_1(x::AbstractVector, y::AbstractVector)            = L1(x, y)
+
+@doc (@doc ℓ_p)
+ℓ_2(x::AbstractVector, y::AbstractVector)            = L2(x, y)
+
+function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
     # TODO: more descriptive error message
     @assert p > 0
-    @assert length(x) == length(y)
+    @assert size(x) == size(y)
 
     result = T(0)
     @inbounds @simd for ii = 1:length(x)
@@ -78,8 +92,7 @@ function ℓ_p(p::Integer, x::Vector{T}, y::Vector{T}) where {T}
     return result^(1/p)
 end
 
-@doc (@doc ℓ_p)
-function ℓ_1(x::Vector{T}, y::Vector{T}) where {T}
+function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
     # TODO: more descriptive error message
     @assert length(x) == length(y)
 
@@ -91,8 +104,7 @@ function ℓ_1(x::Vector{T}, y::Vector{T}) where {T}
     return result
 end
 
-@doc (@doc ℓ_p)
-function ℓ_2(x::Vector{T}, y::Vector{T}) where {T}
+function L2(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
     # TODO: more descriptive error message
     @assert length(x) == length(y)
     result = T(0)
@@ -103,6 +115,11 @@ function ℓ_2(x::Vector{T}, y::Vector{T}) where {T}
 
     return √result
 end
+
+# Function space L^p distances
+Lp(f, g, p::Real=2) = Lp_norm(x -> f(x) - g(x), p)
+L1(f, g)            = L1_norm(x -> f(x) - g(x))
+L2(f, g)            = L2_norm(x -> f(x) - g(x))
 
 #====================
 Jaccard similarity
@@ -145,7 +162,31 @@ function jaccard(A::Set, B::Set) :: Float64
     end
 end
 
-# TODO: inner product
+#====================
+Inner product and norms
+====================#
+
+### Inner products
+# TODO: docs
+inner_prod(x::AbstractVector, y::AbstractVector) = dot(x,y)
+
+# 1-dimensional inner product between L^2 functions
+inner_prod(f, g, interval::LSH.RealInterval) =
+    quadgk(x -> f(x)g(x), interval.lower, interval.upper)
+
+### L^p norms
+Lp_norm(x::AbstractVector, p::Real = 2) = norm(x,p)
+L1_norm(x::AbstractVector)              = norm(x,1)
+L2_norm(x::AbstractVector)              = norm(x)
+
+ℓp_norm(x::AbstractVector, p::Real = 2) = Lp_norm(x, p)
+ℓ1_norm(x::AbstractVector)              = L1_norm(x)
+ℓ2_norm(x::AbstractVector)              = L2_norm(x)
+
+# 1-dimensional L^p norms
+Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)
+L1_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs(f(x)),    interval.lower, interval.upper)
+L2_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs2(f(x)),   interval.lower, interval.upper)
 
 #====================
 1D Wasserstein distance

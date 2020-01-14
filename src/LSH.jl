@@ -8,8 +8,8 @@ Common types/utilities used through the LSH module
 
 include("utils.jl")
 include("LSHBase.jl")
-include("similarities.jl")
 include("intervals.jl")
+include("similarities.jl")
 
 #========================
 Hash functions
@@ -43,8 +43,9 @@ include(joinpath("tables", "table_group.jl"))
 Hash tables for LSHFunctions
 ========================#
 
-# Similarity functions
-export cossim, ℓ_1, ℓ_2, ℓ_p, jaccard
+# Similarity functions, norms, inner products
+export cossim, inner_prod, ℓ_1, ℓ_2, ℓ_p, L1, L2, Lp, ℓ1_norm, ℓ2_norm,
+       ℓp_norm, L1_norm, L2_norm, Lp_norm, jaccard
 
 # Hash functions
 export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
