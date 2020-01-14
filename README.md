@@ -1,4 +1,7 @@
 # LSH.jl
+
+[![Build Status](https://travis-ci.com/kernelmethod/LSH.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSH.jl)
+
 Implementations of different [locality-sensitive hash functions](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) in Julia.
 
 **Installation**: `julia> Pkg.add("https://github.com/kernelmethod/LSH.jl")`
