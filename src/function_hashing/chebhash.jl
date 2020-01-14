@@ -10,7 +10,8 @@ using ApproxFun: Chebyshev, Fun
 Typedefs
 ========================#
 
-struct ChebHash{H<:LSHFunction, I<:RealInterval}
+# B = basis, which is a Symbol (e.g. :Chebyshev)
+struct ChebHash{B, H<:LSHFunction, I<:RealInterval}
     discrete_hashfn :: H
 
     # Interval over which all input functions are defined.
@@ -18,6 +19,9 @@ struct ChebHash{H<:LSHFunction, I<:RealInterval}
 end
 
 ### External ChebHash constructors
+ChebHash{S}(hashfn::H, interval::I) where {S, H<:LSHFunction, I<:RealInterval} =
+    ChebHash{S,H,I}(hashfn, interval)
+
 ChebHash(similarity, args...; kws...) =
     ChebHash(SimilarityFunction(similarity), args...; kws...)
 
@@ -27,7 +31,7 @@ function ChebHash(::SimilarityFunction{S},
                   kws...) where S
 
     discrete_hashfn = LSHFunction(S, args...; kws...)
-    ChebHash(discrete_hashfn, interval)
+    ChebHash{:Chebyshev}(discrete_hashfn, interval)
 end
 
 #========================
@@ -70,17 +74,17 @@ single_hash_collision_probability(hashfn::ChebHash, args...; kws...) =
 Hash computation
 ===============#
 
-function (hashfn::ChebHash)(f)
+function (hashfn::ChebHash{:Chebyshev})(f)
     coeff = get_cheb_coefficients(hashfn.interval, f)
     hashfn.discrete_hashfn(coeff)
 end
 
-function index_hash(hashfn::ChebHash, f)
+function index_hash(hashfn::ChebHash{:Chebyshev}, f)
     coeff = get_cheb_coefficients(hashfn.interval, f)
     index_hash(hashfn.discrete_hashfn, coeff)
 end
 
-function query_hash(hashfn::ChebHash, f)
+function query_hash(hashfn::ChebHash{:Chebyshev}, f)
     coeff = get_cheb_coefficients(hashfn.interval, f)
     query_hash(hashfn.discrete_hashfn, coeff)
 end
@@ -90,7 +94,7 @@ ChebHash API
 ========================#
 
 # Compute the similarity between f and g in the embedded space
-function embedded_similarity(hashfn::ChebHash, f, g)
+function embedded_similarity(hashfn::ChebHash{:Chebyshev}, f, g)
     f_coeff = get_cheb_coefficients(hashfn.interval, f)
     g_coeff = get_cheb_coefficients(hashfn.interval, g)
 
