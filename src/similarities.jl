@@ -117,9 +117,9 @@ function L2(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
 end
 
 # Function space L^p distances
-Lp(f, g, p::Real=2) = Lp_norm(x -> f(x) - g(x), p)
-L1(f, g)            = L1_norm(x -> f(x) - g(x))
-L2(f, g)            = L2_norm(x -> f(x) - g(x))
+Lp(f, g, interval, p::Real=2) = Lp_norm(x -> f(x) - g(x), interval, p)
+L1(f, g, interval)            = L1_norm(x -> f(x) - g(x), interval)
+L2(f, g, interval)            = L2_norm(x -> f(x) - g(x), interval)
 
 #====================
 Jaccard similarity
