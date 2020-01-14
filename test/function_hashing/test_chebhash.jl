@@ -28,7 +28,7 @@ Tests
     #==========
     Cosine similarity hashing
     ==========#
-    @testset "Hash cosine similarity with trivial inputs" begin
+    @testset "Hash cosine similarity (trivial inputs)" begin
         ### Hash inputs with cosine similarity -1
         f(x) = sin(x)
         g(x) = -f(x)
@@ -60,11 +60,7 @@ Tests
         @test mean(hf .== hg) == 1
     end
 
-    @testset "Hash cosine similarity with nontrivial inputs" begin
-        # Construct pairs of trig functions f(x) = sin(πx+δx) and
-        # g(y) = cos(πy+δy) and hash them on cosine similarity.
-        # Note: use trig functions since they're fairly cheap to represent with
-        # Chebyshev series.
+    @testset "Hash cosine similarity (nontrivial inputs)" begin
         interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
         hashfn = ChebHash(cossim, 1024; interval=interval)
 
@@ -73,10 +69,42 @@ Tests
             g = ShiftedSine(π, π * rand())
 
             sim = cossim(f, g, interval)
-            hx, hy = hashfn(f), hashfn(g)
+            hf, hg = hashfn(f), hashfn(g)
             prob = LSH.single_hash_collision_probability(hashfn, sim)
 
-            prob - 0.05 ≤ mean(hx .== hy) ≤ prob + 0.05
+            prob - 0.05 ≤ mean(hf .== hg) ≤ prob + 0.05
+        end
+
+        # Dry-run: test on a single pair of inputs
+        @test trig_function_test()
+
+        # Full test: run across many pairs of inputs
+        @test_skip @test let success = true, ii = 1
+            while ii ≤ 128 && success
+                success = success && trig_function_test()
+                ii += 1
+            end
+            success
+        end
+    end
+
+    #==========
+    L^p distance hashing
+    ==========#
+    @test_skip @testset "Hash L^1 distance (nontrivial inputs)" begin
+        interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
+        hashfn = ChebHash(ℓ1, 1024; interval=interval)
+
+        trig_function_test() = begin
+            f = ShiftedSine(π, π * rand())
+            g = ShiftedSine(π, π * rand())
+
+            sim = L1(f, g, interval)
+            hf, hg = hashfn(f), hashfn(g)
+            prob = LSH.single_hash_collision_probability(hashfn, sim)
+            println(sim, " ", prob, " ", mean(hf .== hg))
+
+            prob - 0.05 ≤ mean(hf .== hg) ≤ prob + 0.05
         end
 
         # Dry-run: test on a single pair of inputs

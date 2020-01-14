@@ -52,8 +52,8 @@ Tests
         μ() = N * rand()
         hashfn = MonteCarloHash(cossim, μ, 2048)
 
-        @test let success = true
-            for ii = 1:128
+        @test let success = true, ii = 1
+            while success && ii ≤ 128
                 f, f_steps = create_step_function(N)
                 g, g_steps = create_step_function(N)
 
@@ -61,10 +61,6 @@ Tests
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
-
-                if !success
-                    break
-                end
             end
             success
         end
@@ -80,20 +76,18 @@ Tests
         μ() = N * rand()
         hashfn = MonteCarloHash(ℓ1, μ, 1024; volume = N)
 
-        @test let success = true
-            for ii = 1:128
+        @test let success = true, ii = 1
+            while success && ii ≤ 128
                 f, f_steps = create_step_function(N)
                 g, g_steps = create_step_function(N)
 
-                # Hash collision rate should be close to the probability of collision
-                prob = LSH.single_hash_collision_probability(hashfn, ℓ1(f_steps, g_steps))
+                # Hash collision rate should be close to the probability of
+                # collision
+                prob = LSH.single_hash_collision_probability(hashfn,
+                                                             ℓ1(f_steps, g_steps))
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
-
-                if !success
-                    break
-                end
             end
             success
         end
