@@ -79,7 +79,7 @@ Tests
         @test trig_function_test()
 
         # Full test: run across many pairs of inputs
-        @test_skip @test let success = true, ii = 1
+        @test let success = true, ii = 1
             while ii ≤ 128 && success
                 success = success && trig_function_test()
                 ii += 1
@@ -91,6 +91,46 @@ Tests
     #==========
     L^p distance hashing
     ==========#
+    @test_skip @testset "Hash L^1 distance (trivial inputs)" begin
+        ### Hash two functions with L^1 distance ≈ 0
+        f(x) = 0.0
+        g(x) = (-1e3 ≤ x ≤ 1e3) ? 1.0 : 0.0
+        hashfn = ChebHash(ℓ1, 1024)
+
+        @test embedded_similarity(hashfn, f, g) ≈ 0
+
+        hf, hg = hashfn(f), hashfn(g)
+        @test mean(hf .== hg) ≥ 0.98
+
+        ### Hash two functions with large L^p distance
+        g(x) = (-0.5 ≤ x ≤ 0.5) ? 1e3 : 0.0
+
+        @test embedded_similarity(hashfn, f, g) ≈ 1e3
+
+        hf, hg = hashfn(f), hashfn(g)
+        @test mean(hf .== hg) ≤ 0.02
+    end
+
+    @test_skip @testset "Hash L^2 distance (trivial inputs)" begin
+        ### Hash two functions with L^2 distance ≈ 0
+        f(x) = 0.0
+        g(x) = (-1e3 ≤ x ≤ 1e3) ? 1.0 : 0.0
+        hashfn = ChebHash(ℓ2, 1024)
+
+        @test embedded_similarity(hashfn, f, g) ≈ 0
+
+        hf, hg = hashfn(f), hashfn(g)
+        @test mean(hf .== hg) ≥ 0.98
+
+        ### Hash two functions with large L^2 distance
+        g(x) = (-0.5 ≤ x ≤ 0.5) ? 1e3 : 0.0
+
+        @test embedded_similarity(hashfn, f, g) ≈ 1e6
+
+        hf, hg = hashfn(f), hashfn(g)
+        @test mean(hf .== hg) ≤ 0.02
+    end
+
     @test_skip @testset "Hash L^1 distance (nontrivial inputs)" begin
         interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
         hashfn = ChebHash(ℓ1, 1024; interval=interval)
