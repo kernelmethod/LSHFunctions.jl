@@ -24,7 +24,7 @@ for ii = 1:10
     @profile hashfn(f)
 end
 
-open("chebhash.benchmark.prof", "w") do f
+open("chebhash.profile.prof", "w") do f
     Profile.print(f)
     println("Results written to ", f.name)
 end
