@@ -45,7 +45,7 @@ end
 MonteCarloHash(similarity, args...; kws...) =
     MonteCarloHash(SimilarityFunction(similarity), args...; kws...)
 
-for (simfn,p) in zip([ℓ_1,ℓ_2,cossim], [1,2,2])
+for (simfn,p) in zip([ℓ1,ℓ2,cossim], [1,2,2])
     quote
         # Create implementation of MonteCarloHash for current similarity function
         # and order of L^p space

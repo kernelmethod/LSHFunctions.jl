@@ -4,8 +4,8 @@ Definitions of various similarity functions
 
 =============================================#
 
+using Markdown, QuadGK
 using LinearAlgebra: dot, norm
-using Markdown
 
 #====================
 Definitions of built-in similarity functions
@@ -59,9 +59,9 @@ L^p distance
 ====================#
 
 @doc raw"""
-    ℓ_p(p, x, y)
-    ℓ_1(x, y)
-    ℓ_2(x, y)
+    ℓp(p, x, y)
+    ℓ1(x, y)
+    ℓ2(x, y)
 
 Computes the ``\ell^p`` distance between a pair of vectors, given by
 
@@ -69,15 +69,15 @@ Computes the ``\ell^p`` distance between a pair of vectors, given by
 \ell^p(x,y) \coloneqq \|x - y\|_p = \sum \left|x_i - y_i\right|^p
 ```
 
-Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, they are given unique function names `ℓ_1` and `ℓ_2` that you can use to call them.
+Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, they are given unique function names `ℓ1` and `ℓ2` that you can use to call them.
 """
-ℓ_p(x::AbstractVector, y::AbstractVector, p::Real=2) = Lp(x, y, p)
+ℓp(x::AbstractVector, y::AbstractVector, p::Real=2) = Lp(x, y, p)
 
-@doc (@doc ℓ_p)
-ℓ_1(x::AbstractVector, y::AbstractVector)            = L1(x, y)
+@doc (@doc ℓp)
+ℓ1(x::AbstractVector, y::AbstractVector)            = L1(x, y)
 
-@doc (@doc ℓ_p)
-ℓ_2(x::AbstractVector, y::AbstractVector)            = L2(x, y)
+@doc (@doc ℓp)
+ℓ2(x::AbstractVector, y::AbstractVector)            = L2(x, y)
 
 function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
     # TODO: more descriptive error message

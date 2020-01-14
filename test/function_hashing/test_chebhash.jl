@@ -18,11 +18,11 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(cossim))
 
         # Hash L^2([-1,1]) over L^p distance
-        hashfn = ChebHash(ℓ_1)
+        hashfn = ChebHash(ℓ1)
 
         @test n_hashes(hashfn) == 1
-        @test similarity(hashfn) == ℓ_1
-        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ_1))
+        @test similarity(hashfn) == ℓ1
+        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ1))
     end
 
     #==========

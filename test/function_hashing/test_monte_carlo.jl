@@ -21,11 +21,11 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(cossim))
 
         # Hash L^1([0,1]) over L^1 distance
-        hashfn = MonteCarloHash(ℓ_1, μ, 10)
+        hashfn = MonteCarloHash(ℓ1, μ, 10)
 
         @test n_hashes(hashfn) == 10
-        @test similarity(hashfn) == ℓ_1
-        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ_1))
+        @test similarity(hashfn) == ℓ1
+        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ1))
     end
 
     #==========
@@ -78,7 +78,7 @@ Tests
         # you can map them into R^N isomorphically
         N = 4
         μ() = N * rand()
-        hashfn = MonteCarloHash(ℓ_1, μ, 1024; volume = N)
+        hashfn = MonteCarloHash(ℓ1, μ, 1024; volume = N)
 
         @test let success = true
             for ii = 1:128
@@ -86,7 +86,7 @@ Tests
                 g, g_steps = create_step_function(N)
 
                 # Hash collision rate should be close to the probability of collision
-                prob = LSH.single_hash_collision_probability(hashfn, ℓ_1(f_steps, g_steps))
+                prob = LSH.single_hash_collision_probability(hashfn, ℓ1(f_steps, g_steps))
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)

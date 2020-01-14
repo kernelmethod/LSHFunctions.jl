@@ -24,9 +24,9 @@ Tests
     end
 
     @testset "Create L^p distance hash function" begin
-        hashfn = LSHFunction(ℓ_1, 20; r = 4.0)
+        hashfn = LSHFunction(ℓ1, 20; r = 4.0)
 
-        @test similarity(hashfn) == ℓ_1
+        @test similarity(hashfn) == ℓ1
         @test n_hashes(hashfn) == 20
         @test isa(hashfn, LSH.LpHash)
         @test hashfn.r == 4.0
