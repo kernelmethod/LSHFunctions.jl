@@ -41,10 +41,11 @@ function get_cheb_coefficients(interval::RealInterval, f)
 end
 
 # Squash a function f into the interval [-1,1]
-function squash_function(interval::RealInterval, f)
-    lower, upper = interval.lower, interval.upper
-    α = (upper - lower) / 2
-    β = (upper + lower) / 2
+function squash_function(interval::RealInterval{T}, f) where T
+    lower::T, upper::T = interval.lower, interval.upper
+    α = (upper - lower) / T(2.0)
+    β = (upper + lower) / T(2.0)
+
     x -> @. √(1-x^2) * f(α*x + β)
 end
 
