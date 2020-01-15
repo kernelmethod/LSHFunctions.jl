@@ -89,28 +89,8 @@ Tests
     end
 
     #==========
-    L^p distance hashing
+    L^2 distance hashing
     ==========#
-    @test_skip @testset "Hash L^1 distance (trivial inputs)" begin
-        ### Hash two functions with L^1 distance ≈ 0
-        f(x) = 0.0
-        g(x) = (-1e3 ≤ x ≤ 1e3) ? 1.0 : 0.0
-        hashfn = ChebHash(ℓ1, 1024)
-
-        @test embedded_similarity(hashfn, f, g) ≈ 0
-
-        hf, hg = hashfn(f), hashfn(g)
-        @test mean(hf .== hg) ≥ 0.98
-
-        ### Hash two functions with large L^p distance
-        g(x) = (-0.5 ≤ x ≤ 0.5) ? 1e3 : 0.0
-
-        @test embedded_similarity(hashfn, f, g) ≈ 1e3
-
-        hf, hg = hashfn(f), hashfn(g)
-        @test mean(hf .== hg) ≤ 0.02
-    end
-
     @test_skip @testset "Hash L^2 distance (trivial inputs)" begin
         ### Hash two functions with L^2 distance ≈ 0
         f(x) = 0.0
@@ -131,15 +111,15 @@ Tests
         @test mean(hf .== hg) ≤ 0.02
     end
 
-    @test_skip @testset "Hash L^1 distance (nontrivial inputs)" begin
+    @test_skip @testset "Hash L^2 distance (nontrivial inputs)" begin
         interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
-        hashfn = ChebHash(ℓ1, 1024; interval=interval)
+        hashfn = ChebHash(ℓ2, 1024; interval=interval)
 
         trig_function_test() = begin
             f = ShiftedSine(π, π * rand())
             g = ShiftedSine(π, π * rand())
 
-            sim = L1(f, g, interval)
+            sim = L2(f, g, interval)
             hf, hg = hashfn(f), hashfn(g)
             prob = LSH.single_hash_collision_probability(hashfn, sim)
             println(sim, " ", prob, " ", mean(hf .== hg))
