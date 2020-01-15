@@ -1,8 +1,9 @@
 # LSH.jl
 
-[![Build Status](https://travis-ci.com/kernelmethod/LSH.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSH.jl)
-[![DOI](https://zenodo.org/badge/197700982.svg)](https://zenodo.org/badge/latestdoi/197700982)
-
+- Build status: [![Build Status](https://travis-ci.com/kernelmethod/LSH.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSH.jl)
+- Code coverage: [![Coverage Status](https://coveralls.io/repos/github/kernelmethod/LSH.jl/badge.svg?branch=master)](https://coveralls.io/github/kernelmethod/LSH.jl?branch=master)
+[![codecov](https://codecov.io/gh/kernelmethod/LSH.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSH.jl)
+- DOI to cite this code: [![DOI](https://zenodo.org/badge/197700982.svg)](https://zenodo.org/badge/latestdoi/197700982)
 
 Implementations of different [locality-sensitive hash functions](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) in Julia.
 
