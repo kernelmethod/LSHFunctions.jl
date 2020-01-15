@@ -1,6 +1,8 @@
-#=
+#================================================================
+
 Common helper functions shared between multiple routines in the LSH module.
-=#
+
+================================================================#
 
 # Compute the norms of vectors and columns of matrices
 col_norms(x::Union{AbstractVector,AbstractMatrix}) =
@@ -23,11 +25,4 @@ col_norms(x::SparseMatrixCSC{T}) where {T} = begin
 		output[ii] = √result
 	end
 	return output
-end
-
-# Regenerate random coefficients for an array
-function redraw!(X::AbstractArray, rng)
-	for ii in eachindex(X)
-		X[ii] = rng()
-	end
 end
