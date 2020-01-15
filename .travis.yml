@@ -3,5 +3,6 @@ os:
   - linux
   - osx
 codecov: true
+coveralls: true
 julia:
   - 1.3
