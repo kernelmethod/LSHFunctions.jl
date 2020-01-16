@@ -6,212 +6,223 @@ include(joinpath("..", "utils.jl"))
 Tests
 ==================#
 @testset "MIPSHash tests" begin
-	Random.seed!(RANDOM_SEED)
-	import LinearAlgebra: norm
-	import Base.Iterators: product
-	import SparseArrays: sprandn
+    Random.seed!(RANDOM_SEED)
+    import LinearAlgebra: norm
+    import Base.Iterators: product
+    import SparseArrays: sprandn
 
-	@testset "Can construct a simple MIPS hash function" begin
-		input_length = 5
-		n_hashes = 8
-		denom = 2
-		m = 3
+    @testset "Can construct a simple MIPSHash" begin
+        hashfn = MIPSHash()
 
-		hashfn = MIPSHash(input_length, n_hashes, denom, m)
-		@test size(hashfn.coeff_A) == (n_hashes, input_length)
-		@test size(hashfn.coeff_B) == (n_hashes, m)
-		@test size(hashfn.shift) == (n_hashes,)
-		@test size(hashfn.Qshift) == (n_hashes,)
-		@test hashfn.denom == denom
-		@test hashfn.m == m
+        @test n_hashes(hashfn) == 1
+        @test hashtype(hashfn) == Vector{Int32}
+        @test isa(hashfn, MIPSHash{Float32})    # Default dtype should be Float32
+        @test isa(hashfn, LSH.AsymmetricLSHFunction)
 
-		# The default datatype should be Float32
-		@test isa(hashfn, MIPSHash{Float32})
-	end
+        ##
+        hashfn = MIPSHash(12)
 
-	@testset "Type consistency in MIPSHash fields" begin
-		# Check for type consistency between fields of the struct, so that we
-		# avoid expensive type conversions during runtime.
-		for T in (Float32, Float64)
-			hashfn = MIPSHash{T}(5, 5, 2, 4)
+        @test n_hashes(hashfn) == 12
 
-			@test isa(hashfn.coeff_A, Matrix{T})
-			@test isa(hashfn.coeff_B, Matrix{T})
-			@test isa(hashfn.shift, Vector{T})
-			@test isa(hashfn.Qshift, Vector{T})
-			@test isa(hashfn.denom, T)
-		end
-	end
+        ##
+        hashfn = MIPSHash(; dtype=Float64)
 
-	@testset "Hashing returns the correct data types" begin
-		hashfn = MIPSHash{Float64}(4, 1, 1., 1)
+        @test isa(hashfn, MIPSHash{Float64})
 
-		# Matrix{Float64} -> Matrix{Int32}
-		x = randn(4, 10)
-		p_hashes = index_hash(hashfn, x)
-		q_hashes = query_hash(hashfn, x)
+        ##
+        hashfn = MIPSHash{Float64}()
+        @test isa(hashfn, MIPSHash{Float64})
 
-		@test isa(p_hashes, Matrix{Int32})
-		@test isa(q_hashes, Matrix{Int32})
-		@test Vector{eltype(p_hashes)} == hashtype(hashfn)
-		@test Vector{eltype(q_hashes)} == hashtype(hashfn)
+        ### Invalid hash function construction
 
-		# Vector{Float64} -> Vector{Int32}
-		x = randn(4)
-		p_hashes = index_hash(hashfn, x)
-		q_hashes = query_hash(hashfn, x)
+        @test_throws ErrorException MIPSHash(-1)
+        @test_throws ErrorException MIPSHash(; m=-1)
+        @test_throws ErrorException MIPSHash(; m=0)
+        @test_throws ErrorException MIPSHash(; scale=-1)
+        @test_throws ErrorException MIPSHash(; scale=0)
+    end
 
-		@test isa(index_hash(hashfn, x), Vector{Int32})
-		@test isa(query_hash(hashfn, x), Vector{Int32})
-	end
+    @testset "Hashing returns the correct data types" begin
+        hashfn = MIPSHash{Float64}(; scale=1, m=3)
 
-	@testset "MIPSHash h(P(x)) is correctly computed" begin
-		input_length = 5; n_hashes = 128; denom = 0.5
-		hashfn = MIPSHash(input_length, n_hashes, denom, 3)
-		coeff = [hashfn.coeff_A hashfn.coeff_B]
-		shift = hashfn.shift
+        # Matrix{Float64} -> Matrix{Int32}
+        x = randn(4, 10)
+        p_hashes = index_hash(hashfn, x)
+        q_hashes = query_hash(hashfn, x)
 
-		@test size(coeff) == (n_hashes, input_length+3)
-		@test size(shift) == (n_hashes,)
+        @test isa(p_hashes, Matrix{Int32})
+        @test isa(q_hashes, Matrix{Int32})
+        @test Vector{eltype(p_hashes)} == hashtype(hashfn)
+        @test Vector{eltype(q_hashes)} == hashtype(hashfn)
 
-		## Test 1: compute hashes on a single input
-		x = randn(input_length)
-		hash = index_hash(hashfn, x)
+        # Vector{Float64} -> Vector{Int32}
+        x = randn(4)
+        p_hashes = index_hash(hashfn, x)
+        q_hashes = query_hash(hashfn, x)
 
-		@test isa(hash, Vector{Int32})
-		@test length(hash) == n_hashes
+        @test isa(index_hash(hashfn, x), Vector{Int32})
+        @test isa(query_hash(hashfn, x), Vector{Int32})
+    end
 
-		# Start by performing the transform P(x)
-		u = x / norm(x)
-		norm_powers = [norm(u)^2, norm(u)^4, norm(u)^8]
-		Px = [u; norm_powers]
+    @testset "MIPSHash h(P(x)) is correctly computed" begin
+        n_hashes = 128
+        scale = 0.5
+        m = 3
+        hashfn = MIPSHash(n_hashes; scale=scale, m=m)
 
-		# Now compute the L^2 hash of P(x)
-		manual_hash = coeff * Px ./ denom .+ shift
-		manual_hash = floor.(Int32, manual_hash)
+        @test size(hashfn.coeff_B) == (n_hashes, 3)
+        @test size(hashfn.shift) == (n_hashes,)
 
-		@test manual_hash == hash
+        x = randn(20)
+        hash = index_hash(hashfn, x)
 
-		## Test 2: compute hashes on many inputs simultaneously
-		n_inputs = 256
-		x = randn(input_length, n_inputs)
-		hashes = index_hash(hashfn, x)
+        @test isa(hash, Vector{Int32})
+        @test length(hash) == n_hashes
 
-		@test isa(hashes, Matrix{Int32})
-		@test size(hashes) == (n_hashes, n_inputs)
+        # Since resize_pow2 was not specified, and x is the largest input seen so
+        # far, the number of coefficients / hash should be equal to 20
 
-		# Scale the inputs so that they each have norm ≤ 1
-		norms = norm.(eachcol(x))
-		max_norm = maximum(norms)
-		u = x ./ max_norm
+        @test size(hashfn.coeff_A) == (n_hashes, length(x))
 
-		# Now re-compute the norms and their first few powers, and
-		# append to the matrix u.
-		norms = norm.(eachcol(u))
-		norm_powers = [norms.^2 norms.^4 norms.^8]
-		Px = [u; norm_powers']
+        ### Compute hash manually
+        # Start by performing the transform P(x)
+        coeff = [hashfn.coeff_A hashfn.coeff_B]
+        u = x / norm(x)
+        norm_powers = [norm(u)^2, norm(u)^4, norm(u)^8]
+        Px = [u; norm_powers]
 
-		# Now compute the L^2 hash of Px
-		manual_hashes = coeff * Px ./ denom .+ shift
-		manual_hashes = floor.(Int32, manual_hashes)
+        # Now compute the L^2 hash of P(x)
+        manual_hash = coeff * Px ./ scale .+ hashfn.shift
+        manual_hash = floor.(Int32, manual_hash)
 
-		@test manual_hashes == hashes
-	end
+        @test manual_hash == hash
+    end
 
-	@testset "MIPSHash h(Q(x)) is correctly computed" begin
-		input_length = 5; n_hashes = 128; denom = 0.5
-		hashfn = MIPSHash(input_length, n_hashes, denom, 3)
-		coeff = [hashfn.coeff_A hashfn.coeff_B]
-		shift = hashfn.shift
+    @testset "MIPSHash h(Q(x)) is correctly computed" begin
+        n_hashes = 128
+        scale = 0.5
+        m = 3
+        hashfn = MIPSHash(n_hashes; scale=scale, m=m)
 
-		@test size(coeff) == (n_hashes, input_length+3)
-		@test size(shift) == (n_hashes,)
+        @test size(hashfn.coeff_B) == (n_hashes, m)
+        @test size(hashfn.shift) == (n_hashes,)
 
-		## Test 1: test on a single input
-		x = randn(input_length)
-		hash = query_hash(hashfn, x)
+        x = randn(40)
+        hash = query_hash(hashfn, x)
 
-		@test isa(hash, Vector{Int32})
-		@test length(hash) == n_hashes
-		
-		# To compute the hash manually, we start by creating the
-		# transform Q(x)
-		u = x ./ norm(x)
-		Qx = [u; 1/2; 1/2; 1/2]
+        @test isa(hash, Vector{Int32})
+        @test length(hash) == n_hashes
 
-		@test size(Qx) == (input_length+3,)
+        # Since x is the largest input we've seen so far and resize_pow2 not
+        # specified, the number of coefficients per hash in hashfn.coeff_A
+        # should be equal to the length of x.
 
-		# Then, we compute the L^2 hash of Qx
-		manual_hash = coeff * Qx ./ denom .+ shift
-		manual_hash = floor.(Int32, manual_hash)
-		
-		@test manual_hash == hash
+        @test size(hashfn.coeff_A) == (n_hashes, length(x))
 
-		## Test 2: test on multiple inputs
-		n_inputs = 256
-		x = randn(input_length, n_inputs)
-		hashes = query_hash(hashfn, x)
+        ### Compute hash manually
+        u = x ./ norm(x)
+        Qx = [u; 1/2; 1/2; 1/2]
+        coeff = [hashfn.coeff_A hashfn.coeff_B]
 
-		@test isa(hashes, Matrix{Int32})
-		@test size(hashes) == (n_hashes, n_inputs)
+        @test size(Qx) == (length(x)+3,)
 
-		u = x ./ norm.(eachcol(x))'
-		Qx = [u; fill(1/2, 3, n_inputs)]
+        # Then, we compute the L^2 hash of Qx
+        manual_hash = coeff * Qx ./ scale .+ hashfn.shift
+        manual_hash = floor.(Int32, manual_hash)
 
-		manual_hashes = coeff * Qx ./ denom .+ shift
-		manual_hashes = floor.(Int32, manual_hashes)
+        @test manual_hash == hash
+    end
 
-		@test manual_hashes == hashes
-	end
+    @testset "Hash inputs of different sizes" begin
+        n_hashes = 16
+        hashfn = MIPSHash(n_hashes)
 
-	@testset "MIPSHash generates collisions for large inner products" begin
-		input_length = 5; n_hashes = 256; denom = 1; m = 5
-		hashfn = MIPSHash(input_length, n_hashes, denom, m)
+        index_hash(hashfn, rand(10))
+        @test size(hashfn.coeff_A) == (n_hashes, 10)
 
-		x = randn(input_length)
-		x_query_hashes = query_hash(hashfn, x)
+        index_hash(hashfn, rand(14))
+        @test size(hashfn.coeff_A) == (n_hashes, 14)
 
-		# Check that MIPSHash isn't just generating a single query hash
-		@test any(x_query_hashes .!= x_query_hashes[1])
+        index_hash(hashfn, rand(8))
+        @test size(hashfn.coeff_A) == (n_hashes, 14)
 
-		# Compute the indexing hashes for a dataset with four vectors:
-		# a) 10 * x (where x is the test query vector)
-		# b) x
-		# c) A vector of all zeros
-		# d) -x
-		dataset = [(10*x) x zeros(input_length) -x]
-		p_hashes = index_hash(hashfn, dataset)
+        query_hash(hashfn, rand(10))
+        @test size(hashfn.coeff_A) == (n_hashes, 14)
 
-		# Each collection of hashes should be different from one another
-		@test let result = true
-			for (ii,jj) in product(1:4, 1:4)
-				if ii != jj && p_hashes[:,ii] == p_hashes[:,jj]
-					result = false
-					break
-				end
-			end
-			result
-		end
+        query_hash(hashfn, rand(20))
+        @test size(hashfn.coeff_A) == (n_hashes, 20)
 
-		# The number of collisions should be highest for x and 2*x, second-highest
-		# for x and x, second-lowest for x and zeros, and lowest for x and -x
-		n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
-		@test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
-	end
+        query_hash(hashfn, rand(100))
+        @test size(hashfn.coeff_A) == (n_hashes, 100)
+    end
 
-	@testset "Can compute hashes for sparse arrays" begin
-		X = sprandn(Float32, 10, 1000, 0.2)
-		hashfn = MIPSHash(size(X,1), 8, 1, 1)
+    @testset "resize_pow2 increases number of coefficients to powers of 2" begin
+        hashfn = MIPSHash(10; resize_pow2=true)
+        @test size(hashfn.coeff_A) == (10, 0)
 
-		ihashes = index_hash(hashfn, X)
-		qhashes = query_hash(hashfn, X)
+        index_hash(hashfn, rand(3))
+        @test size(hashfn.coeff_A) == (10, 4)
 
-		# Compare against the case where X is dense
-		X = Matrix(X)
-		ihashes_dense = index_hash(hashfn, X)
-		qhashes_dense = query_hash(hashfn, X)
-		
-		@test ihashes == ihashes_dense
-		@test qhashes == qhashes_dense
-	end
+        query_hash(hashfn, rand(2))
+        @test size(hashfn.coeff_A) == (10, 4)
+
+        query_hash(hashfn, rand(5))
+        @test size(hashfn.coeff_A) == (10, 8)
+
+        index_hash(hashfn, rand(7))
+        @test size(hashfn.coeff_A) == (10, 8)
+    end
+
+    @testset "MIPSHash generates collisions for large inner products" begin
+        n_hashes = 256
+        scale = 1
+        m = 5
+        hashfn = MIPSHash(n_hashes; scale=scale, m=m)
+
+        x = randn(20)
+        x_query_hashes = query_hash(hashfn, x)
+
+        # Check that MIPSHash isn't just generating a single query hash
+        @test any(x_query_hashes .!= x_query_hashes[1])
+
+        # Compute the indexing hashes for a dataset with four vectors:
+        # a) 10 * x (where x is the test query vector)
+        # b) x
+        # c) A vector of all zeros
+        # d) -x
+        dataset = [(10*x) x zero(x) -x]
+        p_hashes = index_hash(hashfn, dataset)
+
+        # Each collection of hashes should be different from one another
+        @test let result = true
+	        for (ii,jj) in product(1:4, 1:4)
+		        if ii != jj && p_hashes[:,ii] == p_hashes[:,jj]
+			        result = false
+			        break
+		        end
+	        end
+	        result
+        end
+
+        # The number of collisions should be highest for x and 2*x, second-highest
+        # for x and x, second-lowest for x and zeros, and lowest for x and -x
+        n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
+        @test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
+    end
+
+    @testset "Can compute hashes for sparse arrays" begin
+        X = sprandn(Float32, 10, 1000, 0.2)
+        hashfn = MIPSHash(8; scale=1, m=1)
+
+        ihashes = index_hash(hashfn, X)
+        qhashes = query_hash(hashfn, X)
+
+        # Compare against the case where X is dense
+        X = Matrix(X)
+        ihashes_dense = index_hash(hashfn, X)
+        qhashes_dense = query_hash(hashfn, X)
+
+        @test ihashes == ihashes_dense
+        @test qhashes == qhashes_dense
+    end
 end

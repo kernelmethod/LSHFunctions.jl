@@ -13,33 +13,73 @@ Asymmetric LSH for approximate maximum inner product search. Ref:
 
 	https://arxiv.org/abs/1405.5869
 """
-struct MIPSHash{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
+mutable struct MIPSHash{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
     coeff_A :: Matrix{T}
     coeff_B :: Matrix{T}
-    denom :: T
+    scale :: T
     shift :: Vector{T}
     Qshift :: Vector{T}
-    m :: Integer
+    m :: Int64
+
+    # Whether or not the number of coefficients per hash function should be
+    # expanded to be a power of 2 whenever we need to resize coeff_A.
+    resize_pow2 :: Bool
+
+    ### Internal MIPSHash constructors
+    function MIPSHash{T}(
+            n_hashes::Integer = 1;
+            scale::Real = 1,
+            m::Integer = 3,
+            resize_pow2::Bool = false) where {T <: Union{Float32,Float64}}
+
+        if n_hashes < 1
+            "n_hashes must be positive" |> ErrorException |> throw
+        elseif scale ≤ 0
+            "scaling factor `scale` must be positive" |> ErrorException |> throw
+        elseif m ≤ 0
+            "m must be positive" |> ErrorException |> throw
+        end
+
+        coeff_A = Matrix{T}(undef, n_hashes, 0)
+        coeff_B = randn(T, n_hashes, m)
+        scale = T(scale)
+        m = Int64(m)
+        shift = rand(T, n_hashes)
+        Qshift = coeff_B * fill(T(1/2), m) ./ scale .+ shift
+
+	    new{T}(coeff_A, coeff_B, scale, shift, Qshift, m, resize_pow2)
+    end
 end
 
 ### External MIPSHash constructors
-function MIPSHash{T}(
-        input_length::Integer,
-        n_hashes::Integer,
-        denom::Real,
-        m::Integer = 3) where {T <: Union{Float32,Float64}}
 
-    coeff_A = randn(T, n_hashes, input_length)
-    coeff_B = randn(T, n_hashes, m)
-    denom = T(denom)
-    shift = rand(T, n_hashes)
-    Qshift = coeff_B * fill(T(1/2), m) ./ denom .+ shift
+MIPSHash(args...; dtype=Float32, kws...) =
+	MIPSHash{dtype}(args...; kws...)
 
-	MIPSHash{T}(coeff_A, coeff_B, denom, shift, Qshift, m)
+#============
+MIPSHash helper functions
+=============#
+
+function Base.resize!(hashfn::MIPSHash{T}, n::Integer) where T
+    n = (hashfn.resize_pow2) ? nextpow(2, n) : n
+
+    # The only field of MIPSHash that's dependent on the input size is coeff_A,
+    # so we only need to resize that array.
+    n_hashes, old_n = size(hashfn.coeff_A)
+    old_coeff_A = hashfn.coeff_A
+    new_coeff_A = similar(old_coeff_A, n_hashes, n)
+
+    new_coeff_A[1:end, 1:min(n,old_n)] .= old_coeff_A
+
+    if n > old_n
+        new_coeff_slice = @views new_coeff_A[1:end,old_n+1:end]
+        @views map!(x -> randn(T), new_coeff_slice, new_coeff_slice)
+    end
+
+    hashfn.coeff_A = new_coeff_A
 end
 
-MIPSHash(args...; kws...) =
-	MIPSHash{Float32}(args...; kws...)
+current_max_input_size(hashfn::MIPSHash) = size(hashfn.coeff_A, 2)
 
 #========================
 Function definitions for the two hash functions used by the approximate MIPS LSH,
@@ -69,6 +109,11 @@ h(P(x)) definitions
 end
 
 function _MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray) where {T}
+    n = size(x,1)
+    if n > current_max_input_size(h)
+        resize!(h, size(x,1))
+    end
+
     norms = col_norms(x)
     maxnorm = maximum(norms)
     maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
@@ -76,7 +121,7 @@ function _MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray) where {T}
 
     # First, perform a matvec on x and the first array of coefficients.
     # Note: aTx is an n_hashes × n_inputs array
-    aTx = h.coeff_A * x .* (1/maxnorm) |> mat
+    @views aTx = h.coeff_A[1:end,1:n] * x .* (1/maxnorm) |> mat
 
     # Compute norms^2, norms^4, ... norms^(2^m).
     # Multiply these by the second array of coefficients and add them to aTx, so
@@ -96,7 +141,7 @@ function _MIPSHash_P(h :: MIPSHash{T}, x :: AbstractArray) where {T}
     end
 
     # Compute the remainder of the hash the same way we'd compute an L^p distance LSH.
-    @. aTx = aTx / h.denom + h.shift
+    @. aTx = aTx / h.scale + h.shift
 
     return floor.(Int32, aTx)
 end
@@ -126,9 +171,14 @@ h(Q(x)) definitions
 end
 
 function _MIPSHash_Q(hashfn::MIPSHash, x::AbstractArray)
+    n = size(x,1)
+    if n > current_max_input_size(hashfn)
+        resize!(hashfn, n)
+    end
+
     # First, perform a matvec on x and the first array of coefficients.
     # Note: aTx is an n_hashes × n_inputs array
-    aTx = hashfn.coeff_A * x |> mat
+    aTx = @views hashfn.coeff_A[1:end,1:n] * x |> mat
 
     # Normalize the query vectors. We perform normalization after computing
     # aTx (rather than before) so that we don't have to allocate a new array
@@ -151,7 +201,7 @@ function _MIPSHash_Q(hashfn::MIPSHash, x::AbstractArray)
     # since the values concatenated on by Q(x) are always the same, we actually
     # pre-compute coeff_B * [1/2; 1/2; ...; 1/2] + shift when we construct the
     # MIPSHash to reduce the number of computations.
-    @. aTx = aTx / hashfn.denom + hashfn.Qshift
+    @. aTx = aTx / hashfn.scale + hashfn.Qshift
 
     return floor.(Int32, aTx)
 end
