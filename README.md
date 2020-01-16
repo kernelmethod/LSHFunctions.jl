@@ -11,17 +11,19 @@ Implementations of different [locality-sensitive hash functions](https://en.wiki
 
 So far, there are hash functions for the following measures of similarity:
 
-- Cosine similarity
-  - `SimHash`
-- Jaccard similarity
-  - `MinHash`
-- `L^1` (Manhattan / "taxicab") and `L^2` (Euclidean) distance
-  - `L1Hash`
-  - `L2Hash`
+- Cosine similarity (`SimHash`)
+- Jaccard similarity (`MinHash`)
+- L1 (Manhattan / "taxicab") distance: `L1Hash`
+- L2 (Euclidean) distance: `L2Hash`
+- Inner product
+  - `SignALSH` (recommended)
+  - `MIPSHash`
+- Function-space hashes
+  - `MonteCarloHash` (supports L1, L2, and cosine similarity)
+  - `ChebHash` (supports L1, L2, and cosine similarity)
 
 This package still needs a lot of work, including improvement to the documentation and API. In general, if you want to draw one or more new hash functions, you can use the following syntax:
 
 ```julia
-hashfn = HashFunctionFamily(number of hash functions;
-                            [family-specific keyword params])
+hashfn = LSHFunction(similarity; [LSH family-specific keyword arguments])
 ```
