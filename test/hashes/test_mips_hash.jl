@@ -15,7 +15,7 @@ Tests
         hashfn = MIPSHash(; maxnorm=1)
 
         @test n_hashes(hashfn) == 1
-        @test hashtype(hashfn) == Vector{Int32}
+        @test hashtype(hashfn) == Int32
         @test similarity(hashfn) == inner_prod
         @test isa(hashfn, MIPSHash{Float32})    # Default dtype should be Float32
         @test isa(hashfn, LSH.AsymmetricLSHFunction)
@@ -63,8 +63,8 @@ Tests
 
         @test isa(p_hashes, Matrix{Int32})
         @test isa(q_hashes, Matrix{Int32})
-        @test Vector{eltype(p_hashes)} == hashtype(hashfn)
-        @test Vector{eltype(q_hashes)} == hashtype(hashfn)
+        @test hashtype(hashfn) == eltype(p_hashes)
+        @test hashtype(hashfn) == eltype(q_hashes)
 
         # Vector{Float64} -> Vector{Int32}
         x = randn(4)

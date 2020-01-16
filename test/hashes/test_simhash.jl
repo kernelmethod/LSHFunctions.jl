@@ -14,7 +14,7 @@ Tests
         hashfn = LSH.SimHash(128)
 
         @test n_hashes(hashfn) == 128
-        @test hashtype(hashfn) == BitArray{1}
+        @test hashtype(hashfn) == Bool
         @test similarity(hashfn) == cossim
 
         # By default, SimHash should start off unable to hash inputs of any

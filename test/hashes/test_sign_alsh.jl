@@ -13,7 +13,7 @@ Tests
         @test n_hashes(hashfn) == 1
         @test isa(hashfn, SignALSH{Float32})
         @test isa(hashfn, LSH.AsymmetricLSHFunction)
-        @test hashtype(hashfn) == BitArray{1}
+        @test hashtype(hashfn) == Bool
         @test similarity(hashfn) == inner_prod
 
         hashfn = SignALSH(32; maxnorm=1)
@@ -50,7 +50,7 @@ Tests
         qhashes = query_hash(hashfn, X)
 
         @test eltype(ihashes) == eltype(qhashes)
-        @test BitArray{1} == hashtype(hashfn)
+        @test hashtype(hashfn) == Bool
 
         # 1. Compute the indexing hashes manually
         norms = map(norm, eachcol(X))

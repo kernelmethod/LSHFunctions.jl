@@ -16,6 +16,7 @@ Tests
         @test L1_hash.r == 2
         @test L1_hash.power == 1
         @test similarity(L1_hash) == ℓ1
+        @test hashtype(L1_hash) == Int32
 
         # Construct a hash for L^2 distance
         L2_hash = L2Hash(12; r = 3.4)
@@ -57,7 +58,7 @@ Tests
 
         # Test 1: Vector{Float64} -> Vector{Int32}
         hashes = hashfn(randn(5))
-        @test Vector{eltype(hashes)} == hashtype(hashfn)
+        @test eltype(hashes) == hashtype(hashfn)
         @test isa(hashes, Vector{Int32})
 
         # Test 2: Matrix{Float64} -> Matrix{Int32}

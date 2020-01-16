@@ -233,4 +233,4 @@ query_hash(hashfn::MIPSHash, x) = MIPSHash_Q(hashfn, x)
 similarity(::MIPSHash) = inner_prod
 
 n_hashes(hashfn::MIPSHash) = length(hashfn.shift)
-hashtype(::MIPSHash) = Vector{Int32}
+hashtype(::MIPSHash) = Int32

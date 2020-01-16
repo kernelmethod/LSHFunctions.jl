@@ -205,4 +205,4 @@ query_hash(h::SignALSH, x) = SignALSH_Q(h, x)
 
 n_hashes(h::SignALSH) = size(h.coeff_A, 1)
 similarity(::SignALSH) = inner_prod
-hashtype(::SignALSH) = BitArray{1}
+hashtype(::SignALSH) = Bool

@@ -180,7 +180,7 @@ LSHFunction and SymmetricLSHFunction API compliance
 ========================#
 
 n_hashes(h::LpHash) = length(h.shift)
-hashtype(::LpHash) = Vector{Int32}
+hashtype(::LpHash) = Int32
 
 # See Section 3.2 of the reference
 function single_hash_collision_probability(hashfn::LpHash, sim::Real)

@@ -137,8 +137,8 @@ end
 #========================
 LSHFunction and SymmetricLSHFunction API compliance
 ========================#
-n_hashes(hashfn :: MinHash) = length(hashfn.mappings)
-hashtype(:: MinHash{T, I}) where {T, I} = I
+n_hashes(hashfn::MinHash) = length(hashfn.mappings)
+hashtype(::MinHash{T, I}) where {T, I} = I
 similarity(::MinHash) = jaccard
 
 single_hash_collision_probability(::MinHash, sim) = sim

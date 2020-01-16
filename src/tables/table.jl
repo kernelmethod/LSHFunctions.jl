@@ -20,6 +20,8 @@ end
 # Outer constructors
 function LSHTable(hashfn; valtype=Any, unique_values=false, entrytype=Vector)
 	htype = hashtype(hashfn)
+    htype = (htype == Bool) ? BitArray{1} : Vector{htype}
+
 	vtype, etype, ltype = begin
 		if entrytype <: Vector
 			vtype = (valtype <: eltype(entrytype)) ? valtype : eltype(entrytype)

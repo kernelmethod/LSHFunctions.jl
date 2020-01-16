@@ -56,19 +56,21 @@ Tests
 
         dataset = shuffle(symbols)[1:10]
         hashes = hashfn(dataset)
-        hashes_match = true
 
-        for (hash, mapping) in zip(hashes, hashfn.mappings)
-            if !hashes_match
-                break
+        @test eltype(hashes) == hashtype(hashfn)
+
+        @test let hashes_match = true
+            for (hash, mapping) in zip(hashes, hashfn.mappings)
+                if !hashes_match
+                    break
+                end
+
+                # Compute MinHash manually
+                expected_hash = minimum(mapping[x] for x in dataset)
+                hashes_match &= (hash == expected_hash)
             end
-
-            # Compute MinHash manually
-            expected_hash = minimum(mapping[x] for x in dataset)
-            hashes_match &= (hash == expected_hash)
+            hashes_match
         end
-
-        @test hashes_match
     end
 
     @testset "Collision probabilities correlated with Jaccard similarity" begin
