@@ -1,4 +1,6 @@
 using Test, Random, LSH
+using LinearAlgebra: norm
+using QuadGK
 
 include(joinpath("..", "utils.jl"))
 
@@ -111,7 +113,7 @@ Tests
         @test mean(hf .== hg) ≤ 0.02
     end
 
-    @test_skip @testset "Hash L^2 distance (nontrivial inputs)" begin
+    @testset "Hash L^2 distance (nontrivial inputs)" begin
         interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
         hashfn = ChebHash(ℓ2, 1024; interval=interval)
 
@@ -122,7 +124,6 @@ Tests
             sim = L2(f, g, interval)
             hf, hg = hashfn(f), hashfn(g)
             prob = LSH.single_hash_collision_probability(hashfn, sim)
-            println(sim, " ", prob, " ", mean(hf .== hg))
 
             prob - 0.05 ≤ mean(hf .== hg) ≤ prob + 0.05
         end

@@ -74,10 +74,10 @@ Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, th
 ℓp(x::AbstractVector, y::AbstractVector, p::Real=2) = Lp(x, y, p)
 
 @doc (@doc ℓp)
-ℓ1(x::AbstractVector, y::AbstractVector)            = L1(x, y)
+ℓ1(x::AbstractVector, y::AbstractVector) = L1(x, y)
 
 @doc (@doc ℓp)
-ℓ2(x::AbstractVector, y::AbstractVector)            = L2(x, y)
+ℓ2(x::AbstractVector, y::AbstractVector) = L2(x, y)
 
 function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
     # TODO: more descriptive error message
@@ -184,9 +184,9 @@ L2_norm(x::AbstractVector)              = norm(x)
 ℓ2_norm(x::AbstractVector)              = L2_norm(x)
 
 # 1-dimensional L^p norms
-Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)[1]
+Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = (quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)[1])^(1/p)
 L1_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs(f(x)),    interval.lower, interval.upper)[1]
-L2_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs2(f(x)),   interval.lower, interval.upper)[1]
+L2_norm(f, interval::LSH.RealInterval)            = √quadgk(x -> abs2(f(x)),   interval.lower, interval.upper)[1]
 
 #====================
 1D Wasserstein distance
