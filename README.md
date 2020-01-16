@@ -1,5 +1,6 @@
 # LSH.jl
 
+- Docs: [![Stable docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://kernelmethod.github.io/LSH.jl/stable/) [![Dev docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://kernelmethod.github.io/LSH.jl/dev/)
 - Build status: [![Build Status](https://travis-ci.com/kernelmethod/LSH.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSH.jl)
 - Code coverage: [![Coverage Status](https://coveralls.io/repos/github/kernelmethod/LSH.jl/badge.svg?branch=master)](https://coveralls.io/github/kernelmethod/LSH.jl?branch=master)
 [![codecov](https://codecov.io/gh/kernelmethod/LSH.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSH.jl)
