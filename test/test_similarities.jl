@@ -7,7 +7,7 @@ include("utils.jl")
 Tests
 ==================#
 
-@test_skip @testset "Test similarity function API" begin
+@testset "Test similarity function API" begin
     Random.seed!(RANDOM_SEED)
 
     @testset "Register a custom similarity" begin
