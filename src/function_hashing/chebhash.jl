@@ -4,7 +4,7 @@ ChebHash for hashing the L^2([-1,1]) function space.
 
 ================================================================#
 
-using ApproxFun: Chebyshev, Fun
+using FFTW
 
 #========================
 Typedefs
@@ -38,19 +38,37 @@ end
 Helper functions for ChebHash
 ========================#
 
-function get_cheb_coefficients(interval::RealInterval, f)
-    f_ = squash_function(interval, f)
-    cheb = Fun(f_, Chebyshev())
-    cheb.coefficients .* (width(interval) / 2.0)
+# Perform an order-N Chebyshev discrete transform on samples of a function
+# f(x) in order to approximate the coefficients for the degree-N Chebyshev
+# polynomial of best fit for f(x).
+function cheb_coefficients(f, N)
+    # Sample f(x) at the non-uniformly spaced nodes x[1], ..., x[N], where
+    #
+    #       x[i] = cos((i-1)π / (N-1))
+    #
+    x = cos.(range(0, π, length=N))
+    fx = f.(x)
+
+    coeff = dct(fx) * √(1/(2N))
+    coeff[1] /= √2
+    return coeff
 end
 
-# Squash a function f into the interval [-1,1]
+function get_cheb_coefficients(interval::RealInterval, f)
+    f_ = squash_function(interval, f)
+    coeff = cheb_coefficients(f_, 4096)
+    coeff .* width(interval)
+end
+
+# Transform a function f ∈ L^2([a,b]) so that the coefficients of its Chebyshev
+# polynomial create an approximate isomorphism between L^2([a,b]) and ℓ2(N).
 function squash_function(interval::RealInterval{T}, f) where T
     lower::T, upper::T = interval.lower, interval.upper
-    α = (upper - lower) / T(2.0)
-    β = (upper + lower) / T(2.0)
 
-    x -> @. √(1-x^2) * f(α*x + β)
+    α = (upper - lower) / π
+    β = lower
+
+    x -> @. f(α * acos(x) + β)
 end
 
 #========================

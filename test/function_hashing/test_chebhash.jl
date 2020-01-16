@@ -45,7 +45,7 @@ Tests
         f(x) = sin(x)
         g(x) = cos(x)
 
-        @test embedded_similarity(hashfn, f, g) ≈ 0
+        @test isapprox(embedded_similarity(hashfn, f, g), 0; atol=1e-15)
 
         hf, hg = hashfn(f), hashfn(g)
         @test 0.45 ≤ mean(hf .== hg) ≤ 0.55
@@ -91,21 +91,21 @@ Tests
     #==========
     L^2 distance hashing
     ==========#
-    @test_skip @testset "Hash L^2 distance (trivial inputs)" begin
+    @testset "Hash L^2 distance (trivial inputs)" begin
         ### Hash two functions with L^2 distance ≈ 0
         f(x) = 0.0
-        g(x) = (-1e3 ≤ x ≤ 1e3) ? 1.0 : 0.0
+        g(x) = (-1e-3 ≤ x ≤ 1e-3) ? 1.0 : 0.0
         hashfn = ChebHash(ℓ2, 1024)
 
-        @test embedded_similarity(hashfn, f, g) ≈ 0
+        @test isapprox(embedded_similarity(hashfn, f, g), √(2e-3); atol=1e-3)
 
         hf, hg = hashfn(f), hashfn(g)
-        @test mean(hf .== hg) ≥ 0.98
+        @test mean(hf .== hg) ≥ 0.95
 
         ### Hash two functions with large L^2 distance
-        g(x) = (-0.5 ≤ x ≤ 0.5) ? 1e3 : 0.0
+        g(x) = (0.0 ≤ x ≤ 1.0) ? 1e3 : 0.0
 
-        @test embedded_similarity(hashfn, f, g) ≈ 1e6
+        @test embedded_similarity(hashfn, f, g) ≈ 1e3
 
         hf, hg = hashfn(f), hashfn(g)
         @test mean(hf .== hg) ≤ 0.02
