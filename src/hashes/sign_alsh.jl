@@ -43,6 +43,8 @@ end
         quote
             if maxnorm < 0
                 "maxnorm must be non-negative" |> ErrorException |> throw
+            elseif n_hashes ≤ 0
+                "n_hashes must be positive" |> ErrorException |> throw
             elseif m ≤ 0
                 "m must be positive" |> ErrorException |> throw
             end
@@ -202,4 +204,5 @@ index_hash(h::SignALSH, x) = SignALSH_P(h, x)
 query_hash(h::SignALSH, x) = SignALSH_Q(h, x)
 
 n_hashes(h::SignALSH) = size(h.coeff_A, 1)
+similarity(::SignALSH) = inner_prod
 hashtype(::SignALSH) = BitArray{1}

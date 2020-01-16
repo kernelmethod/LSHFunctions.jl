@@ -21,6 +21,10 @@ Tests
         hashfn = SignALSH(; dtype=Float64, maxnorm=1)
         @test isa(hashfn, SignALSH{Float64})
 
+        # n_hashes must be positive
+        @test_throws ErrorException SignALSH(-1; maxnorm=1)
+        @test_throws ErrorException SignALSH( 0; maxnorm=1)
+
         # maxnorm must be specified and non-negative
         @test_throws ErrorException SignALSH()
         @test_throws ErrorException SignALSH(; maxnorm=-1)
