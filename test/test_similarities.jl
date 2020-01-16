@@ -98,3 +98,51 @@ end
               quadgk(x -> abs(f(x) - g(x))^p, -π, π)[1]^(1/p)
     end
 end
+
+@testset "Test cosine similarity" begin
+    @testset "Compute cosine similarity between Vectors" begin
+        x = [1, 0, 1, 0]
+        y = [0, 1, 0, 1]
+
+        @test cossim(x, y) == 0
+
+        y = [1, 0, 0, 0]
+
+        @test cossim(x, y) == 1.0 / √2
+
+        x = randn(20)
+
+        @test cossim(x,   x) ≈  1
+        @test cossim(x,  2x) ≈  1
+        @test cossim(x,  -x) ≈ -1
+        @test cossim(x, -2x) ≈ -1
+
+        @test_throws ErrorException cossim(x, zero(x))
+    end
+
+    @testset "Compute cosine similarity between functions" begin
+        interval = LSH.@interval(0 ≤ x ≤ 1)
+        f(x) = (x ≤ 0.5) ? 1.0 : 0.0
+        g(x) = (x ≤ 0.5) ? 0.0 : 1.0
+
+        @test cossim(f, g, interval) ≈ 0
+        @test cossim(f, f, interval) ≈ cossim(g, g, interval) ≈ 1
+        @test cossim(f, x -> 2f(x), interval) ≈
+              cossim(g, x -> 2g(x), interval) ≈ 1
+        @test cossim(f, x -> -f(x), interval) ≈
+              cossim(g, x -> -g(x), interval) ≈ -1
+
+        f(x) = x
+        g(x) = x.^2
+
+        @test L2_norm(f, interval) ≈ 1/√3
+        @test L2_norm(g, interval) ≈ 1/√5
+        @test inner_prod(f, g, interval) ≈ 1/4
+        @test cossim(f, g, interval) ≈ 1/4 / (1/√3 * 1/√5)
+
+        f, f_steps = create_step_function(10)
+        g, g_steps = create_step_function(10)
+
+        @test cossim(f, g, LSH.@interval(0 ≤ x ≤ 10)) ≈ cossim(f_steps, g_steps)
+    end
+end

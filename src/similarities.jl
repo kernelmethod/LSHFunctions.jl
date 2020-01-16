@@ -46,6 +46,16 @@ ERROR: DimensionMismatch("dot product arguments have lengths 4 and 5")
 
 See also: [`SimHash`](@ref)
 """
+function cossim(x::AbstractVector, y::AbstractVector)
+    norm_x = norm(x)
+    norm_y = norm(y)
+
+    if norm_x == 0 || norm_y == 0
+        "x and y must be nonzero" |> ErrorException |> throw
+    end
+
+    dot(x,y) / (norm_x * norm_y)
+end
 cossim(x::AbstractVector, y::AbstractVector) = dot(x,y) / (norm(x) * norm(y))
 
 function cossim(f, g, interval::LSH.RealInterval)
