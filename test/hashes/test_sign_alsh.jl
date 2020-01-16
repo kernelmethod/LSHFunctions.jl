@@ -14,6 +14,7 @@ Tests
         @test isa(hashfn, SignALSH{Float32})
         @test isa(hashfn, LSH.AsymmetricLSHFunction)
         @test hashtype(hashfn) == BitArray{1}
+        @test similarity(hashfn) == inner_prod
 
         hashfn = SignALSH(32; maxnorm=1)
         @test n_hashes(hashfn) == 32

@@ -16,6 +16,7 @@ Tests
 
         @test n_hashes(hashfn) == 1
         @test hashtype(hashfn) == Vector{Int32}
+        @test similarity(hashfn) == inner_prod
         @test isa(hashfn, MIPSHash{Float32})    # Default dtype should be Float32
         @test isa(hashfn, LSH.AsymmetricLSHFunction)
 
