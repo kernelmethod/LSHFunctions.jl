@@ -22,21 +22,39 @@ mutable struct SignALSH{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
     P_shift :: Vector{T}
     m :: Int64
 
+    # An upper bound on the norm of the data points this hash function will
+    # process
+    maxnorm :: T
+
     # Whether or not SignALSH should round up to the next power of 2 when
     # resizing its coefficient array.
     resize_pow2 :: Bool
 end
 
 ### External SignALSH constructors
-function SignALSH{T}(n_hashes::Integer;
-                     m::Integer = 3,
-                     resize_pow2::Bool = false) where {T}
+@generated function SignALSH{T}(n_hashes::Integer = 1;
+                                maxnorm::Union{Nothing,Real} = nothing,
+                                m::Integer = 3,
+                                resize_pow2::Bool = false) where {T}
 
-    coeff_A = Matrix{T}(undef, n_hashes, 0)
-    coeff_B = randn(T, n_hashes, m)
-    P_shift = coeff_B * fill(T(1/2), m)
+    if maxnorm <: Nothing
+        :("maxnorm must be specified for SignALSH" |> ErrorException |> throw)
+    else
+        quote
+            if maxnorm < 0
+                "maxnorm must be non-negative" |> ErrorException |> throw
+            elseif m ≤ 0
+                "m must be positive" |> ErrorException |> throw
+            end
 
-    SignALSH(coeff_A, coeff_B, P_shift, Int64(m), resize_pow2)
+            coeff_A = Matrix{T}(undef, n_hashes, 0)
+            coeff_B = randn(T, n_hashes, m)
+            P_shift = coeff_B * fill(T(1/2), m)
+
+            SignALSH(coeff_A, coeff_B, P_shift, Int64(m),
+                     T(maxnorm), resize_pow2)
+        end
+    end
 end
 
 SignALSH(args...; dtype=Float32, kws...) =
@@ -86,16 +104,23 @@ function SignALSH_P(hashfn::SignALSH{T}, x::AbstractArray{T}) where {T}
     # after dividing through x by the largest norm of all of the columns
     # of x.
     norms = col_norms(x)
-    maxnorm = maximum(norms)
-    maxnorm = maxnorm == 0 ? 1 : maxnorm	# To handle some edge cases
-    norms .*= 1/maxnorm
+
+    for norm_ii in norms
+        if norm_ii > hashfn.maxnorm
+            "norm $(norm_ii) exceeds hashfn.maxnorm ($(hashfn.maxnorm))" |>
+            ErrorException |>
+            throw
+        end
+    end
+
+    norms .*= 1/hashfn.maxnorm
 
     n = size(x,1)
     if n > current_max_input_size(hashfn)
         resize!(hashfn, n)
     end
 
-    Ax = @views hashfn.coeff_A[1:end,1:n] * x .* (1/maxnorm)
+    Ax = @views hashfn.coeff_A[1:end,1:n] * x .* (1/hashfn.maxnorm)
 
     # Perform the transformation P(x) on x, except that instead of actually
     # allocating memory for it and computing it, pile it onto Ax
@@ -157,6 +182,15 @@ function SignALSH_Q(hashfn::SignALSH{T}, x::AbstractArray{T}) where {T}
 
     Ax = @views hashfn.coeff_A[1:end,1:n] * x
     norms = col_norms(x)
+
+    for norm_ii in norms
+        if norm_ii > hashfn.maxnorm
+            "norm $(norm_ii) exceeds hashfn.maxnorm ($(hashfn.maxnorm))" |>
+            ErrorException |>
+            throw
+        end
+    end
+
     map!(inv, norms, norms)
     @. Ax * norms' ≥ T(0)
 end

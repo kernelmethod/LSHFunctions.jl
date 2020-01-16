@@ -127,7 +127,7 @@ using Test, Random, LSH
         n_hashes = 8
 
         hashfn_mips = MIPSHash(n_hashes)
-        hashfn_sign = SignALSH(n_hashes)
+        hashfn_sign = SignALSH(n_hashes; maxnorm=input_size)
 
         for hashfn in (hashfn_mips, hashfn_sign)
             table = LSHTable(hashfn)

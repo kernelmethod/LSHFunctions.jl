@@ -8,6 +8,28 @@ Tests
 @testset "SignALSH tests" begin
     Random.seed!(RANDOM_SEED)
 
+    @testset "Construct SignALSH" begin
+        hashfn = SignALSH(; maxnorm=1)
+        @test n_hashes(hashfn) == 1
+        @test isa(hashfn, SignALSH{Float32})
+        @test isa(hashfn, LSH.AsymmetricLSHFunction)
+        @test hashtype(hashfn) == BitArray{1}
+
+        hashfn = SignALSH(32; maxnorm=1)
+        @test n_hashes(hashfn) == 32
+
+        hashfn = SignALSH(; dtype=Float64, maxnorm=1)
+        @test isa(hashfn, SignALSH{Float64})
+
+        # maxnorm must be specified and non-negative
+        @test_throws ErrorException SignALSH()
+        @test_throws ErrorException SignALSH(; maxnorm=-1)
+
+        # m must be positive
+        @test_throws ErrorException SignALSH(; m=-1)
+        @test_throws ErrorException SignALSH(; m=0)
+    end
+
     @test_skip @testset "Can hash inputs correctly with SignALSH" begin
         input_length = 5
         n_hashes = 8
@@ -45,22 +67,33 @@ Tests
         @test simhash(Qx) == qhashes
     end
 
+    @testset "SignALSH can't hash inputs of norm > maxnorm" begin
+        hashfn = SignALSH(; maxnorm=0)
+        @test_throws ErrorException index_hash(hashfn, rand(4))
+        @test_throws ErrorException query_hash(hashfn, rand(4))
+
+        # Should have no issue if norm(x) == maxnorm
+        @test index_hash(hashfn, zeros(4)) |> length == 1
+        @test query_hash(hashfn, zeros(4)) |> length == 1
+    end
+
     @testset "SignALSH generates collisions for large inner products" begin
         input_length = 5; n_hashes = 128;
-        hashfn = SignALSH(n_hashes)
 
-        x = randn(input_length)
-        x_query_hashes = query_hash(hashfn, x)
-
-        # Check that SignALSH isn't just generating a single query hash
-        @test any(x_query_hashes .!= x_query_hashes[1])
-
-        # Compute the indexing hashes for a dataset with four vectors:
-        # a) 10 * x (where x is the test query vector)
+        # Compare a random vector x against four other vectors:
+        # a) 10 * x
         # b) x
         # c) A vector of all zeros
         # d) -x
-        dataset = [(10*x) x zeros(input_length) -x]
+        x = randn(input_length)
+        x2, x3, x4 = 10*x, zero(x), -x
+
+        maxnorm = (x, x2, x3, x4) .|> norm |> maximum
+        hashfn = SignALSH(n_hashes; maxnorm=maxnorm)
+
+        x_query_hashes = query_hash(hashfn, x)
+
+        dataset = [x2 x x3 x4]
         p_hashes = index_hash(hashfn, dataset)
 
         # Each collection of hashes should be different from one another
@@ -85,7 +118,7 @@ Tests
         n_inputs = 150
         n_hashes = 2
 
-        hashfn = SignALSH(n_hashes)
+        hashfn = SignALSH(n_hashes; maxnorm=4*input_size)
         x = sprandn(input_size, n_inputs, 0.2)
 
         # Mostly just need to test that the following lines don't crash
@@ -100,7 +133,7 @@ Tests
         input_size = 100
         n_inputs = 150
         n_hashes = 2
-        hashfn = SignALSH(n_hashes)
+        hashfn = SignALSH(n_hashes; maxnorm=4*input_size)
 
         ## Test 1: regular matrix adjoint
         x = randn(n_inputs, input_size)'
@@ -115,7 +148,7 @@ Tests
 
     @testset "Hash inputs of different sizes" begin
         n_hashes = 42
-        hashfn = SignALSH(n_hashes)
+        hashfn = SignALSH(n_hashes; maxnorm=100)
 
         @test size(hashfn.coeff_A) == (n_hashes, 0)
 
@@ -140,7 +173,7 @@ Tests
 
     @testset "Hash inputs of different sizes with resize_pow2 = true" begin
         n_hashes = 25
-        hashfn = SignALSH(n_hashes; resize_pow2=true)
+        hashfn = SignALSH(n_hashes; maxnorm=100, resize_pow2=true)
 
         @test size(hashfn.coeff_A) == (n_hashes, 0)
 
