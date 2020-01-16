@@ -21,6 +21,7 @@ Tests
 
             @test isa(hashfn, MinHash{eltype(symbols)})
             @test LSH.n_hashes(hashfn) == nh
+            @test hashtype(hashfn) == UInt32
         end
     end
 
@@ -91,7 +92,7 @@ Tests
         @test sum(hashes_1 .== hashes_2) > sum(hashes_1 .== hashes_3)
     end
 
-    @testset "Collision probability approx. equals Jaccard similarity" begin
+    @testset "MinHash observed collision frequencies match probabilities" begin
         # In theory, the probability of collision for two datasets should be
         # roughly equal to the Jaccard similarity between those datasets
         symbols = collect(1:200)
@@ -107,13 +108,15 @@ Tests
         hashes_2 = hashfn(dataset_2)
         hashes_3 = hashfn(dataset_3)
 
-        sim_12 = jaccard(Set(dataset_1), Set(dataset_2))
-        sim_13 = jaccard(Set(dataset_1), Set(dataset_3))
+        sim_12 = similarity(hashfn)(Set(dataset_1), Set(dataset_2))
+        sim_13 = similarity(hashfn)(Set(dataset_1), Set(dataset_3))
+        prob_12 = LSH.single_hash_collision_probability(hashfn, sim_12)
+        prob_13 = LSH.single_hash_collision_probability(hashfn, sim_13)
 
         mean(x) = sum(x) / length(x)
 
-        @test abs(mean(hashes_1 .== hashes_2) - sim_12) ≤ 0.01
-        @test abs(mean(hashes_1 .== hashes_3) - sim_13) ≤ 0.01
+        @test abs(mean(hashes_1 .== hashes_2) - prob_12) ≤ 0.01
+        @test abs(mean(hashes_1 .== hashes_3) - prob_13) ≤ 0.01
     end
 
     @testset "Can omit symbol set to lazily update hash functions" begin
