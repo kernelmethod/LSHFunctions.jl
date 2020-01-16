@@ -8,3 +8,6 @@
 *.prof.*
 *.perf.*
 *.mem.*
+
+# Documentation
+docs/build
