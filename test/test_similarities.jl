@@ -35,7 +35,7 @@ Tests
     end
 end
 
-@testset "ℓ^p distance and norm" begin
+@testset "ℓ^p distance and norm tests" begin
     Random.seed!(RANDOM_SEED)
 
     @testset "Compute ℓ^1 distance and norm" begin
@@ -111,7 +111,7 @@ end
     end
 end
 
-@testset "Function space L^p distance and norm" begin
+@testset "Function space L^p distance and norm tests" begin
     Random.seed!(RANDOM_SEED)
 
     @testset "Compute L^1 distance and norm" begin
@@ -175,7 +175,7 @@ end
     end
 end
 
-@testset "Test cosine similarity" begin
+@testset "Cosine similarity tests" begin
     @testset "Compute cosine similarity between Vectors" begin
         x = [1, 0, 1, 0]
         y = [0, 1, 0, 1]
@@ -221,5 +221,40 @@ end
         g, g_steps = create_step_function(10)
 
         @test cossim(f, g, LSH.@interval(0 ≤ x ≤ 10)) ≈ cossim(f_steps, g_steps)
+    end
+end
+
+@testset "Jaccard similarity tests" begin
+
+    @testset "Compute Jaccard similarity with Int64 sets" begin
+        A = Set([1, 2, 3])
+        B = Set([2, 3, 4])
+
+        @test jaccard(A, A) == jaccard(B, B) == 1
+        @test jaccard(A, B) == jaccard(B, A) == 2 / 4
+
+        @test jaccard(A, Set()) == jaccard(B, Set()) == 0
+
+        @test jaccard(A, Set([2])) == jaccard(B, Set([2])) == 1 / 3
+        @test jaccard(A, Set([5])) == jaccard(B, Set([5])) == 0
+
+        # Convention used in this module
+        @test jaccard(Set(), Set()) == 0
+    end
+
+    @testset "Compute Jaccard similarity with String sets" begin
+        A = Set(["a", "b", "c"])
+        B = Set(["b", "c", "d"])
+
+        @test jaccard(A, A) == jaccard(B, B) == 1
+        @test jaccard(A, B) == jaccard(B, A) == 2 / 4
+
+        @test jaccard(A, Set()) == jaccard(B, Set()) == 0
+
+        @test jaccard(A, Set(["b"])) == jaccard(B, Set(["b"])) == 1 / 3
+        @test jaccard(A, Set(["e"])) == jaccard(B, Set(["e"])) == 0
+
+        # Convention used in this module
+        @test jaccard(Set(), Set()) == 0
     end
 end
