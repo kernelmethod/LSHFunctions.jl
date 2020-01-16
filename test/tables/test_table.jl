@@ -126,7 +126,7 @@ using Test, Random, LSH
         n_inputs = 128
         n_hashes = 8
 
-        hashfn_mips = MIPSHash(n_hashes)
+        hashfn_mips = MIPSHash(n_hashes; maxnorm=input_size)
         hashfn_sign = SignALSH(n_hashes; maxnorm=input_size)
 
         for hashfn in (hashfn_mips, hashfn_sign)

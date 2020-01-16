@@ -110,7 +110,8 @@ Tests
         # The number of collisions should be highest for x and 2*x, second-highest
         # for x and x, second-lowest for x and zeros, and lowest for x and -x
         n_collisions = [sum(x_query_hashes .== p) for p in eachcol(p_hashes)]
-        @test n_collisions[1] > n_collisions[2] > n_collisions[3] > n_collisions[4]
+        @test n_collisions[1] > n_collisions[2] >
+              n_collisions[3] > n_collisions[4]
     end
 
     @testset "Can hash sparse arrays" begin
