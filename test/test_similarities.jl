@@ -176,6 +176,8 @@ end
 end
 
 @testset "Cosine similarity tests" begin
+    Random.seed!(RANDOM_SEED)
+
     @testset "Compute cosine similarity between Vectors" begin
         x = [1, 0, 1, 0]
         y = [0, 1, 0, 1]
@@ -225,6 +227,7 @@ end
 end
 
 @testset "Jaccard similarity tests" begin
+    Random.seed!(RANDOM_SEED)
 
     @testset "Compute Jaccard similarity with Int64 sets" begin
         A = Set([1, 2, 3])
@@ -256,5 +259,46 @@ end
 
         # Convention used in this module
         @test jaccard(Set(), Set()) == 0
+    end
+end
+
+@testset "Inner product similarity tests" begin
+    Random.seed!(RANDOM_SEED)
+
+    @testset "Compute ℓ^2 inner products between pairs of Vectors" begin
+        x = [1, 2, 3, 4]
+        y = [5, 6, 0, 0]
+
+        @test inner_prod(x, x) ≈ dot(x, x) ≈ norm(x).^2 ≈
+              1^2 + 2^2 + 3^2 + 4^2
+        @test inner_prod(y, y) ≈ dot(y, y) ≈ norm(y).^2 ≈
+              5^2 + 6^2
+        @test inner_prod(x, y) ≈ dot(x, y) ≈ 1*5 + 2*6
+
+        x = randn(128)
+        y = randn(128)
+
+        @test inner_prod(x, y) ≈ dot(x, y)
+    end
+
+    @testset "Compute L^2 inner products between pairs of functions" begin
+        interval = LSH.@interval(-π ≤ x ≤ π)
+        f(x) = 1
+        g(x) = x
+
+        @test inner_prod(f, f, interval) ≈ L2_norm(f, interval)^2 ≈ 2π
+        @test inner_prod(g, g, interval) ≈ L2_norm(g, interval)^2 ≈ 2π^3 / 3
+        @test isapprox(inner_prod(f, g, interval), 0.0; atol = 1e-15)
+
+        f(x) = sin(x)
+        g(x) = cos(x)
+
+        @test inner_prod(f, f, interval) ≈ L2_norm(f, interval)^2 ≈
+              quadgk(x -> sin(x)^2, -π, π)[1]
+        @test inner_prod(g, g, interval) ≈ L2_norm(g, interval)^2 ≈
+              quadgk(x -> cos(x)^2, -π, π)[1]
+
+        # <f,g> = 0 via the identity sin(x)cos(x) = 1/2 sin(2x)
+        @test isapprox(inner_prod(f, g, interval), 0.0; atol=1e-15)
     end
 end
