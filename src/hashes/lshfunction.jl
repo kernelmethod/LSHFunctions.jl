@@ -70,3 +70,4 @@ Associate similarity functions with LSHFunction subtypes
 @register_similarity!(ℓ1, L1Hash)
 @register_similarity!(ℓ2, L2Hash)
 @register_similarity!(jaccard, MinHash)
+@register_similarity!(inner_prod, SignALSH)

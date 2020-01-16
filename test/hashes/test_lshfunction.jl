@@ -6,7 +6,7 @@ Tests for the LSHFunction() function for constructing hash functions.
 
 using Test, Random, LSH
 
-include("utils.jl")
+include(joinpath("..", "utils.jl"))
 
 #==================
 Tests
@@ -38,6 +38,20 @@ Tests
         @test similarity(hashfn) == jaccard
         @test n_hashes(hashfn) == 64
         @test isa(hashfn, MinHash)
+    end
+
+    @testset "Create inner product similarity hash function" begin
+        hashfn = LSHFunction(inner_prod, 10; maxnorm=1)
+
+        @test similarity(hashfn) == inner_prod
+        @test n_hashes(hashfn) == 10
+        @test isa(hashfn, SignALSH)
+
+        # Test that same exceptions are thrown for invalid construction of
+        # SignALSH
+        @test_throws ErrorException LSHFunction(inner_prod, -1; maxnorm=10)
+        @test_throws ErrorException LSHFunction(inner_prod; m=0, maxnorm=10)
+        @test_throws ErrorException LSHFunction(inner_prod)
     end
 
     @testset "Call LSHFunction() with invalid similarity function" begin
