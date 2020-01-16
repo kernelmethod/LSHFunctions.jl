@@ -117,8 +117,15 @@ function SignALSH_P(hashfn::SignALSH{T}, x::AbstractArray{T}) where {T}
     return Ax .≥ 0
 end
 
-SignALSH_P_update_Ax!(coeff::Vector{T}, norms::Vector{T}, Ax::Array{T}) where T =
+SignALSH_P_update_Ax!(coeff::Vector{T}, norms::Vector{T}, Ax::Matrix{T}) where T =
 	BLAS.ger!(T(-1), coeff, norms, Ax)
+
+function SignALSH_P_update_Ax!(coeff::AbstractVector,
+                               norms::AbstractVector,
+                               Ax::AbstractVector)
+
+    Ax .-= coeff * norms' |> vec
+end
 
 # When the coefficients or norms are AbstractVectors, cascade through to reshape
 # them into AbstractMatrix before updating Ax.

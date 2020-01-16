@@ -112,4 +112,60 @@ Tests
         @test index_hash(hashfn, x) == index_hash(hashfn, copy(x))
         @test query_hash(hashfn, x) == query_hash(hashfn, copy(x))
     end
+
+    @testset "Hash inputs of different sizes" begin
+        n_hashes = 42
+        hashfn = SignALSH(n_hashes)
+
+        @test size(hashfn.coeff_A) == (n_hashes, 0)
+
+        index_hash(hashfn, rand(10))
+        @test size(hashfn.coeff_A) == (n_hashes, 10)
+
+        query_hash(hashfn, rand(20))
+        @test size(hashfn.coeff_A) == (n_hashes, 20)
+
+        index_hash(hashfn, rand(5))
+        @test size(hashfn.coeff_A) == (n_hashes, 20)
+
+        query_hash(hashfn, rand(15))
+        @test size(hashfn.coeff_A) == (n_hashes, 20)
+
+        index_hash(hashfn, rand(20))
+        @test size(hashfn.coeff_A) == (n_hashes, 20)
+
+        query_hash(hashfn, rand(20))
+        @test size(hashfn.coeff_A) == (n_hashes, 20)
+    end
+
+    @testset "Hash inputs of different sizes with resize_pow2 = true" begin
+        n_hashes = 25
+        hashfn = SignALSH(n_hashes; resize_pow2=true)
+
+        @test size(hashfn.coeff_A) == (n_hashes, 0)
+
+        index_hash(hashfn, rand(4))
+        @test size(hashfn.coeff_A) == (n_hashes, 4)
+
+        query_hash(hashfn, rand(8))
+        @test size(hashfn.coeff_A) == (n_hashes, 8)
+
+        index_hash(hashfn, rand(9))
+        @test size(hashfn.coeff_A) == (n_hashes, 16)
+
+        query_hash(hashfn, rand(17))
+        @test size(hashfn.coeff_A) == (n_hashes, 32)
+
+        index_hash(hashfn, rand(15))
+        @test size(hashfn.coeff_A) == (n_hashes, 32)
+
+        query_hash(hashfn, rand(31))
+        @test size(hashfn.coeff_A) == (n_hashes, 32)
+
+        index_hash(hashfn, rand(32))
+        @test size(hashfn.coeff_A) == (n_hashes, 32)
+
+        query_hash(hashfn, rand(32))
+        @test size(hashfn.coeff_A) == (n_hashes, 32)
+    end
 end

@@ -78,7 +78,7 @@ Tests
     end
 
     @testset "Hash collision frequency matches probability" begin
-        hashfn = L2Hash(1024, r = 4)
+        hashfn = L2Hash(1024; r = 4)
 
         # Dry run
         @test test_collision_probability(hashfn, 0.05)
@@ -86,4 +86,43 @@ Tests
         # Full test
         @test all(test_collision_probability(hashfn, 0.05) for ii = 1:128)
     end
+
+    @testset "Hash inputs of different sizes" begin
+        n_hashes = 10
+        for hashfn_type in (:L1Hash, :L2Hash)
+            hashfn = eval(hashfn_type)(n_hashes)
+            @test size(hashfn.coeff) == (n_hashes, 0)
+
+            hashfn(rand(5))
+            @test size(hashfn.coeff) == (n_hashes, 5)
+
+            hashfn(rand(20))
+            @test size(hashfn.coeff) == (n_hashes, 20)
+
+            hashfn(rand(10))
+            @test size(hashfn.coeff) == (n_hashes, 20)
+        end
+    end
+
+    @testset "Hash inputs of different sizes with resize_pow2 = true" begin
+        n_hashes = 20
+        for hashfn_type in (:L1Hash, :L2Hash)
+            hashfn = eval(hashfn_type)(n_hashes; resize_pow2=true)
+            @test size(hashfn.coeff) == (n_hashes, 0)
+
+            hashfn(rand(4))
+            @test size(hashfn.coeff) == (n_hashes, 4)
+
+            hashfn(rand(5))
+            @test size(hashfn.coeff) == (n_hashes, 8)
+
+            hashfn(rand(10))
+            @test size(hashfn.coeff) == (n_hashes, 16)
+
+            hashfn(rand(8))
+            @test size(hashfn.coeff) == (n_hashes, 16)
+        end
+    end
 end
+
+
