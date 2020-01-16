@@ -109,14 +109,14 @@ julia> hashfn = L1Hash();
 
 julia> hashfn.power == 1 &&
        n_hashes(hashfn) == 1 &&
-       similarity(hashfn) == ℓ_1
+       similarity(hashfn) == ℓ1
 true
 
 julia> hashfn = L2Hash(128);
 
 julia> hashfn.power == 2 &&
        n_hashes(hashfn) == 128 &&
-       similarity(hashfn) == ℓ_2
+       similarity(hashfn) == ℓ2
 true
 ```
 
@@ -137,7 +137,7 @@ julia> hashes = hashfn(x);
 Datar, Mayur & Indyk, Piotr & Immorlica, Nicole & Mirrokni, Vahab. (2004). Locality-sensitive hashing scheme based on p-stable distributions. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.
 ```
 
-See also: [`ℓ_p`](@ref), [`ℓ_1`](@ref), [`ℓ_2`](@ref)
+See also: [`ℓp`](@ref), [`ℓ1`](@ref), [`ℓ2`](@ref)
 """ L1Hash
 
 @doc (@doc L1Hash) L2Hash
@@ -198,11 +198,11 @@ end
 
 function similarity(hashfn::LpHash)
     if hashfn.power == 1
-        ℓ_1
+        ℓ1
     elseif hashfn.power == 2
-        ℓ_2
+        ℓ2
     else
-        (x,y) -> ℓ_p(hashfn.power, x, y)
+        (x,y) -> ℓp(hashfn.power, x, y)
     end
 end
 

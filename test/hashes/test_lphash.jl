@@ -15,14 +15,14 @@ Tests
         @test n_hashes(L1_hash) == 5
         @test L1_hash.r == 2
         @test L1_hash.power == 1
-        @test similarity(L1_hash) == ℓ_1
+        @test similarity(L1_hash) == ℓ1
 
         # Construct a hash for L^2 distance
         L2_hash = L2Hash(12; r = 3.4)
         @test n_hashes(L2_hash) == 12
         @test L2_hash.r == Float32(3.4)
         @test L2_hash.power == 2
-        @test similarity(L2_hash) == ℓ_2
+        @test similarity(L2_hash) == ℓ2
 
         # Construct a hash using a specified dtype
         @test isa(L1Hash(1; dtype=Float32), LSH.LpHash{Float32})

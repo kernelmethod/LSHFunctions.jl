@@ -17,9 +17,18 @@ available_similarities_as_strings() = available_similarities .|> string |> sort
 #========================
 Abstract typedefs
 ========================#
+
 abstract type LSHFunction end
 abstract type SymmetricLSHFunction <: LSHFunction end
 abstract type AsymmetricLSHFunction <: LSHFunction end
+
+#========================
+Similarity function API
+========================#
+
+# Value type to encode different similarity functions
+struct SimilarityFunction{F} end
+SimilarityFunction(sim) = SimilarityFunction{sim}()
 
 #========================
 LSHFunction API
