@@ -49,14 +49,12 @@ function cheb_coefficients(f, N)
     x = cos.(range(0, π, length=N))
     fx = f.(x)
 
-    coeff = dct(fx) * √(1/(2N))
-    coeff[1] /= √2
-    return coeff
+    dct(fx) * √(1/(2N))
 end
 
 function get_cheb_coefficients(interval::RealInterval, f)
     f_ = squash_function(interval, f)
-    coeff = cheb_coefficients(f_, 4096)
+    coeff = cheb_coefficients(f_, 1024)
     coeff .* width(interval)
 end
 
