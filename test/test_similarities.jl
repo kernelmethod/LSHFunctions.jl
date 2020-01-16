@@ -35,6 +35,82 @@ Tests
     end
 end
 
+@testset "ℓ^p distance and norm" begin
+    Random.seed!(RANDOM_SEED)
+
+    @testset "Compute ℓ^1 distance and norm" begin
+        x = 2.0 * ones(10)
+        y = zero(x)
+
+        @test ℓ1_norm(x) == ℓ1(x, zero(x)) == 20
+        @test ℓ1_norm(y) == ℓ1(y, zero(y)) == 0
+
+        x = [1, 2, 3, 4]
+        y = [1, 2, 0, 0]
+
+        @test ℓ1_norm(x) == 1 + 2 + 3 + 4
+        @test ℓ1_norm(y) == 1 + 2
+        @test ℓ1(x,y) == ℓ1_norm(x - y) == 3 + 4
+
+        x = randn(128)
+        y = randn(128)
+
+        @test ℓ1_norm(x) ≈ x     .|> abs |> sum
+        @test ℓ1_norm(y) ≈ y     .|> abs |> sum
+        @test ℓ1(x,y)    ≈ x - y .|> abs |> sum
+
+        @test_throws DimensionMismatch ℓ1(zeros(5), zeros(6))
+    end
+
+    @testset "Compute ℓ^2 distance and norm" begin
+        x = 2.0 * ones(10)
+        y = zero(x)
+
+        @test ℓ2_norm(x) == ℓ2(x, zero(x)) == √40
+        @test ℓ2_norm(y) == ℓ2(y, zero(y)) == 0
+
+        x = [1, 2, 3, 4]
+        y = [1, 2, 0, 0]
+
+        @test ℓ2_norm(x) == √(1^2 + 2^2 + 3^2 + 4^2)
+        @test ℓ2_norm(y) == √(1^2 + 2^2)
+        @test ℓ2(x,y) == ℓ2_norm(x - y) == √(3^2 + 4^2)
+
+        x = randn(128)
+        y = randn(128)
+
+        @test ℓ2_norm(x) ≈ x     .|> abs2 |> sum |> √
+        @test ℓ2_norm(y) ≈ y     .|> abs2 |> sum |> √
+        @test ℓ2(x,y)    ≈ x - y .|> abs2 |> sum |> √
+
+        @test_throws DimensionMismatch ℓ2(zeros(5), zeros(6))
+    end
+
+    @testset "Compute ℓ^p distance and norm" begin
+        x = [1, 2, 3, 4]
+        y = [1, 2, 0, 0]
+        
+        @test ℓp_norm(x, 3) ≈ (1^3 + 2^3 + 3^3 + 4^3)^(1/3)
+        @test ℓp_norm(y, 3) ≈ (1^3 + 2^3)^(1/3)
+        @test ℓp(x, y, 3) ≈ ℓp_norm(x - y, 3) ≈ (3^3 + 4^3)^(1/3)
+
+        x = randn(128)
+        y = randn(128)
+
+        @test ℓp_norm(x, 1) ≈ ℓ1_norm(x)
+        @test ℓp_norm(x, 2) ≈ ℓ2_norm(x)
+        @test ℓp_norm(x, 3) ≈ mapreduce(u -> abs(u)^3, +, x)^(1/3)
+        @test ℓp(x, y, 1) ≈ ℓ1(x, y)
+        @test ℓp(x, y, 2) ≈ ℓ2(x, y)
+        @test ℓp(x, y, 3) ≈ mapreduce(u -> abs(u)^3, +, x - y)^(1/3)
+
+        p = rand() + 1
+
+        @test ℓp_norm(x, p) ≈ mapreduce(u -> abs(u)^p, +, x)^(1/p)
+        @test ℓp(x, y, p) ≈ mapreduce(u -> abs(u)^p, +, x - y)^(1/p)
+    end
+end
+
 @testset "Function space L^p distance and norm" begin
     Random.seed!(RANDOM_SEED)
 
@@ -131,6 +207,7 @@ end
               cossim(g, x -> 2g(x), interval) ≈ 1
         @test cossim(f, x -> -f(x), interval) ≈
               cossim(g, x -> -g(x), interval) ≈ -1
+        @test_throws ErrorException cossim(f, x -> 0.0, interval)
 
         f(x) = x
         g(x) = x.^2

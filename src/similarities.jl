@@ -56,11 +56,15 @@ function cossim(x::AbstractVector, y::AbstractVector)
 
     dot(x,y) / (norm_x * norm_y)
 end
-cossim(x::AbstractVector, y::AbstractVector) = dot(x,y) / (norm(x) * norm(y))
 
 function cossim(f, g, interval::LSH.RealInterval)
     norm_f = L2_norm(f, interval)
     norm_g = L2_norm(g, interval)
+
+    if norm_f == 0 || norm_g == 0
+        "f and g must be nonzero" |> ErrorException |> throw
+    end
+
     inner_prod(f, g, interval) / (norm_f * norm_g)
 end
 
@@ -90,9 +94,11 @@ Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, th
 ℓ2(x::AbstractVector, y::AbstractVector) = L2(x, y)
 
 function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
-    # TODO: more descriptive error message
-    @assert p > 0
-    @assert size(x) == size(y)
+    if p ≤ 0
+        "p must be positive" |> ErrorException |> throw
+    elseif length(x) != length(y)
+        "length(x) != length(y)" |> DimensionMismatch |> throw
+    end
 
     result = T(0)
     @inbounds @simd for ii = 1:length(x)
@@ -103,8 +109,9 @@ function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
 end
 
 function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
-    # TODO: more descriptive error message
-    @assert length(x) == length(y)
+    if length(x) != length(y)
+        "length(x) != length(y)" |> DimensionMismatch |> throw
+    end
 
     result = T(0)
     @inbounds @simd for ii = 1:length(x)
@@ -115,10 +122,11 @@ function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
 end
 
 function L2(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
-    # TODO: more descriptive error message
-    @assert length(x) == length(y)
-    result = T(0)
+    if length(x) != length(y)
+        "length(x) != length(y)" |> DimensionMismatch |> throw
+    end
 
+    result = T(0)
     @inbounds @simd for ii = 1:length(x)
         result += abs2(x[ii] - y[ii])
     end
