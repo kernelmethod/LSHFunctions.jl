@@ -11,7 +11,8 @@ makedocs(
     sitename = "LSH.jl",
     format   = Documenter.HTML(),
     modules  = [LSH],
-    pages    = ["Home" => "index.md"]
+    pages    = ["Home" => "index.md",
+                "Similarity functions" => "similarities.md"]
 )
 
 deploydocs(

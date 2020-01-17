@@ -33,3 +33,6 @@ LSH.jl is a package that provides definitions of locality-sensitive hash functio
 - ``L^2`` (Euclidean) distance (`ℓ2`)
 - Inner product (`inner_prod`)
 - Function-space hashes (`L1`, `L2`, and `cossim`)
+
+```@contents
+```

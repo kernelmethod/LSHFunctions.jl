@@ -18,13 +18,11 @@ Cosine similarity
 @doc raw"""
     cossim(x,y)
 
-Computes the cosine similarity between two inputs, `x` and `y`. Cosine similarity is defined as
+Computes the cosine similarity between two inputs ``x`` and ``y``. Cosine similarity is defined as
 
-```\math
-cossim(x,y) = \frac{\left\langle x,y\right\rangle}{\|x\|\cdot\|y\|}
-```
+``\text{cossim}(x,y) = \frac{\left\langle x,y\right\rangle}{\|x\|\cdot\|y\|}``
 
-where ``\left\langle\cdot,\cdot\right\rangle`` is an inner product (e.g. dot product) and ``\|\cdot\|`` is its derived norm. This is roughly interpreted as being related to the angle between the inputs `x` and `y`: when `x` and `y` have low angle between them, `cossim(x,y)` is high (close to `1`). Meanwhile, when `x` and `y` have large angle between them, `cossim(x,y)` is low (close to `-1`).
+where ``\left\langle\cdot,\cdot\right\rangle`` is an inner product (e.g. dot product) and ``\|\cdot\|`` is its derived norm. This is roughly interpreted as being related to the angle between the inputs ``x`` and ``y``: when ``x`` and ``y`` have low angle between them, `cossim(x,y)` is high (close to ``1``). When ``x`` and ``y`` have large angle between them, `cossim(x,y)` is low (close to ``-1``).
 
 # Arguments
 - `x` and `y`: two inputs for which `dot(x,y)`, `norm(x)`, and `norm(y)` are defined.
@@ -73,17 +71,30 @@ L^p distance
 ====================#
 
 @doc raw"""
-    ℓp(p, x, y)
-    ℓ1(x, y)
-    ℓ2(x, y)
+    ℓp(x::AbstractVector, y::AbstractVector, p::Real)
+    ℓ1(x::AbstractVector, y::AbstractVector)
+    ℓ2(x::AbstractVector, y::AbstractVector)
 
 Computes the ``\ell^p`` distance between a pair of vectors, given by
 
-```\math
-\ell^p(x,y) \coloneqq \|x - y\|_p = \sum \left|x_i - y_i\right|^p
+``\ell^p(x,y) \coloneqq \|x - y\|_p = \left(\sum_i \left|x_i - y_i\right|^p\right)^{1/p}``
+
+`ℓ1(x,y)` is the same as `ℓp(x,y,1)`, and `ℓ2(x,y)` is the same as `ℓp(x,y,2)`.
+
+# Examples
+```jldoctest; setup = :(using LSH)
+julia> x = [1, 2, 3];
+
+julia> y = [4, 5, 6];
+
+julia> ℓp(x,y,2) == (abs(1-4)^2 + abs(2-5)^2 + abs(3-6)^2)^(1/2)
+true
+
+julia> ℓp(x,y,3) == (abs(1-4)^3 + abs(2-5)^3 + abs(3-6)^3)^(1/3)
+true
 ```
 
-Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, they are given unique function names `ℓ1` and `ℓ2` that you can use to call them.
+See also: [`ℓp_norm`](@ref)
 """
 ℓp(x::AbstractVector, y::AbstractVector, p::Real=2) = Lp(x, y, p)
 
@@ -93,6 +104,13 @@ Since ``\ell^1`` and ``\ell^2`` are both common cases of ``\ell^p`` distance, th
 @doc (@doc ℓp)
 ℓ2(x::AbstractVector, y::AbstractVector) = L2(x, y)
 
+@doc raw"""
+    Lp(x::AbstractVector, y::AbstractVector, p::Real)
+    L1(x::AbstractVector, y::AbstractVector)
+    L2(x::AbstractVector, y::AbstractVector)
+
+Computes the ``ℓ^p`` distance between a pair of vectors ``x`` and ``y``. Identical to `ℓp(x,y,p)`, `ℓ1(x,y)`, and `ℓ2(x,y)`, respectively.
+"""
 function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
     if p ≤ 0
         "p must be positive" |> ErrorException |> throw
@@ -108,6 +126,7 @@ function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
     return result^(1/p)
 end
 
+@doc (@doc Lp)
 function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
     if length(x) != length(y)
         "length(x) != length(y)" |> DimensionMismatch |> throw
@@ -121,6 +140,7 @@ function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
     return result
 end
 
+@doc (@doc Lp)
 function L2(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
     if length(x) != length(y)
         "length(x) != length(y)" |> DimensionMismatch |> throw
@@ -135,9 +155,47 @@ function L2(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
 end
 
 # Function space L^p distances
+
+@doc raw"""
+    Lp(f, g, interval::LSH.RealInterval, p)
+    L1(f, g, interval::LSH.RealInterval)
+    L2(f, g, interval::LSH.RealInterval)
+
+Computes the ``L^p`` distance between two functions, given by
+
+``L^p(f,g) \coloneqq \|f - g\|_p = \left(\int_a^b \left|f(x) - g(x)\right|^p \hspace{0.15cm} dx\right)^{1/p}``
+
+# Examples
+Below we compute the ``L^1``, ``L^2``, and ``L^3`` distances between ``f(x) = x^2 + 1`` and ``g(x) = 2x`` over the interval ``[0,1]``. The distances are computed by evaluating the integral
+
+``\left(\int_0^1 \left|f(x) - g(x)\right|^p \hspace{0.15cm}dx\right)^{1/p} = \left(\int_0^1 \left|x^2 - 2x + 1\right|^p \hspace{0.15cm}dx\right)^{1/p} = \left(\int_0^1 (x - 1)^{2p} \hspace{0.15cm}dx\right)^{1/p}``
+
+for ``p = 1``, ``p = 2``, and ``p = 3``.
+
+```jldoctest; setup = :(using LSH)
+julia> f(x) = x^2 + 1; g(x) = 2x;
+
+julia> interval = LSH.@interval(0 ≤ x ≤ 1);
+
+julia> Lp(f, g, interval, 1) ≈ L1(f, g, interval) ≈ 3^(-1)
+true
+
+julia> Lp(f, g, interval, 2) ≈ L2(f, g, interval) ≈ 5^(-1/2)
+true
+
+julia> Lp(f, g, interval, 3) ≈ 7^(-1/3)
+true
+```
+
+See also: [`Lp_norm`](@ref), [`ℓp`](@ref)
+"""
 Lp(f, g, interval, p::Real=2) = Lp_norm(x -> f(x) - g(x), interval, p)
-L1(f, g, interval)            = L1_norm(x -> f(x) - g(x), interval)
-L2(f, g, interval)            = L2_norm(x -> f(x) - g(x), interval)
+
+@doc (@doc Lp)
+L1(f, g, interval) = L1_norm(x -> f(x) - g(x), interval)
+
+@doc (@doc Lp)
+L2(f, g, interval) = L2_norm(x -> f(x) - g(x), interval)
 
 #====================
 Jaccard similarity
@@ -146,11 +204,9 @@ Jaccard similarity
 @doc raw"""
     jaccard(A::Set, B::Set) :: Float64
 
-Computes the Jaccard similarity between sets `A` and `B`, which is defined as
+Computes the Jaccard similarity between sets ``A`` and ``B``, which is defined as
 
-```\math
-J(A,B) = \frac{\left|A \cap B\right|}{\left|A \cup B\right|}
-```
+``\text{Jaccard}(A,B) = \frac{\left|A \cap B\right|}{\left|A \cup B\right|}``
 
 # Arguments
 - `A::Set`, `B::Set`: the two sets with which to compute Jaccard similarity.
@@ -186,25 +242,136 @@ Inner product and norms
 
 ### Inner products
 # TODO: docs
+
+@doc raw"""
+    inner_prod(x::AbstractVector, y::AbstractVector)
+
+Computes the ``\ell^2`` inner product (dot product)
+
+``\left\langle x, y\right\rangle = \sum_i x_iy_i``
+
+# Examples
+```jldoctest; setup = :(using LSH)
+julia> using LinearAlgebra: dot;
+
+julia> x, y = randn(4), randn(4);
+
+julia> inner_prod(x,y) ≈ dot(x,y)
+true
+```
+"""
 inner_prod(x::AbstractVector, y::AbstractVector) = dot(x,y)
 
 # 1-dimensional inner product between L^2 functions
+@doc raw"""
+    inner_prod(f, g, interval::LSH.RealInterval)
+
+Computes the ``L^2`` inner product
+
+``\left\langle f, g\right\rangle = \int_a^b f(x)g(x) \hspace{0.15cm} dx``
+
+where the interval we're integrating over is specified by the `interval` argument.
+
+# Examples
+```jldoctest; setup = :(using LSH)
+julia> f(x) = cos(x); g(x) = sin(x);
+
+julia> inner_prod(f, g, LSH.@interval(0 ≤ x ≤ π/2)) ≈ 1/2
+true
+```
+"""
 inner_prod(f, g, interval::LSH.RealInterval) =
     quadgk(x -> f(x)g(x), interval.lower, interval.upper)[1]
 
 ### L^p norms
+@doc raw"""
+    Lp_norm(x::AbstractVector, p::Real = 2)
+    L1_norm(x::AbstractVector)
+    L2_norm(x::AbstractVector)
+
+Compute the ``\ell^p`` norm of a vector ``x``. Identical to `ℓp_norm(x, p)`, `ℓ1_norm(x)`, and `ℓ2_norm(x)`, respectively.
+
+See also: [`ℓp_norm`](@ref)
+"""
 Lp_norm(x::AbstractVector, p::Real = 2) = norm(x,p)
+
+@doc (@doc Lp_norm)
 L1_norm(x::AbstractVector)              = norm(x,1)
+
+@doc (@doc Lp_norm)
 L2_norm(x::AbstractVector)              = norm(x)
 
+@doc raw"""
+    ℓp_norm(x::AbstractVector, p::Real = 2)
+    ℓ1_norm(x::AbstractVector)
+    ℓ2_norm(x::AbstractVector)
+
+Compute the ``\ell^p`` norm of a point ``x``, defined as
+
+``\|x\|_p = \left(\sum_i \left|x_i\right|^p\right)^{1/p}``
+
+# Examples
+
+```jldoctest; setup = :(using LSH)
+julia> x = randn(4);
+
+julia> ℓp_norm(x, 1) ≈ ℓ1_norm(x) ≈ (map(u -> abs(u)^1, x) |> sum)^(1/1)
+true
+
+julia> ℓp_norm(x, 2) ≈ ℓ2_norm(x) ≈ (map(u -> abs(u)^2, x) |> sum)^(1/2)
+true
+
+julia> ℓp_norm(x, 3) ≈ (map(u -> abs(u)^3, x) |> sum)^(1/3)
+true
+```
+
+See also: [`ℓp`](@ref), [`Lp_norm`](@ref)
+"""
 ℓp_norm(x::AbstractVector, p::Real = 2) = Lp_norm(x, p)
-ℓ1_norm(x::AbstractVector)              = L1_norm(x)
-ℓ2_norm(x::AbstractVector)              = L2_norm(x)
+
+@doc (@doc ℓp_norm)
+ℓ1_norm(x::AbstractVector) = L1_norm(x)
+
+@doc (@doc ℓp_norm)
+ℓ2_norm(x::AbstractVector) = L2_norm(x)
 
 # 1-dimensional L^p norms
+
+@doc raw"""
+    Lp_norm(f, interval::LSH.RealInterval, p::Real=2)
+    L1_norm(f, interval::LSH.RealInterval)
+    L2_norm(f, interval::LSH.RealInterval)
+
+Computes the ``L^p`` function-space norm of a function ``f``, which is given by the equation
+
+``\|f\|_p = \left(\int_a^b \left|f(x)\right|^p \hspace{0.15cm} dx\right)^{1/p}``
+        
+`L1_norm(f, interval)` is the same as `Lp_norm(f, interval, 1)`, and `L2_norm(f, interval)` is the same as `Lp_norm(f, interval, 2)`.
+
+# Examples
+
+```jldoctest; setup = :(using LSH)
+julia> f(x) = x;
+
+julia> interval = LSH.@interval(0 ≤ x ≤ 1);
+
+julia> Lp_norm(f, interval, 1) ≈ L1_norm(f, interval) ≈ 2^(-1/1)
+true
+
+julia> Lp_norm(f, interval, 2) ≈ L2_norm(f, interval) ≈ 3^(-1/2)
+true
+
+julia> Lp_norm(f, interval, 3) ≈ 4^(-1/3)
+true
+```
+"""
 Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = (quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)[1])^(1/p)
-L1_norm(f, interval::LSH.RealInterval)            = quadgk(x -> abs(f(x)),    interval.lower, interval.upper)[1]
-L2_norm(f, interval::LSH.RealInterval)            = √quadgk(x -> abs2(f(x)),   interval.lower, interval.upper)[1]
+
+@doc (@doc Lp_norm)
+L1_norm(f, interval::LSH.RealInterval) = quadgk(x -> abs(f(x)), interval.lower, interval.upper)[1]
+
+@doc (@doc Lp_norm)
+L2_norm(f, interval::LSH.RealInterval) = √quadgk(x -> abs2(f(x)), interval.lower, interval.upper)[1]
 
 #====================
 1D Wasserstein distance
@@ -238,9 +405,12 @@ function wasserstein_1d(f, g, p::AbstractFloat)
     error("TODO")
 end
 
+@doc (@doc wasserstein_1d)
 wasserstein1_1d(f, g) = wasserstein_1d(f, g, 1)
+emd = wasserstein1_1d
+
+@doc (@doc wasserstein_1d)
 wasserstein2_2d(f, g) = wasserstein_1d(f, g, 2)
-emd(f, g)             = wasserstein1_1d(f, g)
 
 #====================
 Definitions for similarity function-related components of the AbstractLSHFunction
