@@ -25,33 +25,29 @@ mutable struct SimHash{T <: Union{Float32,Float64}} <: SymmetricLSHFunction
 end
 
 
-function SimHash{T}(n_hashes::Integer = 1;
-                    resize_pow2::Bool = false) where {T <: Union{Float32,Float64}}
+function SimHash{T}(n_hashes::Integer = DEFAULT_N_HASHES;
+                    resize_pow2::Bool = DEFAULT_RESIZE_POW2) where T
 
     coeff = Matrix{T}(undef, 0, n_hashes)
     SimHash{T}(coeff, resize_pow2)
 end
 
-SimHash(args...; dtype = Float32, kws...) =
+SimHash(args...; dtype = DEFAULT_DTYPE, kws...) =
     SimHash{dtype}(args...; kws...)
 
 @doc """
-    SimHash(
-        n_hashes::Integer = 1;
-        dtype::DataType = Float32,
-        resize_pow2::Bool = false)
-    SimHash{dtype}(
-        n_hashes::Integer = 1;
-        resize_pow2::Bool = false) where {dtype <: Union{Float32,Float64}}
+    SimHash(n_hashes::Integer = $(DEFAULT_N_HASHES);
+            dtype::DataType = $(DEFAULT_DTYPE),
+            resize_pow2::Bool = $(DEFAULT_RESIZE_POW2))
 
 Creates a locality-sensitive hash function for cosine similarity.
 
 # Arguments
-- `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
+- $(N_HASHES_DOCSTR())
 
 # Keyword parameters
-- `dtype::DataType` (default: `Float32`): the data type to use for the fields of the resulting `SimHash` struct. You generally want to pick `dtype` to match the type of the data you're hashing.
-- `resize_pow2::Bool` (default: `false`): affects the way in which the `SimHash` struct resizes to hash inputs of different sizes. If you think you'll be hashing inputs of many different sizes, it's more efficient to set `resize_pow2 = true`.
+- $(DTYPE_DOCSTR(SimHash))
+- $(RESIZE_POW2_DOCSTR(SimHash))
 
 # Examples
 Construct a hash function by calling `SimHash` with the number of hash functions you want to generate:
@@ -77,12 +73,10 @@ julia> hashes = hashfn(x);
 
 # References
 
-```
-Charikar, Moses. (2002). Similarity estimation techniques from rounding algorithms. 380-388. 10.1145/509907.509965.
-```
+- Moses S. Charikar. *Similarity estimation techniques from rounding algorithms*. In Proceedings of the Thiry-Fourth Annual ACM Symposium on Theory of Computing, STOC '02, page 380–388, New York, NY, USA, 2002. Association for Computing Machinery. 10.1145/509907.509965.
 
 See also: [`cossim`](@ref)
-"""
+""" SimHash
 
 #========================
 SimHash helper functions

@@ -12,7 +12,12 @@ makedocs(
     format   = Documenter.HTML(),
     modules  = [LSH],
     pages    = ["Home" => "index.md",
-                "Similarity functions" => "similarities.md"]
+                "Similarity functions" => [
+                    "Cosine similarity" => joinpath("similarities", "cosine.md"),
+                    raw"``\ell^p`` distance" => joinpath("similarities", "lp_distance.md"),
+                    "Jaccard similarity" => joinpath("similarities", "jaccard.md"),
+                    "Inner product similarity" => joinpath("similarities", "inner_prod.md")]
+               ]
 )
 
 deploydocs(

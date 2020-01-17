@@ -24,14 +24,14 @@ struct MinHash{T, I <: Union{UInt32,UInt64}} <: SymmetricLSHFunction
 end
 
 """
-    MinHash(n_hashes::Integer = 1;
+    MinHash(n_hashes::Integer = $(DEFAULT_N_HASHES);
             dtype::DataType = Any,
             symbols::Union{Vector,Set} = Set())
 
 Construct a locality-sensitive hash function for Jaccard similarity.
 
 # Arguments
-- `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
+- $(N_HASHES_DOCSTR())
 
 # Keyword parameters
 - `dtype::DataType` (default: `Any`): the type of symbols in the sets you're hashing. This is overriden by the data type contained in `symbols` when `symbols` is non-empty.
@@ -75,9 +75,7 @@ julia> hashfn(Set(["a", "b", "c"]));
 ```
 
 # References
-```
-Broder, A. "On the resemblance and containment of documents". Compression and Complexity of Sequences: Proceedings, Positano, Amalfitan Coast, Salerno, Italy, June 11-13, 1997. doi:10.1109/SEQUEN.1997.666900.
-```
+- Broder, A. *On the resemblance and containment of documents*. Compression and Complexity of Sequences: Proceedings, Positano, Amalfitan Coast, Salerno, Italy, June 11-13, 1997. doi:10.1109/SEQUEN.1997.666900.
 
 See also: [`jaccard`](@ref)
 """
@@ -92,7 +90,7 @@ function MinHash(args...;
     end
 end
 
-function MinHash{T}(n_hashes::Integer = 1;
+function MinHash{T}(n_hashes::Integer = DEFAULT_N_HASHES;
                     symbols::C = Set{T}()) where {T, C <: Union{Vector{<:T},Set{<:T}}}
 
     fixed_symbols = (length(symbols) > 0)

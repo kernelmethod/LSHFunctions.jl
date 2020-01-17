@@ -71,7 +71,7 @@ L^p distance
 ====================#
 
 @doc raw"""
-    ℓp(x::AbstractVector, y::AbstractVector, p::Real)
+    ℓp(x::AbstractVector, y::AbstractVector, p::Real=2)
     ℓ1(x::AbstractVector, y::AbstractVector)
     ℓ2(x::AbstractVector, y::AbstractVector)
 
@@ -94,7 +94,7 @@ julia> ℓp(x,y,3) == (abs(1-4)^3 + abs(2-5)^3 + abs(3-6)^3)^(1/3)
 true
 ```
 
-See also: [`ℓp_norm`](@ref)
+See also: [`ℓp_norm`](@ref), [`L1Hash`](@ref), [`L2Hash`](@ref)
 """
 ℓp(x::AbstractVector, y::AbstractVector, p::Real=2) = Lp(x, y, p)
 
@@ -105,13 +105,15 @@ See also: [`ℓp_norm`](@ref)
 ℓ2(x::AbstractVector, y::AbstractVector) = L2(x, y)
 
 @doc raw"""
-    Lp(x::AbstractVector, y::AbstractVector, p::Real)
+    Lp(x::AbstractVector, y::AbstractVector, p::Real=2)
     L1(x::AbstractVector, y::AbstractVector)
     L2(x::AbstractVector, y::AbstractVector)
 
 Computes the ``ℓ^p`` distance between a pair of vectors ``x`` and ``y``. Identical to `ℓp(x,y,p)`, `ℓ1(x,y)`, and `ℓ2(x,y)`, respectively.
+
+See also: [`ℓp`](@ref)
 """
-function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
+function Lp(x::AbstractVector{T}, y::AbstractVector, p::Real=2) where T
     if p ≤ 0
         "p must be positive" |> ErrorException |> throw
     elseif length(x) != length(y)
@@ -127,7 +129,7 @@ function Lp(x::AbstractVector{T}, y::AbstractVector{T}, p::Real=2) where {T}
 end
 
 @doc (@doc Lp)
-function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
+function L1(x::AbstractVector{T}, y::AbstractVector) where T
     if length(x) != length(y)
         "length(x) != length(y)" |> DimensionMismatch |> throw
     end
@@ -141,7 +143,7 @@ function L1(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
 end
 
 @doc (@doc Lp)
-function L2(x::AbstractVector{T}, y::AbstractVector{T}) where {T}
+function L2(x::AbstractVector{T}, y::AbstractVector) where T
     if length(x) != length(y)
         "length(x) != length(y)" |> DimensionMismatch |> throw
     end
@@ -189,13 +191,14 @@ true
 
 See also: [`Lp_norm`](@ref), [`ℓp`](@ref)
 """
-Lp(f, g, interval, p::Real=2) = Lp_norm(x -> f(x) - g(x), interval, p)
+Lp(f, g, interval::LSH.RealInterval, p::Real=2) =
+    Lp_norm(x -> f(x) - g(x), interval, p)
 
 @doc (@doc Lp)
-L1(f, g, interval) = L1_norm(x -> f(x) - g(x), interval)
+L1(f, g, interval::LSH.RealInterval) = L1_norm(x -> f(x) - g(x), interval)
 
 @doc (@doc Lp)
-L2(f, g, interval) = L2_norm(x -> f(x) - g(x), interval)
+L2(f, g, interval::LSH.RealInterval) = L2_norm(x -> f(x) - g(x), interval)
 
 #====================
 Jaccard similarity
@@ -289,17 +292,17 @@ inner_prod(f, g, interval::LSH.RealInterval) =
     L1_norm(x::AbstractVector)
     L2_norm(x::AbstractVector)
 
-Compute the ``\ell^p`` norm of a vector ``x``. Identical to `ℓp_norm(x, p)`, `ℓ1_norm(x)`, and `ℓ2_norm(x)`, respectively.
+Compute the ``\ell^p`` norm of a vector ``x``. Identical to `ℓp_norm(x,p)`, `ℓ1_norm(x)`, and `ℓ2_norm(x)`, respectively.
 
 See also: [`ℓp_norm`](@ref)
 """
 Lp_norm(x::AbstractVector, p::Real = 2) = norm(x,p)
 
 @doc (@doc Lp_norm)
-L1_norm(x::AbstractVector)              = norm(x,1)
+L1_norm(x::AbstractVector) = norm(x,1)
 
 @doc (@doc Lp_norm)
-L2_norm(x::AbstractVector)              = norm(x)
+L2_norm(x::AbstractVector) = norm(x)
 
 @doc raw"""
     ℓp_norm(x::AbstractVector, p::Real = 2)

@@ -235,4 +235,10 @@ Tests
         @test ihashes == ihashes_dense
         @test qhashes == qhashes_dense
     end
+
+    @testset "MIPSHash throws an error when input norm exceeds maxnorm" begin
+        hashfn = MIPSHash(; maxnorm=1)
+        @test_throws ErrorException index_hash(hashfn, ones(4))
+        @test_throws ErrorException query_hash(hashfn, ones(4))
+    end
 end

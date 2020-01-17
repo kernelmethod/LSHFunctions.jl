@@ -10,12 +10,6 @@ import LinearAlgebra: norm
 Typedefs
 ========================#
 
-"""
-Implementation of the SignALSH maximum inner product search (MIPS)
-hash function. Ref:
-
-    https://arxiv.org/abs/1410.5410v2
-"""
 mutable struct SignALSH{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
     coeff_A :: Matrix{T}
     coeff_B :: Matrix{T}
@@ -32,10 +26,67 @@ mutable struct SignALSH{T <: Union{Float32,Float64}} <: AsymmetricLSHFunction
 end
 
 ### External SignALSH constructors
-@generated function SignALSH{T}(n_hashes::Integer = 1;
+
+@doc """
+    SignALSH(n_hashes::Integer = $(DEFAULT_N_HASHES),
+             dtype::DataType = $(DEFAULT_DTYPE),
+             maxnorm::Union{Nothing,Real} = nothing,
+             m::Integer = 3,
+             resize_pow2::Bool = $(DEFAULT_RESIZE_POW2))
+
+Create a `SignALSH` hash function for hashing on inner product similarity.
+
+# Arguments
+- $(N_HASHES_DOCSTR())
+
+# Keyword parameters
+- $(DTYPE_DOCSTR(SignALSH))
+- `maxnorm::Union{Nothing,Real}` (default: `nothing`): an upper bound on the ``\\ell^2``-norm of the data points. **Note: this keyword argument must be explicitly specified.** If it left unspecified (or set to `nothing`), `SignALSH()` will raise an error.
+- `m::Integer` (default: `3`): parameter `m` that affects the probability of a hash collision.
+- $(RESIZE_POW2_DOCSTR(SignALSH))
+
+# Examples
+`SignALSH` is an [`AsymmetricLSHFunction`](@ref), and hence hashes must be computed using `index_hash` and `query_hash`.
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = SignALSH(12; maxnorm=10);
+
+julia> x = rand(4);
+
+julia> ih = index_hash(hashfn, x); qh = query_hash(hashfn, x);
+
+julia> length(ih) == length(qh) == 12
+true
+
+julia> typeof(ih) == typeof(qh) == BitArray{1}
+true
+```
+
+You need to explicitly specify the `maxnorm` keyword parameter when constructing `SignALSH`, otherwise you will get an error.
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = SignALSH(12)
+ERROR: maxnorm must be specified for SignALSH
+```
+
+You'll also get an error if you try to hash a vector that has norm greater than the `maxnorm` that you specified.
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = SignALSH(; maxnorm=1);
+
+julia> index_hash(hashfn, ones(4))
+ERROR: norm 2.0 exceeds maxnorm (1.0)
+```
+
+# References
+- Anshumali Shrivastava and Ping Li. *Improved Asymmetric Locality Sensitive Hashing (ALSH) for Maximum Inner Product Search (MIPS)*. In Proceedings of the Thirty-First Conference on Uncertainty in Artificial Intelligence, UAI'15, page 812–821, Arlington, Virginia, USA, 2015. AUAI Press. 10.5555/3020847.3020931. [https://arxiv.org/abs/1410.5410v2]
+
+See also: [`inner_prod`](@ref inner_prod(::AbstractVector, ::AbstractVector)), [`ℓ2_norm`](@ref ℓp_norm)
+"""
+@generated function SignALSH{T}(n_hashes::Integer = DEFAULT_N_HASHES;
                                 maxnorm::Union{Nothing,Real} = nothing,
                                 m::Integer = 3,
-                                resize_pow2::Bool = false) where {T}
+                                resize_pow2::Bool = DEFAULT_RESIZE_POW2) where T
 
     if maxnorm <: Nothing
         :("maxnorm must be specified for SignALSH" |> ErrorException |> throw)
@@ -59,7 +110,7 @@ end
     end
 end
 
-SignALSH(args...; dtype=Float32, kws...) =
+SignALSH(args...; dtype=DEFAULT_DTYPE, kws...) =
     SignALSH{dtype}(args...; kws...)
 
 #============
@@ -109,7 +160,7 @@ function SignALSH_P(hashfn::SignALSH{T}, x::AbstractArray{T}) where {T}
 
     for norm_ii in norms
         if norm_ii > hashfn.maxnorm
-            "norm $(norm_ii) exceeds hashfn.maxnorm ($(hashfn.maxnorm))" |>
+            "norm $(norm_ii) exceeds maxnorm ($(hashfn.maxnorm))" |>
             ErrorException |>
             throw
         end
@@ -187,7 +238,7 @@ function SignALSH_Q(hashfn::SignALSH{T}, x::AbstractArray{T}) where {T}
 
     for norm_ii in norms
         if norm_ii > hashfn.maxnorm
-            "norm $(norm_ii) exceeds hashfn.maxnorm ($(hashfn.maxnorm))" |>
+            "norm $(norm_ii) exceeds maxnorm ($(hashfn.maxnorm))" |>
             ErrorException |>
             throw
         end

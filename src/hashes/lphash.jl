@@ -52,10 +52,10 @@ end
 
 ### External LpHash constructors
 
-function LpHash{T}(n_hashes::Integer = 1;
+function LpHash{T}(n_hashes::Integer = DEFAULT_N_HASHES;
                    r::Real = T(1.0),
                    power::Integer = 2,
-                   resize_pow2::Bool = false) where {T <: Union{Float32,Float64}}
+                   resize_pow2::Bool = DEFAULT_RESIZE_POW2) where {T <: Union{Float32,Float64}}
 
     coeff = Matrix{T}(undef, n_hashes, 0)
     shift = rand(T, n_hashes)
@@ -77,53 +77,53 @@ L1Hash(args...; kws...) where {T} = LpHash(args...; power = 1, kws...)
 
 L2Hash(args...; kws...) where {T} = LpHash(args...; power = 2, kws...)
 
-LpHash(args...; dtype::DataType = Float32, kws...) =
+LpHash(args...; dtype::DataType = DEFAULT_DTYPE, kws...) =
     LpHash{dtype}(args...; kws...)
 
-# Documentation for L1Hash and L2Hash
-@doc raw"""
-    L1Hash(n_hashes::Integer = 1;
-           dtype::DataType = Float32,
-           r::Real = 1.0,
-           resize_pow2::Bool = false)
-    L2Hash(n_hashes::Integer = 1;
-           dtype::DataType = Float32,
-           r::Real = 1.0,
-           resize_pow2::Bool = false)
+### Documentation for L1Hash and L2Hash
+for (hashfn, power) in zip((:L1Hash, :L2Hash), (1, 2))
+    sim = "ℓ$(power)"
+    equation = (power == 1) ?
+                "\\|x - y\\|_$(power) = \\sum_i |x_i - y_i|" :
+                "\\|x - y\\|_$(power) = \\left(\\sum_i |x_i - y_i|^$(power)\\right)^{1/$(power)}"
 
-Constructs a locality-sensitive hash for ``\ell^p`` distance (``\|x - y\|_p``). `L1Hash` constructs a hash function for ``\ell^1`` distance, and `L2Hash` constructs a hash function for ``\ell^2`` distance.
+    quote
+@doc """
+    $($hashfn)(
+        n_hashes::Integer = $(DEFAULT_N_HASHES);
+        dtype::DataType = $(DEFAULT_DTYPE),
+        r::Real = 1.0,
+        resize_pow2::Bool = $(DEFAULT_RESIZE_POW2)
+    )
+
+Constructs a locality-sensitive hash for ``\\ell^$($power)`` distance (``\\|x - y\\|_$($power)``), defined as
+
+``$($equation)``
 
 # Arguments
-- `n_hashes::Integer` (default: `1`): the number of hash functions to generate.
+- $(N_HASHES_DOCSTR())
 
 # Keyword parameters
-- `dtype::DataType` (default: `Float32`): the type to use for the resulting `LSH.LpHash`'s coefficients. Can be either `Float32` or `Float64`. You generally want to pick `dtype` to match the type of the data you're hashing.
+- $(DTYPE_DOCSTR($hashfn))
 - `r::Real` (default: `1.0`): a positive coefficient whose magnitude influences the collision rate. Larger values of `r` will increase the collision rate, even for distant points. See references for more information.
-- `resize_pow2::Bool` (default: `false`): affects the way in which the `LSH.LpHash` struct resizes to hash inputs of different sizes. If you think you'll be hashing inputs of many different sizes, it's more efficient to set `resize_pow2 = true`.
+- $(RESIZE_POW2_DOCSTR($hashfn))
 
 # Examples
-Construct an `LSH.LpHash` by calling `L1Hash` or `L2Hash` with the number of hash functions you want to generate:
+Construct an `$($hashfn)` with the number of hash functions you want to generate:
 
 ```jldoctest; setup = :(using LSH)
-julia> hashfn = L1Hash();
+julia> hashfn = $($hashfn)(128);
 
-julia> hashfn.power == 1 &&
-       n_hashes(hashfn) == 1 &&
-       similarity(hashfn) == ℓ1
-true
-
-julia> hashfn = L2Hash(128);
-
-julia> hashfn.power == 2 &&
+julia> hashfn.power == $($power) &&
        n_hashes(hashfn) == 128 &&
-       similarity(hashfn) == ℓ2
+       similarity(hashfn) == $($sim)
 true
 ```
 
 After creating a hash function, you can compute hashes with `hashfn(x)`:
 
 ```jldoctest; setup = :(using LSH)
-julia> hashfn = L1Hash(20);
+julia> hashfn = $($hashfn)(20);
 
 julia> x = rand(4);
 
@@ -133,14 +133,12 @@ julia> hashes = hashfn(x);
 
 # References
 
-```
-Datar, Mayur & Indyk, Piotr & Immorlica, Nicole & Mirrokni, Vahab. (2004). Locality-sensitive hashing scheme based on p-stable distributions. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.
-```
+- Datar, Mayur & Indyk, Piotr & Immorlica, Nicole & Mirrokni, Vahab. (2004). *Locality-sensitive hashing scheme based on p-stable distributions*. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.
 
-See also: [`ℓp`](@ref), [`ℓ1`](@ref), [`ℓ2`](@ref)
-""" L1Hash
-
-@doc (@doc L1Hash) L2Hash
+See also: [`$($sim)`](@ref ℓp)
+""" $hashfn
+    end |> eval
+end
 
 #========================
 Helper functions for LpHash
