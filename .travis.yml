@@ -16,8 +16,7 @@ notifications:
 
 jobs:
   allow_failures:
-    #- env: TRAVIS_JULIA_VERSION=nightly
-    - julia: nightly
+    - env: TRAVIS_JULIA_VERSION=nightly
   include:
     - stage: "Documentation"
       julia: 1.3
