@@ -79,7 +79,7 @@ ERROR: norm 2.0 exceeds maxnorm (1.0)
 ```
 
 # References
-- Anshumali Shrivastava and Ping Li. *Asymmetric LSH (ALSH) for Sublinear Time Maximum Inner Product Search (MIPS)*. Proceedings of the 27th International Conference on Neural Information Processing Systems - Volume 2, NIPS'14, page 2321–2329, Cambridge, MA, USA, 2014. MIT Press. 10.5555/2969033.2969086. [https://arxiv.org/abs/1405.5869]
+- Anshumali Shrivastava and Ping Li. *Asymmetric LSH (ALSH) for Sublinear Time Maximum Inner Product Search (MIPS)*. Proceedings of the 27th International Conference on Neural Information Processing Systems - Volume 2, NIPS'14, page 2321–2329, Cambridge, MA, USA, 2014. MIT Press. 10.5555/2969033.2969086. [https://arxiv.org/abs/1405.5869](https://arxiv.org/abs/1405.5869)
 
 See also: [`inner_prod`](@ref), [`ℓ2_norm`](@ref ℓp_norm)
 """
