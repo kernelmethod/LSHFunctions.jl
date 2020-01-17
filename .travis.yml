@@ -15,21 +15,18 @@ jobs:
       julia: 1.3
       os: linux
       script:
-        -  julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
+        -  julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test(coverage=true)'
+      after_success:
+        # Code coverage
+        - julia -e 'using Pkg; Pkg.add("Coverage");'
+        - julia -e 'using Coverage; Coveralls.submit(Coveralls.process_folder());'
+        - julia -e 'using Coverage; Codecov.submit(Codecov.process_folder());'
+
     - stage: "Test (Julia nightly)"
       julia: nightly
       os: linux
       script:
         -  julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
-
-    ### Coverage
-    - stage: "Code coverage"
-      julia: 1.3
-      os: linux
-      script:
-        - julia -e 'using Pkg; Pkg.add("Coverage");'
-        - julia -e 'using Coverage; Coveralls.submit(Coveralls.process_folder());'
-        - julia -e 'using Coverage; Codecov.submit(Codecov.process_folder());'
 
     ### Documentation generation
     - stage: "Documentation"
