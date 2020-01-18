@@ -38,6 +38,7 @@ LSHFunction API
 ========================#
 
 macro register_similarity! end
+function lsh_family end
 
 #=
 The following functions must be defined for all LSHFunction subtypes

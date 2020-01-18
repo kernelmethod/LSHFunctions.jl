@@ -12,6 +12,44 @@ include(joinpath("..", "utils.jl"))
 Tests
 ==================#
 
+@testset "Test similarity function registration" begin
+    Random.seed!(RANDOM_SEED)
+
+    @testset "Register a custom similarity" begin
+        ### Test 1: register a function with @register_similarity!
+        mysim(x,y) = dot(x,y) / (norm(x) * norm(y))
+
+        @test_throws MethodError LSHFunction(mysim)
+        @test_throws MethodError lsh_family(mysim)
+
+        LSH.@register_similarity!(mysim, SimHash)
+
+        hashfn = LSHFunction(mysim)
+        @test isa(hashfn, SimHash)
+        @test lsh_family(mysim) == SimHash
+
+        ### Test 2: register a function-like object with @register_similarity!
+        struct mytype end
+
+        @test_throws MethodError LSHFunction(mytype())
+        @test_throws MethodError lsh_family(mytype())
+        @test_throws ErrorException LSH.@register_similarity!(mytype(), SimHash)
+
+        (::mytype)(x,y) = cossim(x,y)
+
+        LSH.@register_similarity!(mytype(), SimHash)
+        hashfn = LSH.LSHFunction(mytype())
+        @test isa(hashfn, SimHash)
+        @test lsh_family(mysim) == SimHash
+
+        ### Test 3: reset the available similarity functions
+        LSH.@reset_similarities!()
+
+        @test_throws MethodError LSHFunction(mysim)
+        @test_throws MethodError LSHFunction(mytype())
+    end
+end
+
 @testset "Test LSHFunction()" begin
     Random.seed!(RANDOM_SEED)
 

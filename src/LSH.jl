@@ -52,7 +52,7 @@ export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
        LSHFunction, MonteCarloHash, ChebHash
 
 # Helper / utility functions for LSHFunctions
-export index_hash, query_hash, n_hashes, hashtype, similarity,
+export index_hash, query_hash, n_hashes, hashtype, similarity, lsh_family,
        embedded_similarity
 
 # Hash tables and related functions
