@@ -6,11 +6,25 @@
 [![codecov](https://codecov.io/gh/kernelmethod/LSH.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSH.jl)
 - DOI to cite this code: [![DOI](https://zenodo.org/badge/197700982.svg)](https://zenodo.org/badge/latestdoi/197700982)
 
-Implementations of different [locality-sensitive hash functions](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) in Julia.
+A Julia package for [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) to accelerate similarity search.
 
-**Installation**: `julia> Pkg.add("https://github.com/kernelmethod/LSH.jl")`
+## What's LSH?
+Traditionally, if you have a data point `x`, and want to find the most similar point(s) to `x` in your database, you would compute the similarity between `x` and all of the points in your database, and keep whichever points were the most similar. For instance, this type of approach is used by the classic [k-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm). However, it has two major problems:
 
-So far, there are hash functions for the following measures of similarity:
+- The time to find the most similar point(s) to `x` is linear in the number of points in your database. This can make similarity search prohibitively expensive for even moderately large datasets.
+- In addition, the time complexity to compute the similarity between two datapoints is typically linear in the number of dimensions of those datapoints. If your data are high-dimensional (i.e. in the thousands to millions of dimensions), every similarity computation you perform can be fairly costly.
+
+**Locality-sensitive hashing** (LSH) is a technique for accelerating these kinds of similarity searches. Instead of measuring how similar your query point is to every point in your database, you calculate a few hashes of the query point and only compare it against those points with which it experiences a hash collision. Locality-sensitive hash functions are randomly generated, with the fundamental property that as the similarity between `x` and `y` increases, the probability of a hash collision between `x` and `y` also increases.
+
+## Installation
+You can install LSH.jl from the Julia REPL with
+
+```
+pkg> add https://github.com/kernelmethod/LSH.jl
+```
+
+## Supported similarity functions
+So far, there are hash functions for the similarity functions:
 
 - Cosine similarity (`SimHash`)
 - Jaccard similarity (`MinHash`)
@@ -19,12 +33,41 @@ So far, there are hash functions for the following measures of similarity:
 - Inner product
   - `SignALSH` (recommended)
   - `MIPSHash`
-- Function-space hashes
-  - `MonteCarloHash` (supports L1, L2, and cosine similarity)
-  - `ChebHash` (supports L1, L2, and cosine similarity)
+- Function-space hashes (supports L1, L2, and cosine similarity)
+  - `MonteCarloHash`
+  - `ChebHash`
 
 This package still needs a lot of work, including improvement to the documentation and API. In general, if you want to draw one or more new hash functions, you can use the following syntax:
 
-```julia
-hashfn = LSHFunction(similarity; [LSH family-specific keyword arguments])
+## Examples
+The easiest way to start constructing new hash functions is by calling `LSHFunction` with the following syntax:
+
 ```
+hashfn = LSHFunction(similarity function,
+                     number of hash functions to generate;
+                     [LSH family-specific keyword arguments])
+```
+
+For example, the following snippet generates 10 locality-sensitive hash functions (bundled together into a single `SimHash` struct) for cosine similarity:
+
+```julia
+julia> using LSH;
+
+julia> hashfn = LSHFunction(cossim, 10);
+
+julia> n_hashes(hashfn)
+10
+
+julia> similarity(hashfn)
+cossim
+```
+
+You can then start hashing new vectors by calling `hashfn()`:
+
+```julia
+julia> x = randn(128);
+
+julia> x_hashes = hashfn(x);
+```
+
+For more details, [check out the LSH.jl documentation](https://kernelmethod.github.io/LSH.jl/dev/).
