@@ -38,6 +38,7 @@ LSHFunction API
 ========================#
 
 macro register_similarity! end
+function LSHFunction end
 function lsh_family end
 
 #=

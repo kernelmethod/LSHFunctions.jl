@@ -414,26 +414,3 @@ emd = wasserstein1_1d
 
 @doc (@doc wasserstein_1d)
 wasserstein2_2d(f, g) = wasserstein_1d(f, g, 2)
-
-#====================
-Definitions for similarity function-related components of the AbstractLSHFunction
-API.
-====================#
-
-# Define documentation for `similarity` manually so that we can dynamically
-# modify it through the available_similarities list.
-Docs.getdoc(::typeof(similarity)) = Markdown.parse("""
-    similarity(hashfn::AbstractLSHFunction)
-
-Returns the similarity function that the input `AbstractLSHFunction` hashes on.
-
-# Arguments
-- `hashfn::AbstractLSHFunction`: the hash function whose similarity we would like to retrieve.
-
-# Returns
-    Returns a similarity function, which is one of the following:
-
-```
-$(join(available_similarities_as_strings(), "\n"))
-```
-""")

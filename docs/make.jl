@@ -12,11 +12,13 @@ makedocs(
     format   = Documenter.HTML(),
     modules  = [LSH],
     pages    = ["Home" => "index.md",
+                "The LSHFunction API" => "lshfunction_api.md",
                 "Similarity functions" => [
                     "Cosine similarity" => joinpath("similarities", "cosine.md"),
                     raw"``\ell^p`` distance" => joinpath("similarities", "lp_distance.md"),
                     "Jaccard similarity" => joinpath("similarities", "jaccard.md"),
-                    "Inner product similarity" => joinpath("similarities", "inner_prod.md")]
+                    "Inner product similarity" => joinpath("similarities", "inner_prod.md")],
+                "Performance tips" => "performance.md",
                ]
 )
 

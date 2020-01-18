@@ -3,13 +3,13 @@
 LSH.jl is a Julia package for performing [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) with various similarity functions.
 
 ## Introduction
-One of the simplest methods for classifying, categorizing, and grouping data is to measure how similarities pairs of data points are. For instance, the classical [``k``-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm) takes a similarity function
+One of the simplest methods for classifying, categorizing, and grouping data is to measure how similarities pairs of data points are. For instance, the classical [``k``-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm) searches an input space ``X`` by taking a query point ``x\in X`` and a similarity function
 
 ```math
 s:X\times X\to\mathbb{R}
 ```
 
-and a query point ``x\in X``, where ``X`` is the input space. It then computes ``s(x,y)`` for every point ``y`` in a database, and keeps the ``k`` points that are closest to ``x``.
+It then computes ``s(x,y)`` for every point ``y`` in a database, and keeps the ``k`` points that are closest to ``x``.
 
 Broadly, there are two computational issues with this approach:
 
@@ -23,8 +23,8 @@ LSH.jl is a package that provides definitions of locality-sensitive hash functio
 
 - Cosine similarity (`cossim`)
 - Jaccard similarity (`jaccard`)
-- ``L^1`` (Manhattan / "taxicab") distance (`ℓ1`)
-- ``L^2`` (Euclidean) distance (`ℓ2`)
+- ``\ell^1`` (Manhattan / "taxicab") distance (`ℓ1`)
+- ``\ell^2`` (Euclidean) distance (`ℓ2`)
 - Inner product (`inner_prod`)
 - Function-space hashes (`L1`, `L2`, and `cossim`)
 
