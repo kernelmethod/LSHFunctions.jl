@@ -44,7 +44,7 @@ julia> for uh in unique(hashes)
 12
 ```
 
-Our hash function has generated 3 unique 20-bit hashes, with 72 points sharing the first hash, 16 points sharing the second hash, and 12 points sharing the third hash. That's not a great split, but could still drastically reduce the size of the search space. For instance, the following benchmarks (on an Intel Core i7-8565U @ 1.80 GHz) suggest that the cost of computing [`SimHash`](@ref) on 10-dimensional data is about 34 times the cost of computing [`cossim`](@ref):
+Our hash function has generated 3 unique 20-bit hashes, with 72 points sharing the first hash, 16 points sharing the second hash, and 12 points sharing the third hash. That's not a great split, but could still drastically reduce the size of the search space. For instance, the following benchmarks (on an Intel Core i7-8565U @ 1.80 GHz) suggest that the cost of computing 20-bit [`SimHash`](@ref) on 10-dimensional data is about 34 times the cost of computing [`cossim`](@ref):
 
 ```
 julia> using BenchmarkTools
