@@ -6,5 +6,6 @@
 ## API reference
 
 ```@docs
+LSHFunction
 lsh_family
 ```
