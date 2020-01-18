@@ -52,4 +52,29 @@ julia&gt; typeof(hashes)
 BitArray{1}
 
 julia&gt; typeof(hashes[1]) == hashtype(hashfn)
-true</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../similarities/cosine/">Cosine similarity »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 18 January 2020 19:30">Saturday 18 January 2020</span>. Using Julia version 1.3.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+true</code></pre><ul><li><p><a href="../full_api/#LSH.collision_probability"><code>collision_probability</code></a>: returns the probability of collision for two inputs with a given similarity. For instance, the probability that a single MinHash hash function causes a collision between inputs <code>A</code> and <code>B</code> is equal to <a href="../full_api/#LSH.jaccard-Tuple{Set,Set}"><code>jaccard(A,B)</code></a>:</p><pre><code class="language-julia-repl">julia&gt; hashfn = MinHash();
+
+julia&gt; A = Set([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]);
+
+julia&gt; B = Set([&quot;b&quot;, &quot;c&quot;, &quot;d&quot;]);
+
+julia&gt; collision_probability(hashfn, A, B) ==
+       collision_probability(hashfn, jaccard(A,B)) ==
+       jaccard(A,B)
+true</code></pre><p>We often want to compute the probability that not just one hash collides, but that multiple hashes collide simultaneously. You can calculate this using the <code>n_hashes</code> keyword argument. If left unspecified, then <a href="../full_api/#LSH.collision_probability"><code>collision_probability</code></a> will use <a href="../full_api/#LSH.n_hashes"><code>n_hashes(hashfn)</code></a> hash functions to compute the probability.</p><pre><code class="language-julia-repl">julia&gt; hashfn = MinHash(5);
+
+julia&gt; A = Set([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]);
+
+julia&gt; B = Set([&quot;b&quot;, &quot;c&quot;, &quot;d&quot;]);
+
+julia&gt; collision_probability(hashfn, A, B) ==
+       collision_probability(hashfn, A, B; n_hashes=5) ==
+       collision_probability(hashfn, A, B; n_hashes=1)^5
+true
+
+julia&gt; sim = jaccard(A,B);
+
+julia&gt; collision_probability(hashfn, sim) ==
+       collision_probability(hashfn, sim; n_hashes=5) ==
+       collision_probability(hashfn, sim; n_hashes=1)^5
+true</code></pre></li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../similarities/cosine/">Cosine similarity »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 18 January 2020 21:12">Saturday 18 January 2020</span>. Using Julia version 1.3.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
