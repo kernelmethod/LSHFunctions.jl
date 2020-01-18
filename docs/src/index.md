@@ -3,7 +3,7 @@
 LSH.jl is a Julia package for performing [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) with various similarity functions.
 
 ## Introduction
-One of the simplest methods for classifying, categorizing, and grouping data is to measure how similarities pairs of data points are. For instance, the classical [``k``-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm) searches an input space ``X`` by taking a query point ``x\in X`` and a similarity function
+One of the simplest methods for classifying, categorizing, and grouping data is to measure how similar pairs of data points are. For instance, the classical [``k``-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm) searches an input space ``X`` by taking a query point ``x\in X`` and a similarity function
 
 ```math
 s:X\times X\to\mathbb{R}
@@ -21,12 +21,12 @@ Broadly, there are two computational issues with this approach:
 
 LSH.jl is a package that provides definitions of locality-sensitive hash functions for a variety of different similarities. Currently, LSH.jl supports hash functions for
 
-- Cosine similarity (`cossim`)
-- Jaccard similarity (`jaccard`)
-- ``\ell^1`` (Manhattan / "taxicab") distance (`ℓ1`)
-- ``\ell^2`` (Euclidean) distance (`ℓ2`)
-- Inner product (`inner_prod`)
-- Function-space hashes (`L1`, `L2`, and `cossim`)
+- Cosine similarity ([`cossim`](@ref))
+- Jaccard similarity ([`jaccard`](@ref)
+- ``\ell^1`` (Manhattan / "taxicab") distance ([`ℓ1`](@ref))
+- ``\ell^2`` (Euclidean) distance ([`ℓ2`](@ref))
+- Inner product ([`inner_prod`](@ref))
+- Function-space hashes ([`L1`](@ref), [`L2`](@ref), and [`cossim`](@ref))
 
 ## Contents
 

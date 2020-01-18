@@ -63,7 +63,7 @@ true
 
 ```
 
-Note that [`SimHash`](@ref) is a one-bit hash function, meaning that each hash you compute is just one bit. As a result, `hashfn(x)` returns a `BitArray`:
+Note that [`SimHash`](@ref) is a one-bit hash function. As a result, `hashfn(x)` returns a `BitArray`:
 
 ```jldoctest; setup = :(using LSH)
 julia> hashfn = SimHash();
@@ -93,8 +93,6 @@ julia> hashes = hashfn(randn(4));
 julia> length(hashes)
 10
 ```
-
----
 
 ### Footnotes
 
