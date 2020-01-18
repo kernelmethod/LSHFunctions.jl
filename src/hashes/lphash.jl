@@ -50,6 +50,9 @@ mutable struct LpHash{T <: Union{Float32,Float64}, D} <: SymmetricLSHFunction
     resize_pow2 :: Bool
 end
 
+abstract type L1Hash <: SymmetricLSHFunction end
+abstract type L2Hash <: SymmetricLSHFunction end
+
 ### External LpHash constructors
 
 function LpHash{T}(n_hashes::Integer = DEFAULT_N_HASHES;

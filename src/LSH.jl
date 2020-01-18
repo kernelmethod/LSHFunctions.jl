@@ -45,11 +45,13 @@ Hash tables for LSHFunctions
 
 # Similarity functions, norms, inner products
 export cossim, inner_prod, ℓ1, ℓ2, ℓp, L1, L2, Lp, ℓ1_norm, ℓ2_norm,
-       ℓp_norm, L1_norm, L2_norm, Lp_norm, jaccard
+       ℓp_norm, L1_norm, L2_norm, Lp_norm, jaccard, wasserstein_1d,
+       wasserstein1_1d, wasserstein2_1d
 
 # Hash functions
 export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
-       LSHFunction, MonteCarloHash, ChebHash
+       LSHFunction, MonteCarloHash, ChebHash, SymmetricLSHFunction,
+       AsymmetricLSHFunction
 
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity, lsh_family,

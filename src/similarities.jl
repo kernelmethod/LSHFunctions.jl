@@ -392,12 +392,9 @@ Compute the order-``p`` Wasserstein distance between two probability distributio
 
 # Arguments
 - `f` and `g`: two probability distributions defined on ``[-1,1]``.
-- `p::AbstractFloat`: the order of Wasserstein distance to compute.
-
-# Returns
-The order-``p`` Wasserstein distance between `f` and `g` (an `AbstractFloat`).
+- `p::Real`: the order of Wasserstein distance to compute.
 """
-function wasserstein_1d(f, g, p::AbstractFloat)
+function wasserstein_1d(f, g, p::Real)
     # For one-dimensional probability distributions, the Wasserstein distance has the
     # closed form
     #
@@ -413,4 +410,4 @@ wasserstein1_1d(f, g) = wasserstein_1d(f, g, 1)
 emd = wasserstein1_1d
 
 @doc (@doc wasserstein_1d)
-wasserstein2_2d(f, g) = wasserstein_1d(f, g, 2)
+wasserstein2_1d(f, g) = wasserstein_1d(f, g, 2)

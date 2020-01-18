@@ -93,32 +93,6 @@ end
 Documentation for various components of the LSHFunction API
 ========================#
 
-### similarity docs
-
-Docs.getdoc(::typeof(similarity)) = Markdown.parse("""
-    similarity(hashfn::LSHFunction)
-
-Returns the similarity function that `hashfn` hashes on.
-
-# Arguments
-- `hashfn::AbstractLSHFunction`: the hash function whose similarity we would like to retrieve.
-
-# Returns
-Returns a similarity function, which is one of the following:
-
-```
-$(join(available_similarities_as_strings(), "\n"))
-```
-
-# Examples
-```jldoctest; setup = :(using LSH)
-julia> hashfn = LSHFunction(cossim);
-
-julia> similarity(hashfn) == cossim
-true
-```
-""") # similarity
-
 ### LSHFunction docs
 
 Docs.getdoc(::typeof(LSHFunction)) = Markdown.parse("""
@@ -128,10 +102,7 @@ Construct the default `LSHFunction` subtype that corresponds to the similarity f
 
 # Arguments
 - `similarity`: the similarity function you want to use. Can be any of the following:
-
-```
-$(join(available_similarities_as_strings(), "\n"))
-```
+$(join("  - `" .* available_similarities_as_strings() .* "`", "\n"))
 
 - `args...`: arguments to pass on to the default `LSHFunction` constructor corresponding to `similarity`.
 - `kws...`: keyword parameters to pass on to the default `LSHFunction` constructor corresponding to `similarity`.
@@ -161,7 +132,9 @@ true
 ```
 
 See also: [`lsh_family`](@ref)
-""") # LSHFunction
+""")
+
+@doc Docs.getdoc(LSHFunction) LSHFunction
 
 ### lsh_family docs
 
@@ -186,13 +159,7 @@ julia> lsh_family(cossim)
 SimHash
 
 julia> lsh_family(ℓ1)
-$(
-if L1Hash |> methods |> length == 1
-    "L1Hash (generic function with 1 method)"
-else
-    "L1Hash (generic function with $(L1Hash |> methods |> length) methods)"
-end
-)
+L1Hash
 ```
 
 See also: [`LSHFunction`](@ref)

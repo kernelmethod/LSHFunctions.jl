@@ -19,6 +19,7 @@ makedocs(
                     "Jaccard similarity" => joinpath("similarities", "jaccard.md"),
                     "Inner product similarity" => joinpath("similarities", "inner_prod.md")],
                 "Performance tips" => "performance.md",
+                "API reference" => "full_api.md",
                ]
 )
 
