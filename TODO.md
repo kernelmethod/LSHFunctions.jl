@@ -11,5 +11,3 @@
 - Add GPU support with `CuArrays.jl`.
 
 ### Old TODO items
-- ~Implement a `LSHTable` type. This will wrap around an `LSHFunction` and allow users to search for hash collisions.~ See [`6a9fc54`](https://github.com/wshand/LSH.jl/commit/6a9fc54b5ff5043467493cd9cdd5c140033b13a5).
-- ~Following the previous item, implement a `LSHTableCollection` (or similarly-named) type. `LSHTableCollection` will wrap around multiple `LSHTable`s. For a given query, if any one of the tables experiences a collision, then that collision will be added to the results.~ See [`5ef44a6`](https://github.com/wshand/LSH.jl/commit/5ef44a6b1955794e6cc602eb258b9bf297a82df5).
