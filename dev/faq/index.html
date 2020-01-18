@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>FAQ · LSH.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">LSH.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../lshfunction_api/">The LSHFunction API</a></li><li><span class="tocitem">Similarity functions</span><ul><li><a class="tocitem" href="../similarities/cosine/">Cosine similarity</a></li><li><a class="tocitem" href="../similarities/lp_distance/"><span>$\ell^p$</span> distance</a></li><li><a class="tocitem" href="../similarities/jaccard/">Jaccard similarity</a></li><li><a class="tocitem" href="../similarities/inner_prod/">Inner product similarity</a></li></ul></li><li><a class="tocitem" href="../performance/">Performance tips</a></li><li><a class="tocitem" href="../full_api/">API reference</a></li><li class="is-active"><a class="tocitem" href>FAQ</a><ul class="internal"><li><a class="tocitem" href="#Why-do-we-compute-multiple-hashes-for-every-input?-1"><span>Why do we compute multiple hashes for every input?</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>FAQ</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>FAQ</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/kernelmethod/LSH.jl/blob/master/docs/src/faq.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="FAQ-1"><a class="docs-heading-anchor" href="#FAQ-1">FAQ</a><a class="docs-heading-anchor-permalink" href="#FAQ-1" title="Permalink"></a></h1><h2 id="Why-do-we-compute-multiple-hashes-for-every-input?-1"><a class="docs-heading-anchor" href="#Why-do-we-compute-multiple-hashes-for-every-input?-1">Why do we compute multiple hashes for every input?</a><a class="docs-heading-anchor-permalink" href="#Why-do-we-compute-multiple-hashes-for-every-input?-1" title="Permalink"></a></h2><p>In a traditional hash table data structure, you have a single hash function (e.g. MurmurHash) that you use to convert inputs into hashes, which you can then use to index into the table. With LSH, you randomly generate multiple hash functions from a single LSH family. To index into the hash table, you apply each of those hash functions to your input and concatenate your computed hashes together. The concatenated hashes form the key you use to index into the hash table.</p><p>The reason for computing multiple hashes is that every LSH function provides (at most) only a few bits of additional information with which to partition the input space. For example, <a href="../full_api/#LSH.SimHash"><code>SimHash</code></a> is a single-bit hash: that is, if you create <code>hashfn = SimHash()</code>, then <code>hashfn(x)</code> can only return either <code>BitArray([0])</code> or <code>BitArray([1])</code>. If you&#39;re trying to use <code>hashfn</code> to speed up similarity search, then the hash you compute will – <em>at best</em> – reduce the number of points you have to search through by only 50% on average.</p><p>In fact, the situation can be much more dire than that. If your data are highly structured, it is likely that each of your hashes will place data points into a tiny handful of buckets – even just one bucket. For instance, in the snippet below we have a dataset of 100 points that all have very high cosine similarity with one another. If we only create a single hash function when we call <a href="../full_api/#LSH.SimHash"><code>SimHash</code></a>, then it&#39;s very likely that all of the data points will have the same hash.</p><pre><code class="language-julia-repl">julia&gt; hashfn = SimHash();
+
+julia&gt; data = ones(10, 100);  # Each column is a data point
+
+julia&gt; data[end,1:end] .= rand(100);  # Randomize the last dimension of each point
+
+julia&gt; hashes = map(x -&gt; hashfn(x), eachcol(data));
+
+julia&gt; unique(hashes)
+1-element Array{BitArray{1},1}:
+ [0]</code></pre><p>The solution to this is to generate multiple hash functions, and combine each of the hashes we compute for an input into a single key. In the snippet below, we create 20 hash functions with <a href="../full_api/#LSH.SimHash"><code>SimHash</code></a>. Each hash computed in <code>map(x -&gt; hashfn(x), eachcol(data))</code> is a length-20 <code>BitArray</code>.</p><pre><code class="language-julia-repl">julia&gt; hashfn = SimHash(20);
+
+julia&gt; data = ones(10,100);  # Each column is a data point
+
+julia&gt; data[end,1:end] .= rand(100);  # Randomize the last dimension of each point
+
+julia&gt; hashes = map(x -&gt; hashfn(x), eachcol(data));
+
+julia&gt; unique(hashes) |&gt; length
+3
+
+julia&gt; for uh in unique(hashes)
+           println(sum(uh == h for h in hashes))
+       end
+72
+16
+12</code></pre><p>Our hash function has generated 3 unique 20-bit hashes, with 72 points sharing the first hash, 16 points sharing the second hash, and 12 points sharing the third hash. That&#39;s not a great split, but could still drastically reduce the size of the search space. For instance, the following benchmarks (on an Intel Core i7-8565U @ 1.80 GHz) suggest that the cost of computing <a href="../full_api/#LSH.SimHash"><code>SimHash</code></a> on 10-dimensional data is about 34 times the cost of computing <a href="../full_api/#LSH.cossim-Tuple{AbstractArray{T,1} where T,AbstractArray{T,1} where T}"><code>cossim</code></a>:</p><pre><code class="language-none">julia&gt; using BenchmarkTools
+
+julia&gt; @benchmark(hashfn(x), setup=(x=rand(10)))
+BenchmarkTools.Trial: 
+  memory estimate:  4.66 KiB
+  allocs estimate:  6
+  --------------
+  minimum time:     612.231 ns (0.00% GC)
+  median time:      1.563 μs (0.00% GC)
+  mean time:        1.728 μs (17.60% GC)
+  maximum time:     24.123 μs (92.03% GC)
+  --------------
+  samples:          10000
+  evals/sample:     169
+
+julia&gt; @benchmark(cossim(x,y), setup=(x=rand(10);y=rand(10)))
+BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     46.203 ns (0.00% GC)
+  median time:      46.415 ns (0.00% GC)
+  mean time:        47.467 ns (0.00% GC)
+  maximum time:     160.076 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     988
+
+julia&gt; 1.563e-6 / 46.415e-9
+33.67445868792416</code></pre><p>So as long as <a href="../full_api/#LSH.SimHash"><code>SimHash</code></a> reduces the size of the search space by 34 data points on average, it&#39;s faster than calculating the similarity between every pair of points. Even for our tiny dataset, which only had 100 points, that&#39;s still well worth it: with the 72/16/12 split that we got, <a href="../full_api/#LSH.SimHash"><code>SimHash</code></a> reduces the number of similarities we have to calculate by <span>$100 - \left(\frac{72^2}{100} + \frac{16^2}{100} + \frac{12^2}{100}\right) \approx 44$</span> points on average.</p><div class="admonition is-info"><header class="admonition-header">Improving LSH partitioning</header><div class="admonition-body"><p>LSH can be poor at partitioning your input space when data points are very similar to one another. In these cases, it may be helpful to find ways to transform your data in order to reduce their similarity.</p><p>For instance, in the example above, we created a synthetic dataset with the following code:</p><pre><code class="language-julia">julia&gt; data = ones(10,100);  # Each column is a data point
+
+julia&gt; data[end,1:end] .= rand(100);  # Randomize the last dimension of each point </code></pre><p>These data are, for all practical purposes, one-dimensional. Their first nine dimensions are all the same; only the last dimension provides any unique information about a given data point. As a result, a dimensionality reduction technique like principal component analysis (PCA) would have helped de-correlate the dimensions of the data and thereby reduced the cosine similarity between pairs of points.</p></div></div></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../full_api/">« API reference</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 18 January 2020 08:44">Saturday 18 January 2020</span>. Using Julia version 1.3.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
