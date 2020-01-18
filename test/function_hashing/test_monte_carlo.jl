@@ -57,7 +57,7 @@ Tests
                 f, f_steps = create_step_function(N)
                 g, g_steps = create_step_function(N)
 
-                prob = LSH.single_hash_collision_probability(hashfn, cossim(f_steps, g_steps))
+                prob = collision_probability(hashfn, cossim(f_steps, g_steps); n_hashes=1)
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)
@@ -84,8 +84,7 @@ Tests
 
                 # Hash collision rate should be close to the probability of
                 # collision
-                prob = LSH.single_hash_collision_probability(hashfn,
-                                                             ℓ1(f_steps, g_steps))
+                prob = collision_probability(hashfn, ℓ1(f_steps, g_steps); n_hashes=1)
                 hf, hg = hashfn(f), hashfn(g)
 
                 success &= (prob-0.05 ≤ mean(hf .== hg) ≤ prob+0.05)

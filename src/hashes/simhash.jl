@@ -117,7 +117,8 @@ LSHFunction and SymmetricLSHFunction API compliance
 hashtype(::SimHash) = Bool
 n_hashes(hashfn::SimHash) = size(hashfn.coeff, 2)
 similarity(::SimHash) = cossim
-single_hash_collision_probability(::SimHash, sim::Real) = (1 - acos(sim) / π)
+single_hash_collision_probability(::SimHash, sim::Real) =
+    @. (1 - acos(sim) / π)
 
 ### Hash computation
 

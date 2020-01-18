@@ -120,4 +120,40 @@ julia> typeof(hashes[1]) == hashtype(hashfn)
 true
 ```
 
+- [`collision_probability`](@ref): returns the probability of collision for two inputs with a given similarity. For instance, the probability that a single MinHash hash function causes a collision between inputs `A` and `B` is equal to [`jaccard(A,B)`](@ref jaccard):
+
+  ```jldoctest; setup = :(using LSH)
+  julia> hashfn = MinHash();
+
+  julia> A = Set(["a", "b", "c"]);
+
+  julia> B = Set(["b", "c", "d"]);
+
+  julia> collision_probability(hashfn, A, B) ==
+         collision_probability(hashfn, jaccard(A,B)) ==
+         jaccard(A,B)
+  true
+  ```
+
+  We often want to compute the probability that not just one hash collides, but that multiple hashes collide simultaneously. You can calculate this using the `n_hashes` keyword argument. If left unspecified, then [`collision_probability`](@ref) will use [`n_hashes(hashfn)`](@ref n_hashes) hash functions to compute the probability.
+
+  ```jldoctest; setup = :(using LSH)
+  julia> hashfn = MinHash(5);
+
+  julia> A = Set(["a", "b", "c"]);
+
+  julia> B = Set(["b", "c", "d"]);
+
+  julia> collision_probability(hashfn, A, B) ==
+         collision_probability(hashfn, A, B; n_hashes=5) ==
+         collision_probability(hashfn, A, B; n_hashes=1)^5
+  true
+
+  julia> sim = jaccard(A,B);
+
+  julia> collision_probability(hashfn, sim) ==
+         collision_probability(hashfn, sim; n_hashes=5) ==
+         collision_probability(hashfn, sim; n_hashes=1)^5
+  true
+  ```
 

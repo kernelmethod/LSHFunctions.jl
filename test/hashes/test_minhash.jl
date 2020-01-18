@@ -112,8 +112,8 @@ Tests
 
         sim_12 = similarity(hashfn)(Set(dataset_1), Set(dataset_2))
         sim_13 = similarity(hashfn)(Set(dataset_1), Set(dataset_3))
-        prob_12 = LSH.single_hash_collision_probability(hashfn, sim_12)
-        prob_13 = LSH.single_hash_collision_probability(hashfn, sim_13)
+        prob_12 = collision_probability(hashfn, sim_12; n_hashes=1)
+        prob_13 = collision_probability(hashfn, sim_13; n_hashes=1)
 
         mean(x) = sum(x) / length(x)
 

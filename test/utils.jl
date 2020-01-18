@@ -42,7 +42,7 @@ function test_collision_probability(
     sim = similarity_fn(x,y)
 
     hx, hy = hashfn(x), hashfn(y)
-    prob = LSH.single_hash_collision_probability(hashfn, sim)
+    prob = collision_probability(hashfn, sim; n_hashes=1)
     coll_freq = mean(hx .== hy)
 
     prob - δ ≤ coll_freq ≤ prob + δ

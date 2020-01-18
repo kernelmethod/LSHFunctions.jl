@@ -72,7 +72,7 @@ Tests
 
             sim = cossim(f, g, interval)
             hf, hg = hashfn(f), hashfn(g)
-            prob = LSH.single_hash_collision_probability(hashfn, sim)
+            prob = collision_probability(hashfn, sim; n_hashes=1)
 
             prob - 0.05 ≤ mean(hf .== hg) ≤ prob + 0.05
         end
@@ -123,7 +123,7 @@ Tests
 
             sim = L2(f, g, interval)
             hf, hg = hashfn(f), hashfn(g)
-            prob = LSH.single_hash_collision_probability(hashfn, sim)
+            prob = collision_probability(hashfn, sim; n_hashes=1)
 
             prob - 0.05 ≤ mean(hf .== hg) ≤ prob + 0.05
         end

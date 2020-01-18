@@ -8,6 +8,7 @@ lsh_family
 hashtype
 n_hashes
 similarity
+collision_probability
 index_hash
 query_hash
 SymmetricLSHFunction

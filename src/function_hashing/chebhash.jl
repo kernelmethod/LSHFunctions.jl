@@ -83,8 +83,8 @@ hashtype(hashfn::ChebHash) =
     hashtype(hashfn.discrete_hashfn)
 
 # TODO: this may not be true
-single_hash_collision_probability(hashfn::ChebHash, args...; kws...) =
-    single_hash_collision_probability(hashfn.discrete_hashfn, args...; kws...)
+collision_probability(hashfn::ChebHash, args...; kws...) =
+    collision_probability(hashfn.discrete_hashfn, args...; kws...)
 
 #===============
 Hash computation

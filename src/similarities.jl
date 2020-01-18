@@ -395,8 +395,8 @@ Compute the order-``p`` Wasserstein distance between two probability distributio
 - `p::Real`: the order of Wasserstein distance to compute.
 """
 function wasserstein_1d(f, g, p::Real)
-    # For one-dimensional probability distributions, the Wasserstein distance has the
-    # closed form
+    # For one-dimensional probability distributions, the Wasserstein distance has
+    # the closed form
     #
     #       ∫_0^1 |F^{-1}(x) - G^{-1}(x)|^p dx
     #

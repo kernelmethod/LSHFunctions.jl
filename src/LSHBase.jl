@@ -57,6 +57,136 @@ macro register_similarity! end
 function LSHFunction end
 function lsh_family end
 
+@doc """
+    collision_probability(hashfn::H, sim;
+                          n_hashes::Union{Symbol,Integer}=:auto) where {H <: LSHFunction}
+
+Compute the probability of hash collision between two inputs with similarity `sim` for an [`LSHFunction`](@ref) of type `H`. This function returns the probability that `n_hashes` hashes simultaneously collide.
+
+# Arguments
+- `hashfn::LSHFunction`: the `LSHFunction` for which we want to compute the probability of collision.
+- `sim`: a similarity (or vector of similarities), computed using the similarity function returned by `similarity(hashfn)`.
+
+# Keyword arguments
+- `n_hashes::Union{Symbol,Integer}` (default: `:auto`): the number of hash functions to use to compute the probability of collision. If the probability that a single hash collides is ``p``, then the probability that `n_hashes` hashes simultaneously collide is
+
+  ```math
+  p^{\\text{n_hashes}}
+  ```
+
+  As a result, `collision_probability(hashfn, sim; n_hashes=N)` is the same as `collision_probability(hashfn, sim; n_hashes=1).^N`. If `n_hashes = :auto` then this function will select the number of hashes to be `n_hashes(hashfn)` (using the [`n_hashes`](@ref) function from the [`LSHFunction`](@ref) API).
+
+# Examples
+The probability that a single MinHash hash function causes a hash collision between inputs `A` and `B` is equal to `jaccard(A,B)`:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash();
+
+julia> A = Set(["a", "b", "c"]);
+
+julia> B = Set(["b", "c", "d"]);
+
+julia> jaccard(A,B)
+0.5
+
+julia> collision_probability(hashfn, jaccard(A,B); n_hashes=1)
+0.5
+```
+
+If our [`MinHash`](@ref) struct keeps track of `N` hash functions simultaneously, then the probability of collision is `jaccard(A,B)^N`:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash(10);
+
+julia> A = Set(["a", "b", "c"]);
+
+julia> B = Set(["b", "c", "d"]);
+
+julia> collision_probability(hashfn, jaccard(A,B)) ==
+       collision_probability(hashfn, jaccard(A,B); n_hashes=10) ==
+       collision_probability(hashfn, jaccard(A,B); n_hashes=1)^10
+true
+```
+
+See also: [`n_hashes`](@ref), [`similarity`](@ref)
+"""
+@generated function collision_probability(hashfn::LSHFunction, sim;
+                                          n_hashes::Union{Symbol,Integer} = :auto)
+
+    error_msg = :("n_hashes must be :auto or a positive Integer" |>
+                  ErrorException |>
+                  throw)
+
+    n_hashes = begin
+        if n_hashes <: Symbol
+            quote
+                if n_hashes != :auto
+                    $error_msg
+                end
+
+                n_hashes = _n_hashes(hashfn)
+            end
+        else
+            quote
+                if n_hashes ≤ 0
+                    $error_msg
+                end
+                nh = n_hashes
+            end
+        end
+    end
+
+    quote
+        $n_hashes
+        single_hash_collision_probability(hashfn, sim).^n_hashes
+    end
+end
+
+@doc """
+    collision_probability(hashfn::LSHFunction, x, y;
+                          n_hashes::Union{Symbol,Integer} = :auto)
+
+Computes the probability of a hash collision between two inputs `x` and `y` for a given hash function `hashfn`. This is the same as calling
+
+    collision_probability(hashfn, similarity(hashfn)(x,y); n_hashes=n_hashes)
+
+# Examples
+The following snippet computes the probability of collision between two sets `A` and `B` for a single MinHash. For MinHash, this probability is just equal to the Jaccard similarity between `A` and `B`.
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash();
+
+julia> A = Set(["a", "b", "c"]);
+
+julia> B = Set(["a", "b", "c"]);
+
+julia> similarity(hashfn) == jaccard
+true
+
+julia> collision_probability(hashfn, A, B) ==
+       collision_probability(hashfn, jaccard(A,B)) ==
+       jaccard(A,B)
+true
+```
+
+We can use the `n_hashes` argument to specify the probability that `n_hashes` MinHash hash functions simultaneously collide. If left unspecified, then we'll simply use `n_hashes(hashfn)` as the number of hash functions:
+
+```jldoctest; setup = :(using LSH)
+julia> hashfn = MinHash(10);
+
+julia> A = Set(["a", "b", "c"]);
+
+julia> B = Set(["a", "b", "c"]);
+
+julia> collision_probability(hashfn, A, B) ==
+       collision_probability(hashfn, A, B; n_hashes=10) ==
+       collision_probability(hashfn, A, B; n_hashes=1)^10
+true
+```
+"""
+collision_probability(hashfn::LSHFunction, A, B; kws...) =
+    collision_probability(hashfn, similarity(hashfn)(A,B); kws...)
+
 #=
 The following functions must be defined for all LSHFunction subtypes
 =#
@@ -128,6 +258,19 @@ julia> length(hashes)
 ```
 """
 function n_hashes end
+
+# Alias for n_hashes that's occasionally useful when we need to process
+# variables that are named n_hashes
+const _n_hashes = n_hashes
+
+# The function
+#
+#       single_hash_collision_probability(hashfn::H, sim)
+#
+# must be implemented for every subtype H of LSHFunction. Note that users don't
+# access this function directly; instead, they use the collision_probability
+# function exported by the LSH API.
+function single_hash_collision_probability end
 
 #========================
 SymmetricLSHFunction API

@@ -48,6 +48,6 @@ export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
 
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity, lsh_family,
-       embedded_similarity
+       embedded_similarity, collision_probability
 
 end # module

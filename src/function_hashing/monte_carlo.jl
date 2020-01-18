@@ -82,8 +82,8 @@ n_hashes(hashfn::MonteCarloHash) =
     n_hashes(hashfn.discrete_hashfn)
 
 # TODO: this may not be true
-single_hash_collision_probability(hashfn::MonteCarloHash, args...; kws...) =
-    single_hash_collision_probability(hashfn.discrete_hashfn, args...; kws...)
+collision_probability(hashfn::MonteCarloHash, args...; kws...) =
+    collision_probability(hashfn.discrete_hashfn, args...; kws...)
 
 #========================
 SymmetricLSHFunction API compliance
