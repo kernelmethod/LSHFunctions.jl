@@ -8,6 +8,11 @@
 
 A Julia package for [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) to accelerate similarity search.
 
+- [What's LSH?](#whats-lsh)
+- [Installation](#installation)
+- [Supported similarity functions](#supported-similarity-functions)
+- [Examples](#examples)
+
 ## What's LSH?
 Traditionally, if you have a data point `x`, and want to find the most similar point(s) to `x` in your database, you would compute the similarity between `x` and all of the points in your database, and keep whichever points were the most similar. For instance, this type of approach is used by the classic [k-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm). However, it has two major problems:
 
