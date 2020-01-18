@@ -41,12 +41,16 @@ Create a `SignALSH` hash function for hashing on inner product similarity.
 
 # Keyword parameters
 - $(DTYPE_DOCSTR(SignALSH))
-- `maxnorm::Union{Nothing,Real}` (default: `nothing`): an upper bound on the ``\\ell^2``-norm of the data points. **Note: this keyword argument must be explicitly specified.** If it left unspecified (or set to `nothing`), `SignALSH()` will raise an error.
+- `maxnorm::Union{Nothing,Real}` (default: `nothing`): an upper bound on the ``\\ell^2``-norm of the data points.
+
+!!! warning "Warning: maxnorm must be set"
+    The `maxnorm` keyword parameter must be explicitly specified. If it is left unspecified (or set to `nothing`), `SignALSH()` will raise an error.
+
 - `m::Integer` (default: `3`): parameter `m` that affects the probability of a hash collision.
 - $(RESIZE_POW2_DOCSTR(SignALSH))
 
 # Examples
-`SignALSH` is an [`AsymmetricLSHFunction`](@ref), and hence hashes must be computed using `index_hash` and `query_hash`.
+`SignALSH` is an [`AsymmetricLSHFunction`](@ref), and hence hashes must be computed using [`index_hash`](@ref) and [`query_hash`](@ref).
 
 ```jldoctest; setup = :(using LSH)
 julia> hashfn = SignALSH(12; maxnorm=10);

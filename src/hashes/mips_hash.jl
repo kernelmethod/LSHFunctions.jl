@@ -42,7 +42,11 @@ Create a `MIPSHash` hash function for hashing on inner product similarity.
 
 # Keyword parameters
 - $(DTYPE_DOCSTR(MIPSHash))
-- `maxnorm::Union{Nothing,Real}` (default: `nothing`): an upper bound on the ``\\ell^2``-norm of the data points. **Note: this keyword argument must be explicitly specified.** If it left unspecified (or set to `nothing`), `MIPSHash()` will raise an error.
+- `maxnorm::Union{Nothing,Real}` (default: `nothing`): an upper bound on the ``\\ell^2``-norm of the data points.
+
+!!! warning "Warning: maxnorm must be explicitly set"
+    The `maxnorm` keyword parameter must be explicitly specified. If it is left unspecified (or set to `nothing`), `MIPSHash()` will raise an error.
+
 - `scale::Real` (default: `1`): parameter that affects the probability of a hash collision. Large values of `scale` increases hash collision probability (even for inputs with low inner product similarity); small values of `scale` will decrease hash collision probability.
 
 # Examples
