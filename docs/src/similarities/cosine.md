@@ -94,6 +94,30 @@ julia> length(hashes)
 10
 ```
 
+The probability of a hash collision (for a single hash) is
+
+```
+Pr[h(x) = h(y)] = 1 - \frac{\theta}{\pi}
+```
+
+where ``\theta = \text{arccos}(\text{cossim}(x,y))`` is the angle between ``x`` and ``y``. This collision probability is shown in the plot below.
+
+```@eval
+using PyPlot, LSH
+hashfn = SimHash()
+x = range(-1, 1; length=1024)
+y = [LSH.single_hash_collision_probability(hashfn, xii) for xii in x]
+
+plot(x, y)
+title("Probability of hash collision for SimHash")
+xlabel(raw"$cossim(x,y)$")
+ylabel(raw"$Pr[h(x) = h(y)]$")
+
+savefig("simhash_collision_probability.svg")
+```
+
+![Probability of collision for SimHash](simhash_collision_probability.svg)
+
 ### Footnotes
 
 [^1]: Moses S. Charikar. *Similarity estimation techniques from rounding algorithms*. In Proceedings of the Thiry-Fourth Annual ACM Symposium on Theory of Computing, STOC '02, page 380–388, New York, NY, USA, 2002. Association for Computing Machinery. 10.1145/509907.509965.
