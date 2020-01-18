@@ -33,14 +33,7 @@ include(joinpath("function_hashing", "chebhash.jl"))
 include(joinpath("function_hashing", "monte_carlo.jl"))
 
 #========================
-Hash tables for LSHFunctions
-========================#
-
-include(joinpath("tables", "table.jl"))
-include(joinpath("tables", "table_group.jl"))
-
-#========================
-Hash tables for LSHFunctions
+Exports
 ========================#
 
 # Similarity functions, norms, inner products
@@ -56,8 +49,5 @@ export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity, lsh_family,
        embedded_similarity
-
-# Hash tables and related functions
-export LSHTable, LSHTableGroup, insert!, reset!
 
 end # module
