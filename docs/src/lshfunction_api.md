@@ -87,6 +87,11 @@ julia> hashfn = LSHFunction(jaccard, 10);
 
 julia> n_hashes(hashfn)
 10
+
+julia> hashes = hashfn(randn(50));
+
+julia> length(hashes)
+10
 ```
 
 - [`similarity`](@ref): returns the similarity function for which the input [`LSHFunction`](@ref) is locality-sensitive:

@@ -120,6 +120,11 @@ julia> hashfn = SimHash(12);
 
 julia> n_hashes(hashfn)
 12
+
+julia> hashes = hashfn(rand(25));
+
+julia> length(hashes)
+12
 ```
 """
 function n_hashes end
