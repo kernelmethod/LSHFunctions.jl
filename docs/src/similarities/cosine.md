@@ -96,9 +96,7 @@ julia> length(hashes)
 
 The probability of a hash collision (for a single hash) is
 
-```
-Pr[h(x) = h(y)] = 1 - \frac{\theta}{\pi}
-```
+``Pr[h(x) = h(y)] = 1 - \frac{\theta}{\pi}``
 
 where ``\theta = \text{arccos}(\text{cossim}(x,y))`` is the angle between ``x`` and ``y``. This collision probability is shown in the plot below.
 
