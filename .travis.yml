@@ -69,8 +69,7 @@ jobs:
         - sudo apt-get install -y python3.7 python3-pip python3-setuptools
         - pip3 install --upgrade pip
         - pip3 install --user matplotlib
-        - julia --project=docs -e 'using Pkg; Pkg.instantiate(); \
-                                   Pkg.add(PackageSpec(path=pwd()));'
+        - julia --project=docs -e 'using Pkg; Pkg.instantiate(); Pkg.add(PackageSpec(path=pwd()));'
         - julia --project=docs -e 'using Pkg; Pkg.build("PyCall");'
       script:
         - julia --project=docs --color=yes docs/make.jl
