@@ -1,7 +1,7 @@
 # Cosine similarity
 
 !!! warning "Under construction"
-    This section is currently being developed. If you're interested in helping write this section, feel free to [open a pull request](https://github.com/kernelmethod/LSH.jl/pulls); otherwise, please check back later.
+    This section is currently being developed. If you're interested in helping write this section, feel free to [open a pull request](https://github.com/kernelmethod/LSHFunctions.jl/pulls); otherwise, please check back later.
 
 ## Definition
 [Cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity), roughly speaking, measures the angle between a pair of inputs. Two inputs are very similar if the angle between them is low, and their similarity drops as the angle between them increases.

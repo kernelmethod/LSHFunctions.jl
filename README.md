@@ -1,9 +1,9 @@
-# LSH.jl
+# LSHFunctions.jl
 
-- Docs: [![Stable docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://kernelmethod.github.io/LSH.jl/stable/) [![Dev docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://kernelmethod.github.io/LSH.jl/dev/)
-- Build status: [![Build Status](https://travis-ci.com/kernelmethod/LSH.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSH.jl)
-- Code coverage: [![Coverage Status](https://coveralls.io/repos/github/kernelmethod/LSH.jl/badge.svg?branch=master)](https://coveralls.io/github/kernelmethod/LSH.jl?branch=master)
-[![codecov](https://codecov.io/gh/kernelmethod/LSH.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSH.jl)
+- Docs: [![Stable docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://kernelmethod.github.io/LSHFunctions.jl/stable/) [![Dev docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://kernelmethod.github.io/LSHFunctions.jl/dev/)
+- Build status: [![Build Status](https://travis-ci.com/kernelmethod/LSHFunctions.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSHFunctions.jl)
+- Code coverage: [![Coverage Status](https://coveralls.io/repos/github/kernelmethod/LSHFunctions.jl/badge.svg?branch=master)](https://coveralls.io/github/kernelmethod/LSHFunctions.jl?branch=master)
+[![codecov](https://codecov.io/gh/kernelmethod/LSHFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSHFunctions.jl)
 - DOI to cite this code: [![DOI](https://zenodo.org/badge/197700982.svg)](https://zenodo.org/badge/latestdoi/197700982)
 
 A Julia package for [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) to accelerate similarity search.
@@ -22,10 +22,10 @@ Traditionally, if you have a data point `x`, and want to find the most similar p
 **Locality-sensitive hashing** (LSH) is a technique for accelerating these kinds of similarity searches. Instead of measuring how similar your query point is to every point in your database, you calculate a few hashes of the query point and only compare it against those points with which it experiences a hash collision. Locality-sensitive hash functions are randomly generated, with the fundamental property that as the similarity between `x` and `y` increases, the probability of a hash collision between `x` and `y` also increases.
 
 ## Installation
-You can install LSH.jl from the Julia REPL with
+You can install LSHFunctions.jl from the Julia REPL with
 
 ```
-pkg> add https://github.com/kernelmethod/LSH.jl
+pkg> add https://github.com/kernelmethod/LSHFunctions.jl
 ```
 
 ## Supported similarity functions
@@ -75,4 +75,4 @@ julia> x = randn(128);
 julia> x_hashes = hashfn(x);
 ```
 
-For more details, [check out the LSH.jl documentation](https://kernelmethod.github.io/LSH.jl/dev/).
+For more details, [check out the LSHFunctions.jl documentation](https://kernelmethod.github.io/LSHFunctions.jl/dev/).

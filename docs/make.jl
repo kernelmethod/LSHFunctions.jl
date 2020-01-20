@@ -8,7 +8,7 @@ pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 using Documenter, LSH
 
 makedocs(
-    sitename = "LSH.jl",
+    sitename = "LSHFunctions.jl",
     format   = Documenter.HTML(),
     modules  = [LSH],
     pages    = ["Home" => "index.md",
@@ -25,5 +25,5 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/kernelmethod/LSH.jl.git"
+    repo = "github.com/kernelmethod/LSHFunctions.jl.git"
 )

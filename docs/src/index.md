@@ -1,6 +1,6 @@
-# LSH.jl
+# LSHFunctions.jl
 
-LSH.jl is a Julia package for performing [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) with various similarity functions.
+LSHFunctions.jl is a Julia package for performing [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) with various similarity functions.
 
 ## Introduction
 One of the simplest methods for classifying, categorizing, and grouping data is to measure how similar pairs of data points are. For instance, the classical [``k``-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm) searches an input space ``X`` by taking a query point ``x\in X`` and a similarity function
@@ -19,7 +19,7 @@ Broadly, there are two computational issues with this approach:
 ## Locality-sensitive hashing
 *Locality-sensitive hashing* (LSH) is a technique for accelerating similarity search that works by using a hash function on the query point ``x`` and limiting similarity search to only those points in the database that experience a hash collision with ``x``. The hash functions that are used are randomly generated from a family of *locality-sensitive hash functions*. These hash functions have the property that ``Pr[h(x) = h(y)]`` (i.e., the probability of a hash collision) increases the more similar that ``x`` and ``y`` are.
 
-LSH.jl is a package that provides definitions of locality-sensitive hash functions for a variety of different similarities. Currently, LSH.jl supports hash functions for
+LSHFunctions.jl is a package that provides definitions of locality-sensitive hash functions for a variety of different similarities. Currently, LSHFunctions.jl supports hash functions for
 
 - Cosine similarity ([`cossim`](@ref))
 - Jaccard similarity ([`jaccard`](@ref))

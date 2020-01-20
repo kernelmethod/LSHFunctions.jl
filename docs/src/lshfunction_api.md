@@ -1,7 +1,7 @@
 # The LSHFunction API
 
 !!! warning "Under construction"
-    This section is currently being developed. If you're interested in helping write this section, feel free to [open a pull request](https://github.com/kernelmethod/LSH.jl/pulls); otherwise, please check back later.
+    This section is currently being developed. If you're interested in helping write this section, feel free to [open a pull request](https://github.com/kernelmethod/LSHFunctions.jl/pulls); otherwise, please check back later.
 
 ## LSHFunction
 The `LSH` module exposes a relatively easy interface for constructing new hash functions. Namely, you call [`LSHFunction`](@ref) with 
@@ -73,7 +73,7 @@ L1Hash
 ```
 
 ## Utilities
-LSH.jl provides a few common utility functions that you can use across [`LSHFunction`](@ref) subtypes:
+LSHFunctions.jl provides a few common utility functions that you can use across [`LSHFunction`](@ref) subtypes:
 
 - [`n_hashes`](@ref): returns the number of hash functions computed by an [`LSHFunction`](@ref).
 
