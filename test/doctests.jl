@@ -2,8 +2,8 @@
 Doctests
 ========================#
 
-using Documenter, LSH, Test
+using Documenter, LSHFunctions, Test
 
 @testset "LSH doctests" begin
-    doctest(LSH; manual = false)
+    doctest(LSHFunctions; manual = false)
 end

@@ -1,4 +1,4 @@
-using Test, Random, LSH, QuadGK
+using Test, Random, LSHFunctions, QuadGK
 using LinearAlgebra: dot, norm
 
 include("utils.jl")
@@ -87,7 +87,7 @@ end
     Random.seed!(RANDOM_SEED)
 
     @testset "Compute L^1 distance and norm" begin
-        interval = LSH.@interval(-π ≤ x ≤ π)
+        interval = LSHFunctions.@interval(-π ≤ x ≤ π)
         f(x) = 0
         g(x) = 2
 
@@ -105,7 +105,7 @@ end
     end
 
     @testset "Compute L^2 distance and norm" begin
-        interval = LSH.@interval(-π ≤ x ≤ π)
+        interval = LSHFunctions.@interval(-π ≤ x ≤ π)
         f(x) = 0
         g(x) = 2
 
@@ -123,7 +123,7 @@ end
     end
 
     @testset "Compute L^p distance and norm" begin
-        interval = LSH.@interval(-π ≤ x ≤ π)
+        interval = LSHFunctions.@interval(-π ≤ x ≤ π)
         f(x) = 0
         g(x) = 2
 
@@ -171,7 +171,7 @@ end
     end
 
     @testset "Compute cosine similarity between functions" begin
-        interval = LSH.@interval(0 ≤ x ≤ 1)
+        interval = LSHFunctions.@interval(0 ≤ x ≤ 1)
         f(x) = (x ≤ 0.5) ? 1.0 : 0.0
         g(x) = (x ≤ 0.5) ? 0.0 : 1.0
 
@@ -194,7 +194,7 @@ end
         f, f_steps = create_step_function(10)
         g, g_steps = create_step_function(10)
 
-        @test cossim(f, g, LSH.@interval(0 ≤ x ≤ 10)) ≈ cossim(f_steps, g_steps)
+        @test cossim(f, g, LSHFunctions.@interval(0 ≤ x ≤ 10)) ≈ cossim(f_steps, g_steps)
     end
 end
 
@@ -254,7 +254,7 @@ end
     end
 
     @testset "Compute L^2 inner products between pairs of functions" begin
-        interval = LSH.@interval(-π ≤ x ≤ π)
+        interval = LSHFunctions.@interval(-π ≤ x ≤ π)
         f(x) = 1
         g(x) = x
 

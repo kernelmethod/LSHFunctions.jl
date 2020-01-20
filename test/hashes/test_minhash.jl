@@ -1,4 +1,4 @@
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 
 include(joinpath("..", "utils.jl"))
 
@@ -20,7 +20,7 @@ Tests
             hashfn = MinHash(nh; symbols=symbols)
 
             @test isa(hashfn, MinHash{eltype(symbols)})
-            @test LSH.n_hashes(hashfn) == nh
+            @test LSHFunctions.n_hashes(hashfn) == nh
             @test hashtype(hashfn) == UInt32
         end
     end

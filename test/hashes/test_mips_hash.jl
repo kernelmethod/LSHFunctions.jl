@@ -1,4 +1,4 @@
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 
 include(joinpath("..", "utils.jl"))
 
@@ -18,7 +18,7 @@ Tests
         @test hashtype(hashfn) == Int32
         @test similarity(hashfn) == inner_prod
         @test isa(hashfn, MIPSHash{Float32})    # Default dtype should be Float32
-        @test isa(hashfn, LSH.AsymmetricLSHFunction)
+        @test isa(hashfn, LSHFunctions.AsymmetricLSHFunction)
 
         ##
         hashfn = MIPSHash(12; maxnorm=1)

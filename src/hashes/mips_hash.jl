@@ -52,7 +52,7 @@ Create a `MIPSHash` hash function for hashing on inner product similarity.
 # Examples
 `MIPSHash` is an [`AsymmetricLSHFunction`](@ref), and hence hashes must be computed using `index_hash` and `query_hash`.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = MIPSHash(5; maxnorm=10);
 
 julia> x = rand(4);
@@ -68,14 +68,14 @@ true
 
 You need to explicitly specify the `maxnorm` keyword parameter when constructing `MIPSHash`, otherwise you will get an error.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = MIPSHash(5)
 ERROR: maxnorm must be specified for MIPSHash
 ```
 
 You'll also get an error if you try to hash a vector that has norm greater than the `maxnorm` that you specified.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = MIPSHash(; maxnorm=1);
 
 julia> index_hash(hashfn, ones(4))

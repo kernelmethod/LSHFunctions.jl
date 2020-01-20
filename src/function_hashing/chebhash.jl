@@ -27,7 +27,7 @@ ChebHash(similarity, args...; kws...) =
 
 function ChebHash(::SimilarityFunction{S},
                   args...;
-                  interval::RealInterval = LSH.@interval(-1 ≤ x ≤ 1),
+                  interval::RealInterval = LSHFunctions.@interval(-1 ≤ x ≤ 1),
                   kws...) where S
 
     discrete_hashfn = LSHFunction(S, args...; kws...)

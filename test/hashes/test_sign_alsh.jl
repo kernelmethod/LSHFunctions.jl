@@ -1,4 +1,4 @@
-using Test, Random, LSH, LinearAlgebra, SparseArrays
+using Test, Random, LSHFunctions, LinearAlgebra, SparseArrays
 
 include(joinpath("..", "utils.jl"))
 
@@ -12,7 +12,7 @@ Tests
         hashfn = SignALSH(; maxnorm=1)
         @test n_hashes(hashfn) == 1
         @test isa(hashfn, SignALSH{Float32})
-        @test isa(hashfn, LSH.AsymmetricLSHFunction)
+        @test isa(hashfn, LSHFunctions.AsymmetricLSHFunction)
         @test hashtype(hashfn) == Bool
         @test similarity(hashfn) == inner_prod
 

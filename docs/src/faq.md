@@ -7,7 +7,7 @@ The reason for computing multiple hashes is that every LSH function provides (at
 
 In fact, the situation can be much more dire than that. If your data are highly structured, it is likely that each of your hashes will place data points into a tiny handful of buckets -- even just one bucket. For instance, in the snippet below we have a dataset of 100 points that all have very high cosine similarity with one another. If we only create a single hash function when we call [`SimHash`](@ref), then it's very likely that all of the data points will have the same hash.
 
-```jldoctest; setup = :(using LSH, Random; Random.seed!(0))
+```jldoctest; setup = :(using LSHFunctions, Random; Random.seed!(0))
 julia> hashfn = SimHash();
 
 julia> data = ones(10, 100);  # Each column is a data point
@@ -24,7 +24,7 @@ julia> unique(hashes)
 The solution to this is to generate multiple hash functions, and combine each of the hashes we compute for an input into a single key. In the snippet below, we create 20 hash functions with [`SimHash`](@ref). Each hash computed in `map(x -> hashfn(x), eachcol(data))` is a length-20 `BitArray`.
 
 
-```jldoctest; setup = :(using LSH, Random; Random.seed!(0))
+```jldoctest; setup = :(using LSHFunctions, Random; Random.seed!(0))
 julia> hashfn = SimHash(20);
 
 julia> data = ones(10,100);  # Each column is a data point

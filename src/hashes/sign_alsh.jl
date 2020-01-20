@@ -52,7 +52,7 @@ Create a `SignALSH` hash function for hashing on inner product similarity.
 # Examples
 `SignALSH` is an [`AsymmetricLSHFunction`](@ref), and hence hashes must be computed using [`index_hash`](@ref) and [`query_hash`](@ref).
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = SignALSH(12; maxnorm=10);
 
 julia> x = rand(4);
@@ -68,14 +68,14 @@ true
 
 You need to explicitly specify the `maxnorm` keyword parameter when constructing `SignALSH`, otherwise you will get an error.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = SignALSH(12)
 ERROR: maxnorm must be specified for SignALSH
 ```
 
 You'll also get an error if you try to hash a vector that has norm greater than the `maxnorm` that you specified.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = SignALSH(; maxnorm=1);
 
 julia> index_hash(hashfn, ones(4))

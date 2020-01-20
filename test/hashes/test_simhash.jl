@@ -1,4 +1,4 @@
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 
 include(joinpath("..", "utils.jl"))
 
@@ -7,11 +7,10 @@ Tests
 ==================#
 @testset "SimHash tests" begin
     Random.seed!(RANDOM_SEED)
-    import LSH: SymmetricLSHFunction
 
     @testset "Construct SimHash" begin
         # Create 128 SimHash hash functions
-        hashfn = LSH.SimHash(128)
+        hashfn = LSHFunctions.SimHash(128)
 
         @test n_hashes(hashfn) == 128
         @test hashtype(hashfn) == Bool
@@ -19,7 +18,7 @@ Tests
 
         # By default, SimHash should start off unable to hash inputs of any
         # size, and should not resize in powers of 2.
-        @test LSH.current_max_input_size(hashfn) == 0
+        @test LSHFunctions.current_max_input_size(hashfn) == 0
         @test hashfn.resize_pow2 == false
     end
 
@@ -65,7 +64,7 @@ Tests
         # the probability of collision for many different pairs of random inputs.
         # As the number of pairs increases, the probability that one pair has an
         # above- or below-average number of collisions increases.
-        hashfn = LSH.SimHash(1024)
+        hashfn = LSHFunctions.SimHash(1024)
 
         # Run test_collision_probability lots of times to ensure that the
         # collision probability is close to what's advertised.
@@ -80,21 +79,21 @@ Tests
         inputs = [rand(4), rand(7), rand(127), rand(4)]
 
         ### First round of tests: run with resize_pow2 == false
-        hashfn = LSH.SimHash(1; resize_pow2 = false)
+        hashfn = LSHFunctions.SimHash(1; resize_pow2 = false)
 
         for (ii,x) in enumerate(inputs)
             max_size_seen = inputs[1:ii] .|> length |> maximum
             hashfn(x)
-            @test LSH.current_max_input_size(hashfn) == max_size_seen
+            @test LSHFunctions.current_max_input_size(hashfn) == max_size_seen
         end
 
         # Second round of tests: run with resize_pow2 == true
-        hashfn = LSH.SimHash(1; resize_pow2 = true)
+        hashfn = LSHFunctions.SimHash(1; resize_pow2 = true)
         for (ii,x) in enumerate(inputs)
             max_size_seen = inputs[1:ii] .|> length |> maximum
             next_pow_2 = nextpow(2, max_size_seen)
             hashfn(x)
-            @test LSH.current_max_input_size(hashfn) == next_pow_2
+            @test LSHFunctions.current_max_input_size(hashfn) == next_pow_2
         end
     end
 end

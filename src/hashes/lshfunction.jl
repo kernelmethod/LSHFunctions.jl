@@ -21,7 +21,7 @@ Register `hashfn` to the `LSH` module as the default locality-sensitive hash fun
 # Examples
 Create a custom implementation of cosine similarity called `my_cossim`, and associate it with `SimHash`:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> using LinearAlgebra: dot, norm
 
 julia> my_cossim(x,y) = dot(x,y) / (norm(x) * norm(y));
@@ -29,7 +29,7 @@ julia> my_cossim(x,y) = dot(x,y) / (norm(x) * norm(y));
 julia> hashfn = LSHFunction(my_cossim);
 ERROR: MethodError: no method matching LSHFunction(::typeof(my_cossim))
 
-julia> LSH.@register_similarity!(my_cossim, SimHash);
+julia> LSHFunctions.@register_similarity!(my_cossim, SimHash);
 
 julia> hashfn = LSHFunction(my_cossim);
 
@@ -38,8 +38,8 @@ true
 ```
 """
 macro register_similarity!(similarity, hashfn)
-    lshfn = :(LSH.LSHFunction)
-    lshfam = :(LSH.lsh_family)
+    lshfn = :(LSHFunctions.LSHFunction)
+    lshfam = :(LSHFunctions.lsh_family)
 
     quote
         local similarity = $(esc(similarity))
@@ -113,7 +113,7 @@ Returns a subtype of `LSH.LSHFunction` that hashes the similarity function `simi
 # Examples
 In the snippet below, we construct `$(lsh_family(cossim))` (the default hash function corresponding to cosine similarity) using `LSHFunction()`:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = LSHFunction(cossim);
 
 julia> typeof(hashfn) <: $(lsh_family(cossim)) <: LSHFunction
@@ -122,7 +122,7 @@ true
 
 We can provide arguments and keyword parameters corresponding to the hash function that we construct:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = LSHFunction(inner_prod, 100; dtype=Float64, maxnorm=10);
 
 julia> n_hashes(hashfn) == 100 &&
@@ -154,7 +154,7 @@ help?> SignALSH
 
 # Examples
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> lsh_family(cossim)
 SimHash
 

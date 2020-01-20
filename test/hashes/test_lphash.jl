@@ -1,4 +1,4 @@
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 
 include(joinpath("..", "utils.jl"))
 
@@ -7,7 +7,6 @@ Tests
 ==================#
 @testset "LpHash tests" begin
     Random.seed!(RANDOM_SEED)
-    import LSH: SymmetricLSHFunction
 
     @testset "Can construct an ℓ^p distance hash function" begin
         # Construct a hash for L^1 distance
@@ -26,8 +25,8 @@ Tests
         @test similarity(L2_hash) == ℓ2
 
         # Construct a hash using a specified dtype
-        @test isa(L1Hash(1; dtype=Float32), LSH.LpHash{Float32})
-        @test isa(L2Hash(1; dtype=Float64), LSH.LpHash{Float64})
+        @test isa(L1Hash(1; dtype=Float32), LSHFunctions.LpHash{Float32})
+        @test isa(L2Hash(1; dtype=Float64), LSHFunctions.LpHash{Float64})
     end
 
     @testset "Hashes are correctly computed" begin

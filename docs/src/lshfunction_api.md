@@ -17,7 +17,7 @@ LSHFunction(similarity, n_hashes::Integer=1; kws...)
 For instance, in the snippet below we create a single hash function corresponding to cosine similarity:
 
 ```jldoctest
-julia> using LSH
+julia> using LSHFunctions
 
 julia> hashfn = LSHFunction(cossim);
 
@@ -37,7 +37,7 @@ As another example, following code snippet creates 10 hash functions for inner p
 - `maxnorm`: an upper bound on the norm of the data points we're hashing, and a required parameter for [`SignALSH`](@ref).
 
 ```jldoctest
-julia> using LSH
+julia> using LSHFunctions
 
 julia> hashfn = LSHFunction(inner_prod, 10; dtype=Float64, maxnorm=5.0);
 
@@ -64,7 +64,7 @@ julia> hashfn.maxnorm
 
 If you want to know what hash function will be created for a given similarity, you can use [`lsh_family`](@ref):
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> lsh_family(jaccard)
 MinHash
 
@@ -77,7 +77,7 @@ LSHFunctions.jl provides a few common utility functions that you can use across 
 
 - [`n_hashes`](@ref): returns the number of hash functions computed by an [`LSHFunction`](@ref).
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = LSHFunction(jaccard);
 
 julia> n_hashes(hashfn)
@@ -96,7 +96,7 @@ julia> length(hashes)
 
 - [`similarity`](@ref): returns the similarity function for which the input [`LSHFunction`](@ref) is locality-sensitive:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = LSHFunction(cossim);
 
 julia> similarity(hashfn)
@@ -105,7 +105,7 @@ cossim (generic function with 2 methods)
 
 - [`hashtype`](@ref): returns the type of hash computed by the input hash function. Note that in practice `hashfn(x)` (or [`index_hash(hashfn,x)`](@ref) and [`query_hash(hashfn,x)`](@ref) for an [`AsymmetricLSHFunction`](@ref)) will return an array of hashes, one for each hash function you generated. [`hashtype`](@ref) is the data type of each element of `hashfn(x)`.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = LSHFunction(cossim, 5);
 
 julia> hashtype(hashfn)
@@ -122,7 +122,7 @@ true
 
 - [`collision_probability`](@ref): returns the probability of collision for two inputs with a given similarity. For instance, the probability that a single MinHash hash function causes a collision between inputs `A` and `B` is equal to [`jaccard(A,B)`](@ref jaccard):
 
-  ```jldoctest; setup = :(using LSH)
+  ```jldoctest; setup = :(using LSHFunctions)
   julia> hashfn = MinHash();
 
   julia> A = Set(["a", "b", "c"]);
@@ -137,7 +137,7 @@ true
 
   We often want to compute the probability that not just one hash collides, but that multiple hashes collide simultaneously. You can calculate this using the `n_hashes` keyword argument. If left unspecified, then [`collision_probability`](@ref) will use [`n_hashes(hashfn)`](@ref n_hashes) hash functions to compute the probability.
 
-  ```jldoctest; setup = :(using LSH)
+  ```jldoctest; setup = :(using LSHFunctions)
   julia> hashfn = MinHash(5);
 
   julia> A = Set(["a", "b", "c"]);

@@ -40,7 +40,7 @@ Construct a locality-sensitive hash function for Jaccard similarity.
 # Examples
 Construct a hash function to hash sets whose elements are integers between `1` and `50`:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = MinHash(40; symbols = Set(1:50));
 
 julia> n_hashes(hashfn) == 40 && similarity(hashfn) == jaccard
@@ -56,7 +56,7 @@ ERROR: Symbol 100 not found
 
 If you aren't sure ahead of time exactly what kinds of elements will be in the sets you're hashing, you can opt not to specify `symbols`, in which case `MinHash` will lazily update its hash functions as it encounters new symbols:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = MinHash();
 
 julia> hashfn(Set([1, 2, 3]));
@@ -67,7 +67,7 @@ julia> hashfn(Set(["a", "b", "c"]));
 
 If you don't know what elements you'll encounter, but you know that they'll all be of a specific data type, you can specify the `dtype` argument for increased efficiency:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = MinHash(10; dtype = String);
 
 julia> hashfn(Set(["a", "b", "c"]));

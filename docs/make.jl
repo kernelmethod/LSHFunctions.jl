@@ -5,12 +5,12 @@ Pkg.activate(); Pkg.instantiate()
 
 pushfirst!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
-using Documenter, LSH
+using Documenter, LSHFunctions
 
 makedocs(
     sitename = "LSHFunctions.jl",
     format   = Documenter.HTML(),
-    modules  = [LSH],
+    modules  = [LSHFunctions],
     pages    = ["Home" => "index.md",
                 "The LSHFunction API" => "lshfunction_api.md",
                 "Similarity functions" => [

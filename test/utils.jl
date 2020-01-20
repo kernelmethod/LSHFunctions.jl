@@ -1,4 +1,4 @@
-using LSH
+using LSHFunctions
 
 #========================
 Global variables
@@ -33,7 +33,7 @@ mean(x) = sum(x) / length(x)
 # is within δ of the expected single-hash collision probability, and
 # false otherwise.
 function test_collision_probability(
-        hashfn :: LSH.LSHFunction,
+        hashfn :: LSHFunctions.LSHFunction,
         δ :: AbstractFloat,
         sampler = () -> randn(4))
 

@@ -114,7 +114,7 @@ Constructs a locality-sensitive hash for ``\\ell^$($power)`` distance (``\\|x - 
 # Examples
 Construct an `$($hashfn)` with the number of hash functions you want to generate:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = $($hashfn)(128);
 
 julia> hashfn.power == $($power) &&
@@ -125,7 +125,7 @@ true
 
 After creating a hash function, you can compute hashes with `hashfn(x)`:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = $($hashfn)(20);
 
 julia> x = rand(4);

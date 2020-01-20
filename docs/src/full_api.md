@@ -29,7 +29,7 @@ MIPSHash
 ## Similarity functions
 
 ```@autodocs
-Modules = [LSH]
+Modules = [LSHFunctions]
 Private = false
 Pages = ["similarities.jl"]
 ```
@@ -37,6 +37,6 @@ Pages = ["similarities.jl"]
 ## Private interface
 
 ```@autodocs
-Modules = [LSH]
+Modules = [LSHFunctions]
 Public = false
 ```

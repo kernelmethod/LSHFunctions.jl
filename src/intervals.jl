@@ -24,8 +24,8 @@ Encodes an interval of the real line, such as `[-1,1]` or `[0,Inf)`.
 # Examples
 The following snippet constructs `RealInterval` represeting the interval [0,1)
 
-```jldoctest; setup = :(using LSH)
-julia> interval = LSH.RealInterval(0, 1, true, false);
+```jldoctest; setup = :(using LSHFunctions)
+julia> interval = LSHFunctions.RealInterval(0, 1, true, false);
 ```
 
 It's generally easier to construct an interval using the `@interval` macro. Check out the documentation for [`@interval`](@ref) for more information.
@@ -143,35 +143,35 @@ new RealIntervals.
 @doc """
     @interval(expr)
 
-Construct a new `LSH.RealInterval` representing an interval on the real line from an expression such as
+Construct a new `LSHFunctions.RealInterval` representing an interval on the real line from an expression such as
 
     0 ≤ x < 1
 
-The returned expression constructs an `LSH.RealInterval` encoding the lower and upper bounds on the interval, as well as whether the ends are opened or closed.
+The returned expression constructs an `LSHFunctions.RealInterval` encoding the lower and upper bounds on the interval, as well as whether the ends are opened or closed.
 
 # Examples
 You can construct an interval using the following syntax:
 
-```jldoctest; setup = :(using LSH)
-julia> interval = LSH.@interval(0 ≤ x < 1);
+```jldoctest; setup = :(using LSHFunctions)
+julia> interval = LSHFunctions.@interval(0 ≤ x < 1);
 ```
 
 There are usually multiple ways of constructing the same interval. For instance, each of the expressions below are equivalent ways of constructing the interval `[-1,1]`.
 
-```jldoctest; setup = :(using LSH)
-julia> LSH.@interval(-1 ≤  x ≤  1) ==
-       LSH.@interval(-1 <= x <= 1) ==
-       LSH.@interval(-1 ≤  y ≤  1) ==
-       LSH.@interval( 1 ≥  x ≥ -1)
+```jldoctest; setup = :(using LSHFunctions)
+julia> LSHFunctions.@interval(-1 ≤  x ≤  1) ==
+       LSHFunctions.@interval(-1 <= x <= 1) ==
+       LSHFunctions.@interval(-1 ≤  y ≤  1) ==
+       LSHFunctions.@interval( 1 ≥  x ≥ -1)
 true
 ```
 
-You can even create intervals with `Inf` or `-Inf` at the endpoints, e.g. `LSH.@interval(-Inf < x < Inf)`.
+You can even create intervals with `Inf` or `-Inf` at the endpoints, e.g. `LSHFunctions.@interval(-Inf < x < Inf)`.
 
 There are two primary operations you can run on an interval: testing for membership and intersection. You can test whether or not `x` is in an interval using `x ∈ interval`, as shown below.
 
-```jldoctest; setup = :(using LSH)
-julia> interval = LSH.@interval(0 ≤ x < 1);
+```jldoctest; setup = :(using LSHFunctions)
+julia> interval = LSHFunctions.@interval(0 ≤ x < 1);
 
 julia> 0 ∈ interval && 1 ∉ interval
 true
@@ -183,7 +183,7 @@ true
 You can also intersect two intervals using the `∩` operator (or by using `intersect(interval_1, interval_2)`).
 
 ```
-julia> LSH.@interval(0 ≤ x < 1) ∩ LSH.@interval(1/2 < x ≤ 1) == LSH.@interval(1/2 < x < 1)
+julia> LSHFunctions.@interval(0 ≤ x < 1) ∩ LSHFunctions.@interval(1/2 < x ≤ 1) == LSHFunctions.@interval(1/2 < x < 1)
 true
 ```
 
@@ -191,12 +191,12 @@ See also: [`RealInterval`](@ref)
 """
 macro interval(expr)
     invalid_expr_msg = """
-    Expression is invalid. The expression passed to LSH.@interval must take the form
+    Expression is invalid. The expression passed to LSHFunctions.@interval must take the form
 
         a {<,≤,>,≥} x {<,≤,>,≥} b
 
     where a and b evaluate to real numbers, and x is a valid variable identifier.
-    See the documentation for LSH.@interval for more information.
+    See the documentation for LSHFunctions.@interval for more information.
     """
 
     if !isa(expr, Expr)

@@ -1,4 +1,4 @@
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 
 include(joinpath("..", "utils.jl"))
 

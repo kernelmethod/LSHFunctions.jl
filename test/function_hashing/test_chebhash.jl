@@ -1,4 +1,4 @@
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 using LinearAlgebra: norm
 using QuadGK
 
@@ -63,7 +63,7 @@ Tests
     end
 
     @testset "Hash cosine similarity (nontrivial inputs)" begin
-        interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
+        interval = LSHFunctions.@interval(-1.0 ≤ x ≤ 1.0)
         hashfn = ChebHash(cossim, 1024; interval=interval)
 
         trig_function_test() = begin
@@ -114,7 +114,7 @@ Tests
     end
 
     @testset "Hash L^2 distance (nontrivial inputs)" begin
-        interval = LSH.@interval(-1.0 ≤ x ≤ 1.0)
+        interval = LSHFunctions.@interval(-1.0 ≤ x ≤ 1.0)
         hashfn = ChebHash(ℓ2, 1024; interval=interval)
 
         trig_function_test() = begin

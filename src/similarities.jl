@@ -28,7 +28,7 @@ where ``\left\langle\cdot,\cdot\right\rangle`` is an inner product (e.g. dot pro
 - `x` and `y`: two inputs for which `dot(x,y)`, `norm(x)`, and `norm(y)` are defined.
 
 # Examples
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> using LinearAlgebra: dot, norm;
 
 julia> x, y = rand(4), rand(4);
@@ -55,7 +55,7 @@ function cossim(x::AbstractVector, y::AbstractVector)
     dot(x,y) / (norm_x * norm_y)
 end
 
-function cossim(f, g, interval::LSH.RealInterval)
+function cossim(f, g, interval::LSHFunctions.RealInterval)
     norm_f = L2_norm(f, interval)
     norm_g = L2_norm(g, interval)
 
@@ -82,7 +82,7 @@ Computes the ``\ell^p`` distance between a pair of vectors, given by
 `ℓ1(x,y)` is the same as `ℓp(x,y,1)`, and `ℓ2(x,y)` is the same as `ℓp(x,y,2)`.
 
 # Examples
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> x = [1, 2, 3];
 
 julia> y = [4, 5, 6];
@@ -159,9 +159,9 @@ end
 # Function space L^p distances
 
 @doc raw"""
-    Lp(f, g, interval::LSH.RealInterval, p)
-    L1(f, g, interval::LSH.RealInterval)
-    L2(f, g, interval::LSH.RealInterval)
+    Lp(f, g, interval::LSHFunctions.RealInterval, p)
+    L1(f, g, interval::LSHFunctions.RealInterval)
+    L2(f, g, interval::LSHFunctions.RealInterval)
 
 Computes the ``L^p`` distance between two functions, given by
 
@@ -174,10 +174,10 @@ Below we compute the ``L^1``, ``L^2``, and ``L^3`` distances between ``f(x) = x^
 
 for ``p = 1``, ``p = 2``, and ``p = 3``.
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> f(x) = x^2 + 1; g(x) = 2x;
 
-julia> interval = LSH.@interval(0 ≤ x ≤ 1);
+julia> interval = LSHFunctions.@interval(0 ≤ x ≤ 1);
 
 julia> Lp(f, g, interval, 1) ≈ L1(f, g, interval) ≈ 3^(-1)
 true
@@ -191,14 +191,14 @@ true
 
 See also: [`Lp_norm`](@ref), [`ℓp`](@ref)
 """
-Lp(f, g, interval::LSH.RealInterval, p::Real=2) =
+Lp(f, g, interval::LSHFunctions.RealInterval, p::Real=2) =
     Lp_norm(x -> f(x) - g(x), interval, p)
 
 @doc (@doc Lp)
-L1(f, g, interval::LSH.RealInterval) = L1_norm(x -> f(x) - g(x), interval)
+L1(f, g, interval::LSHFunctions.RealInterval) = L1_norm(x -> f(x) - g(x), interval)
 
 @doc (@doc Lp)
-L2(f, g, interval::LSH.RealInterval) = L2_norm(x -> f(x) - g(x), interval)
+L2(f, g, interval::LSHFunctions.RealInterval) = L2_norm(x -> f(x) - g(x), interval)
 
 #====================
 Jaccard similarity
@@ -218,7 +218,7 @@ Computes the Jaccard similarity between sets ``A`` and ``B``, which is defined a
 `Float64`: the Jaccard similarity between sets `A` and `B`, which is between `0` and `1`.
 
 # Examples
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> A, B = Set([1, 2, 3]), Set([2, 3, 4]);
 
 julia> jaccard(A,B)
@@ -254,7 +254,7 @@ Computes the ``\ell^2`` inner product (dot product)
 ``\left\langle x, y\right\rangle = \sum_i x_iy_i``
 
 # Examples
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> using LinearAlgebra: dot;
 
 julia> x, y = randn(4), randn(4);
@@ -267,7 +267,7 @@ inner_prod(x::AbstractVector, y::AbstractVector) = dot(x,y)
 
 # 1-dimensional inner product between L^2 functions
 @doc raw"""
-    inner_prod(f, g, interval::LSH.RealInterval)
+    inner_prod(f, g, interval::LSHFunctions.RealInterval)
 
 Computes the ``L^2`` inner product
 
@@ -276,14 +276,14 @@ Computes the ``L^2`` inner product
 where the interval we're integrating over is specified by the `interval` argument.
 
 # Examples
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> f(x) = cos(x); g(x) = sin(x);
 
-julia> inner_prod(f, g, LSH.@interval(0 ≤ x ≤ π/2)) ≈ 1/2
+julia> inner_prod(f, g, LSHFunctions.@interval(0 ≤ x ≤ π/2)) ≈ 1/2
 true
 ```
 """
-inner_prod(f, g, interval::LSH.RealInterval) =
+inner_prod(f, g, interval::LSHFunctions.RealInterval) =
     quadgk(x -> f(x)g(x), interval.lower, interval.upper)[1]
 
 ### L^p norms
@@ -315,7 +315,7 @@ Compute the ``\ell^p`` norm of a point ``x``, defined as
 
 # Examples
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> x = randn(4);
 
 julia> ℓp_norm(x, 1) ≈ ℓ1_norm(x) ≈ (map(u -> abs(u)^1, x) |> sum)^(1/1)
@@ -341,9 +341,9 @@ See also: [`ℓp`](@ref), [`Lp_norm`](@ref)
 # 1-dimensional L^p norms
 
 @doc raw"""
-    Lp_norm(f, interval::LSH.RealInterval, p::Real=2)
-    L1_norm(f, interval::LSH.RealInterval)
-    L2_norm(f, interval::LSH.RealInterval)
+    Lp_norm(f, interval::LSHFunctions.RealInterval, p::Real=2)
+    L1_norm(f, interval::LSHFunctions.RealInterval)
+    L2_norm(f, interval::LSHFunctions.RealInterval)
 
 Computes the ``L^p`` function-space norm of a function ``f``, which is given by the equation
 
@@ -353,10 +353,10 @@ Computes the ``L^p`` function-space norm of a function ``f``, which is given by 
 
 # Examples
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> f(x) = x;
 
-julia> interval = LSH.@interval(0 ≤ x ≤ 1);
+julia> interval = LSHFunctions.@interval(0 ≤ x ≤ 1);
 
 julia> Lp_norm(f, interval, 1) ≈ L1_norm(f, interval) ≈ 2^(-1/1)
 true
@@ -368,13 +368,13 @@ julia> Lp_norm(f, interval, 3) ≈ 4^(-1/3)
 true
 ```
 """
-Lp_norm(f, interval::LSH.RealInterval, p::Real=2) = (quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)[1])^(1/p)
+Lp_norm(f, interval::LSHFunctions.RealInterval, p::Real=2) = (quadgk(x -> abs(f(x)).^p, interval.lower, interval.upper)[1])^(1/p)
 
 @doc (@doc Lp_norm)
-L1_norm(f, interval::LSH.RealInterval) = quadgk(x -> abs(f(x)), interval.lower, interval.upper)[1]
+L1_norm(f, interval::LSHFunctions.RealInterval) = quadgk(x -> abs(f(x)), interval.lower, interval.upper)[1]
 
 @doc (@doc Lp_norm)
-L2_norm(f, interval::LSH.RealInterval) = √quadgk(x -> abs2(f(x)), interval.lower, interval.upper)[1]
+L2_norm(f, interval::LSHFunctions.RealInterval) = √quadgk(x -> abs2(f(x)), interval.lower, interval.upper)[1]
 
 #====================
 1D Wasserstein distance

@@ -52,7 +52,7 @@ Creates a locality-sensitive hash function for cosine similarity.
 # Examples
 Construct a hash function by calling `SimHash` with the number of hash functions you want to generate:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = SimHash(24);
 
 julia> n_hashes(hashfn) == 24 &&
@@ -62,7 +62,7 @@ true
 
 You can then call `hashfn(x)` in order to compute hashes:
 
-```jldoctest; setup = :(using LSH)
+```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = SimHash(32);
 
 julia> x = randn(30);

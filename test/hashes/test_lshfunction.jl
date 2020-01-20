@@ -4,7 +4,7 @@ Tests for the LSHFunction() function for constructing hash functions.
 
 ==================#
 
-using Test, Random, LSH
+using Test, Random, LSHFunctions
 
 include(joinpath("..", "utils.jl"))
 
@@ -22,7 +22,7 @@ Tests
         @test_throws MethodError LSHFunction(mysim)
         @test_throws MethodError lsh_family(mysim)
 
-        LSH.@register_similarity!(mysim, SimHash)
+        LSHFunctions.@register_similarity!(mysim, SimHash)
 
         hashfn = LSHFunction(mysim)
         @test isa(hashfn, SimHash)
@@ -33,17 +33,17 @@ Tests
 
         @test_throws MethodError LSHFunction(mytype())
         @test_throws MethodError lsh_family(mytype())
-        @test_throws ErrorException LSH.@register_similarity!(mytype(), SimHash)
+        @test_throws ErrorException LSHFunctions.@register_similarity!(mytype(), SimHash)
 
         (::mytype)(x,y) = cossim(x,y)
 
-        LSH.@register_similarity!(mytype(), SimHash)
-        hashfn = LSH.LSHFunction(mytype())
+        LSHFunctions.@register_similarity!(mytype(), SimHash)
+        hashfn = LSHFunctions.LSHFunction(mytype())
         @test isa(hashfn, SimHash)
         @test lsh_family(mysim) == SimHash
 
         ### Test 3: reset the available similarity functions
-        LSH.@reset_similarities!()
+        LSHFunctions.@reset_similarities!()
 
         @test_throws MethodError LSHFunction(mysim)
         @test_throws MethodError LSHFunction(mytype())
@@ -66,7 +66,7 @@ end
 
         @test similarity(hashfn) == ℓ1
         @test n_hashes(hashfn) == 20
-        @test isa(hashfn, LSH.LpHash)
+        @test isa(hashfn, LSHFunctions.LpHash)
         @test hashfn.r == 4.0
     end
 

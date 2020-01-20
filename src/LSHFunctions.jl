@@ -1,4 +1,4 @@
-module LSH
+module LSHFunctions
 
 using Distributions, LinearAlgebra, SparseArrays
 
