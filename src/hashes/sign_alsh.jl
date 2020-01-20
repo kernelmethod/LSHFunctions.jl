@@ -83,7 +83,7 @@ ERROR: norm 2.0 exceeds maxnorm (1.0)
 ```
 
 # References
-- Anshumali Shrivastava and Ping Li. *Improved Asymmetric Locality Sensitive Hashing (ALSH) for Maximum Inner Product Search (MIPS)*. In Proceedings of the Thirty-First Conference on Uncertainty in Artificial Intelligence, UAI'15, page 812–821, Arlington, Virginia, USA, 2015. AUAI Press. 10.5555/3020847.3020931. [https://arxiv.org/abs/1410.5410v2](https://arxiv.org/abs/1410.5410v2)
+- Anshumali Shrivastava and Ping Li. *Improved Asymmetric Locality Sensitive Hashing (ALSH) for Maximum Inner Product Search (MIPS)*. In Proceedings of the Thirty-First Conference on Uncertainty in Artificial Intelligence, UAI'15, page 812–821, Arlington, Virginia, USA, 2015. AUAI Press. 10.5555/3020847.3020931. [arXiv:1405.5869](https://arxiv.org/abs/1410.5410v2)
 
 See also: [`inner_prod`](@ref inner_prod(::AbstractVector, ::AbstractVector)), [`ℓ2_norm`](@ref ℓp_norm)
 """

@@ -22,7 +22,7 @@ Broadly, there are two computational issues with this approach:
 LSH.jl is a package that provides definitions of locality-sensitive hash functions for a variety of different similarities. Currently, LSH.jl supports hash functions for
 
 - Cosine similarity ([`cossim`](@ref))
-- Jaccard similarity ([`jaccard`](@ref)
+- Jaccard similarity ([`jaccard`](@ref))
 - ``\ell^1`` (Manhattan / "taxicab") distance ([`ℓ1`](@ref))
 - ``\ell^2`` (Euclidean) distance ([`ℓ2`](@ref))
 - Inner product ([`inner_prod`](@ref))
