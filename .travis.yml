@@ -52,6 +52,9 @@ jobs:
       script:
         - julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
       julia: nightly
+
+    - stage: # Unit tests
+      name: "Unit tests (Julia nightly) (Windows)"
       os: windows
       script:
         - julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
