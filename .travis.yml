@@ -15,7 +15,6 @@ jobs:
     ###### Tests
     ### Julia 1.0
     - stage: "Unit tests"
-      name: "Unit tests (Julia 1.0) (Linux)"
       julia: 1.0
       os: linux
       script:
@@ -23,7 +22,6 @@ jobs:
 
     ### Julia 1.1
     - stage: "Unit tests"
-      name: "Unit tests (Julia 1.1) (Linux)"
       julia: 1.1
       os: linux
       script:
@@ -31,7 +29,6 @@ jobs:
 
     ### Julia 1.2
     - stage: "Unit tests"
-      name: "Unit tests (Julia 1.2) (Linux)"
       julia: 1.2
       os: linux
       script:
@@ -39,7 +36,6 @@ jobs:
 
     ### Julia 1.3
     - stage: "Unit tests"
-      name: "Unit tests (Julia 1.3) (Linux)"
       julia: 1.3
       os: linux
       script:
@@ -51,14 +47,12 @@ jobs:
         - julia -e 'using Coverage; Codecov.submit(Codecov.process_folder());'
 
     - stage: # Unit tests
-      name: "Unit tests (Julia 1.3) (OSX)"
       julia: 1.3
       os: osx
       script:
         -  julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
 
     - stage: # Unit tests
-      name: "Unit tests (Julia 1.3) (Windows)"
       julia: 1.3
       os: windows
       script:
@@ -66,14 +60,12 @@ jobs:
 
     ### Julia nightly
     - stage: # Unit tests
-      name: "Unit tests (Julia nightly) (Linux)"
       julia: nightly
       os: linux
       script:
         -  julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
 
     - stage: # Unit tests
-      name: "Unit tests (Julia nightly) (OSX)"
       julia: nightly
       os: osx
       script:
@@ -81,7 +73,6 @@ jobs:
       julia: nightly
 
     - stage: # Unit tests
-      name: "Unit tests (Julia nightly) (Windows)"
       os: windows
       script:
         - julia --color=yes -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.test()'
