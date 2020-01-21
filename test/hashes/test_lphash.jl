@@ -10,17 +10,17 @@ Tests
 
     @testset "Can construct an ℓ^p distance hash function" begin
         # Construct a hash for L^1 distance
-        L1_hash = L1Hash(5; r = 2)
+        L1_hash = L1Hash(5; scale = 2)
         @test n_hashes(L1_hash) == 5
-        @test L1_hash.r == 2
+        @test L1_hash.scale == 2
         @test L1_hash.power == 1
         @test similarity(L1_hash) == ℓ1
         @test hashtype(L1_hash) == Int32
 
         # Construct a hash for L^2 distance
-        L2_hash = L2Hash(12; r = 3.4)
+        L2_hash = L2Hash(12; scale = 3.4)
         @test n_hashes(L2_hash) == 12
-        @test L2_hash.r == Float32(3.4)
+        @test L2_hash.scale == Float32(3.4)
         @test L2_hash.power == 2
         @test similarity(L2_hash) == ℓ2
 
@@ -31,14 +31,14 @@ Tests
 
     @testset "Hashes are correctly computed" begin
         n_hashes = 8
-        r = 2
+        scale = 2
 
-        hashfn = L2Hash(n_hashes; r = r)
+        hashfn = L2Hash(n_hashes; scale=scale)
 
         # Test on a single input
         x = randn(8)
         hashes = hashfn(x)
-        manual_hashes = floor.(Int32, hashfn.coeff * x ./ r .+ hashfn.shift)
+        manual_hashes = floor.(Int32, hashfn.coeff * x ./ scale .+ hashfn.shift)
 
         @test isa(hashes, Vector{Int32})
         @test hashes == manual_hashes
@@ -46,7 +46,7 @@ Tests
         # Test on many inputs, simultaneously
         x = randn(8, 128)
         hashes = hashfn(x)
-        manual_hashes = floor.(Int32, hashfn.coeff * x ./ r .+ hashfn.shift)
+        manual_hashes = floor.(Int32, hashfn.coeff * x ./ scale .+ hashfn.shift)
 
         @test isa(hashes, Matrix{Int32})
         @test hashes == manual_hashes
@@ -66,7 +66,7 @@ Tests
     end
 
     @testset "Nearby points experience more frequent collisions" begin
-        hashfn = L2Hash(1024; dtype=Float64, r=4)
+        hashfn = L2Hash(1024; dtype=Float64, scale=4)
 
         x1 = randn(128)
         x2 = x1 + 0.05 * randn(length(x1))
@@ -78,7 +78,7 @@ Tests
     end
 
     @testset "Hash collision frequency matches probability" begin
-        hashfn = L2Hash(1024; r = 4)
+        hashfn = L2Hash(1024; scale = 4)
 
         # Dry run
         @test test_collision_probability(hashfn, 0.05)

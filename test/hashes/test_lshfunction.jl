@@ -62,12 +62,12 @@ end
     end
 
     @testset "Create L^p distance hash function" begin
-        hashfn = LSHFunction(ℓ1, 20; r = 4.0)
+        hashfn = LSHFunction(ℓ1, 20; scale = 4.0)
 
         @test similarity(hashfn) == ℓ1
         @test n_hashes(hashfn) == 20
         @test isa(hashfn, LSHFunctions.LpHash)
-        @test hashfn.r == 4.0
+        @test hashfn.scale == 4.0
     end
 
     @testset "Create Jaccard similarity hash function" begin

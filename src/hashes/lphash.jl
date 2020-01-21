@@ -24,9 +24,10 @@ mutable struct LpHash{T <: Union{Float32,Float64}, D} <: SymmetricLSHFunction
     # Coefficient matrix with which we multiply the input to the hash function
     coeff :: Matrix{T}
 
-    # "Denominator" parameter r. Higher values of r lead to higher collision
-    # rates. This parameter is user-specified
-    r :: T
+    # "Denominator" parameter scale (called "r" in the reference paper). Higher
+    # values of r lead to higher collision rates. This parameter is
+    # user-specified.
+    scale :: T
 
     # "Shift" parameter (referred to as 'b' in the 'p-stable distributions' paper.
     # There's one shift parameter for every hash function; each parameter is
@@ -56,7 +57,7 @@ abstract type L2Hash <: SymmetricLSHFunction end
 ### External LpHash constructors
 
 function LpHash{T}(n_hashes::Integer = DEFAULT_N_HASHES;
-                   r::Real = T(1.0),
+                   scale::Real = T(1.0),
                    power::Integer = 2,
                    resize_pow2::Bool = DEFAULT_RESIZE_POW2) where {T <: Union{Float32,Float64}}
 
@@ -73,7 +74,7 @@ function LpHash{T}(n_hashes::Integer = DEFAULT_N_HASHES;
         end
     end
 
-    LpHash(coeff, T(r), shift, Int64(power), distr, resize_pow2)
+    LpHash(coeff, T(scale), shift, Int64(power), distr, resize_pow2)
 end
 
 L1Hash(args...; kws...) where {T} = LpHash(args...; power = 1, kws...)
@@ -186,9 +187,9 @@ hashtype(::LpHash) = Int32
 # See Section 3.2 of the reference paper
 function single_hash_collision_probability(hashfn::LpHash, sim::Real)
     ### Compute the collision probability for a single hash function
-    distr, r = hashfn.distr, hashfn.r
-    integral, err = quadgk(x -> pdf(distr, x/sim) * (1 - x/r),
-                           0, r, rtol=1e-5)
+    distr, scale = hashfn.distr, hashfn.scale
+    integral, err = quadgk(x -> pdf(distr, x/sim) * (1 - x/scale),
+                           0, scale, rtol=1e-5)
     integral = integral ./ sim
 
     # Note that from the reference for the L^p LSH family, we're supposed to
@@ -223,6 +224,6 @@ function (hashfn::LpHash{T})(x::AbstractArray{T}) where T
     end
 
     h = @views hashfn.coeff[1:end,1:n] * x
-    h = @. h / hashfn.r + hashfn.shift
+    h = @. h / hashfn.scale + hashfn.shift
     floor.(Int32, h)
 end
