@@ -13,13 +13,6 @@ A Julia package for [locality-sensitive hashing](https://en.wikipedia.org/wiki/L
 - [Supported similarity functions](#supported-similarity-functions)
 - [Examples](#examples)
 
-## Installation
-You can install LSHFunctions.jl from the Julia REPL with
-
-```
-pkg> add LSHFunctions
-```
-
 ## What's LSH?
 Traditionally, if you have a data point `x`, and want to find the most similar point(s) to `x` in your database, you would compute the similarity between `x` and all of the points in your database, and keep whichever points were the most similar. For instance, this type of approach is used by the classic [k-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm). However, it has two major problems:
 
@@ -27,6 +20,14 @@ Traditionally, if you have a data point `x`, and want to find the most similar p
 - In addition, the time complexity to compute the similarity between two datapoints is typically linear in the number of dimensions of those datapoints. If your data are high-dimensional (i.e. in the thousands to millions of dimensions), every similarity computation you perform can be fairly costly.
 
 **Locality-sensitive hashing** (LSH) is a technique for accelerating these kinds of similarity searches. Instead of measuring how similar your query point is to every point in your database, you calculate a few hashes of the query point and only compare it against those points with which it experiences a hash collision. Locality-sensitive hash functions are randomly generated, with the fundamental property that as the similarity between `x` and `y` increases, the probability of a hash collision between `x` and `y` also increases.
+
+
+## Installation
+You can install LSHFunctions.jl from the Julia REPL with
+
+```
+pkg> add LSHFunctions
+```
 
 ## Supported similarity functions
 So far, there are hash functions for the similarity functions:
