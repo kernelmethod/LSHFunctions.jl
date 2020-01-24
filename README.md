@@ -56,7 +56,7 @@ hashfn = LSHFunction(similarity function,
 For example, the following snippet generates 10 locality-sensitive hash functions (bundled together into a single `SimHash` struct) for cosine similarity:
 
 ```julia
-julia> using LSH;
+julia> using LSHFunction;
 
 julia> hashfn = LSHFunction(cossim, 10);
 
