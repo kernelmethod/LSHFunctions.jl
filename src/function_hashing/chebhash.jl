@@ -91,7 +91,7 @@ Hash computation
 ===============#
 
 function (hashfn::ChebHash{:Chebyshev})(f; kws...)
-    coeff = get_cheb_coefficients(hashfn.interval, f, kws...)
+    coeff = get_cheb_coefficients(hashfn.interval, f; kws...)
     hashfn.discrete_hashfn(coeff)
 end
 
