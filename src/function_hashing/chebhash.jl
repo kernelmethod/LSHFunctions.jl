@@ -52,9 +52,9 @@ function cheb_coefficients(f, N)
     dct(fx) * √(1/(2N))
 end
 
-function get_cheb_coefficients(interval::RealInterval, f)
+function get_cheb_coefficients(interval::RealInterval, f; n_coeffs::Integer=1024)
     f_ = squash_function(interval, f)
-    coeff = cheb_coefficients(f_, 1024)
+    coeff = cheb_coefficients(f_, n_coeffs)
     coeff .* width(interval)
 end
 
@@ -90,18 +90,18 @@ collision_probability(hashfn::ChebHash, args...; kws...) =
 Hash computation
 ===============#
 
-function (hashfn::ChebHash{:Chebyshev})(f)
-    coeff = get_cheb_coefficients(hashfn.interval, f)
+function (hashfn::ChebHash{:Chebyshev})(f; kws...)
+    coeff = get_cheb_coefficients(hashfn.interval, f, kws...)
     hashfn.discrete_hashfn(coeff)
 end
 
-function index_hash(hashfn::ChebHash{:Chebyshev}, f)
-    coeff = get_cheb_coefficients(hashfn.interval, f)
+function index_hash(hashfn::ChebHash{:Chebyshev}, f; kws...)
+    coeff = get_cheb_coefficients(hashfn.interval, f; kws...)
     index_hash(hashfn.discrete_hashfn, coeff)
 end
 
 function query_hash(hashfn::ChebHash{:Chebyshev}, f)
-    coeff = get_cheb_coefficients(hashfn.interval, f)
+    coeff = get_cheb_coefficients(hashfn.interval, f; kws...)
     query_hash(hashfn.discrete_hashfn, coeff)
 end
 
