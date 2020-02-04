@@ -110,9 +110,9 @@ ChebHash API
 ========================#
 
 # Compute the similarity between f and g in the embedded space
-function embedded_similarity(hashfn::ChebHash{:Chebyshev}, f, g)
-    f_coeff = get_cheb_coefficients(hashfn.interval, f)
-    g_coeff = get_cheb_coefficients(hashfn.interval, g)
+function embedded_similarity(hashfn::ChebHash{:Chebyshev}, f, g; kws...)
+    f_coeff = get_cheb_coefficients(hashfn.interval, f; kws...)
+    g_coeff = get_cheb_coefficients(hashfn.interval, g; kws...)
 
     simfun = similarity(hashfn)
 
