@@ -49,13 +49,13 @@ function cheb_coefficients(f, N)
     x = cos.(range(0, π, length=N))
     fx = f.(x)
 
-    dct(fx) * √(1/(2N))
+    dct(fx) * √(1/N)
 end
 
 function get_cheb_coefficients(interval::RealInterval, f; n_coeffs::Integer=1024)
     f_ = squash_function(interval, f)
     coeff = cheb_coefficients(f_, n_coeffs)
-    coeff .* width(interval)
+    coeff .* √width(interval)
 end
 
 # Transform a function f ∈ L^2([a,b]) so that the coefficients of its Chebyshev
