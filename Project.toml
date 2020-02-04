@@ -1,7 +1,7 @@
 name = "LSHFunctions"
 uuid = "5134c85a-a9db-11e9-340f-8514dff59a31"
 authors = ["Will Shand <wish5031@colorado.edu>"]
-version = "0.0.1"
+version = "0.0.2"
 
 [compat]
 Distributions = "0.22"
