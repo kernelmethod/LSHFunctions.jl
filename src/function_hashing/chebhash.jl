@@ -46,7 +46,7 @@ const _valid_ChebHash_similarities = (
 @doc """
     ChebHash(sim, args...; interval=$(_DEFAULT_CHEBHASH_INTERVAL), kws...)
 
-    Samples a hash function from an LSH family for the similarity `sim` defined over the function space ``L^p_{\\mu}(\\Omega)``. `sim` may be one of the following:
+Samples a hash function from an LSH family for the similarity `sim` defined over the function space ``L^p_{\\mu}(\\Omega)``. `sim` may be one of the following:
 $(
 join(
     ["- `" * sim * "`" for sim in (_valid_ChebHash_similarities[1] .|> 
