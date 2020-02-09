@@ -82,7 +82,7 @@ julia> 1.563e-6 / 46.415e-9
 So as long as [`SimHash`](@ref) reduces the size of the search space by 34 data points on average, it's faster than calculating the similarity between every pair of points. Even for our tiny dataset, which only had 100 points, that's still well worth it: with the 72/16/12 split that we got, [`SimHash`](@ref) reduces the number of similarities we have to calculate by ``100 - \left(\frac{72^2}{100} + \frac{16^2}{100} + \frac{12^2}{100}\right) \approx 44`` points on average.
 
 !!! info "Improving LSH partitioning"
-    LSH can be poor at partitioning your input space when data points are very similar to one another. In these cases, it may be helpful to find ways to transform your data in order to reduce their similarity.
+    LSH can be poor at partitioning your input space when all of your data points are very similar to one another. In these cases, it may be helpful to find ways to transform your data in order to reduce their similarity.
 
     For instance, in the example above, we created a synthetic dataset with the following code:
 

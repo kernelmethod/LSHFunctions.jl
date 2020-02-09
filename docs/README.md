@@ -5,7 +5,6 @@ The module documentation is automatically built and updated whenever `master` is
 
 ```
 $ cd docs/
-$ julia make.jl
 $ julia --project=. --color=yes make.jl
 $ python3 -m http.server 8000
 ```

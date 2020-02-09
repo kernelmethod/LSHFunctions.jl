@@ -8,7 +8,9 @@
 
 Concretely, cosine similarity is computed as
 
-``\text{cossim}(x,y) = \frac{\left\langle x,y\right\rangle}{\|x\|\cdot\|y\|} = \left\langle\frac{x}{\|x\|},\frac{y}{\|y\|}\right\rangle``
+```math
+\text{cossim}(x,y) = \frac{\left\langle x,y\right\rangle}{\|x\|\cdot\|y\|} = \left\langle\frac{x}{\|x\|},\frac{y}{\|y\|}\right\rangle
+```
 
 where ``\left\langle\cdot,\cdot\right\rangle`` is an inner product (e.g., dot product) and ``\|\cdot\|`` is the norm derived from that inner product. ``\text{cossim}(x,y)`` goes from ``-1`` to ``1``, where ``-1`` corresponds to low similarity and ``1`` corresponds to high similarity. To calculate cosine similarity, you can use the [`cossim`](@ref) function exported from the `LSH` module:
 
@@ -96,12 +98,15 @@ julia> length(hashes)
 
 The probability of a hash collision (for a single hash) is
 
-``Pr[h(x) = h(y)] = 1 - \frac{\theta}{\pi}``
+```math
+Pr[h(x) = h(y)] = 1 - \frac{\theta}{\pi}
+```
 
 where ``\theta = \text{arccos}(\text{cossim}(x,y))`` is the angle between ``x`` and ``y``. This collision probability is shown in the plot below.
 
 ```@eval
 using PyPlot, LSHFunctions
+fig = figure()
 hashfn = SimHash()
 x = range(-1, 1; length=1024)
 y = [LSHFunctions.single_hash_collision_probability(hashfn, xii) for xii in x]
