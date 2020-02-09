@@ -97,8 +97,9 @@ function Base.resize!(hashfn::SimHash, n :: Integer)
 
     # Generate new coefficients in the empty entries
     if n > old_n
-        # TODO: implement with map! to reduce memory allocation
-        @views new_coeff[old_n+1:end,1:end] = randn(n - old_n, n_hashes)
+        @views map!(_ -> randn(),
+                    new_coeff[old_n+1:end,1:end],
+                    new_coeff[old_n+1:end,1:end])
     end
 
     hashfn.coeff = new_coeff
