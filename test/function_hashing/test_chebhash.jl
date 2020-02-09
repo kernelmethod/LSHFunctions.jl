@@ -35,7 +35,7 @@ Tests
         @test_throws(ErrorException, ChebHash(L1))
         @test_throws(ErrorException, ChebHash(ℓ2))
 
-        # Construct a hash function (with valid similarity_ in the same
+        # Construct a hash function (with valid similarity) in the same
         # manner as we did above in case the ChebHash API ever changes.
         # This ensures that we won't forget to update these tests.
         _ = ChebHash(L2)

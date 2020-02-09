@@ -28,6 +28,21 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(ℓ1))
     end
 
+    @testset "Pass invalid similarity function" begin
+        # Attempt to construct a MonteCarloHash with an invalid
+        # similarity function.
+        μ() = rand()
+
+        @test_throws(ErrorException, MonteCarloHash(ℓ1, μ))
+        @test_throws(ErrorException, MonteCarloHash(ℓ2, μ))
+        @test_throws(ErrorException, MonteCarloHash(jaccard, μ))
+
+        # Construct a hash function (with valid similarity) in the same
+        # manner in case the MonteCarloHash API ever changes.
+        # This ensures that we won't forget to update these tests.
+        _ = MonteCarloHash(L2, μ)
+    end
+
     #==========
     Cosine similarity hashing
     ==========#

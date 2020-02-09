@@ -33,7 +33,14 @@ end
 ChebHash(similarity, args...; kws...) =
     ChebHash(SimilarityFunction(similarity), args...; kws...)
 
-for (discrete_sim, fn_sim) in zip([ℓ2, cossim], [L2, cossim])
+const _valid_ChebHash_similarities = (
+    # Function space similarities
+    (L2, cossim),
+    # Discrete-space similarities corresponding to function space similarities
+    (ℓ2, cossim),
+)
+
+for (fn_sim, discrete_sim) in zip(_valid_ChebHash_similarities...)
     quote
         # Add an implementation of ChebHash that dispatches on the similarity
         # function fn_sim
@@ -49,11 +56,18 @@ for (discrete_sim, fn_sim) in zip([ℓ2, cossim], [L2, cossim])
 end
 
 # Implementation of ChebHash for invalid similarity functions. Just throws
-# a TypeError. Necessary because otherwise the first external ChebHash
-# constructor will go into an infinite loop when it receives an invalid
-# similarity function.
-ChebHash(sim::SimilarityFunction, args...; kws...) =
-    ErrorException("similarity must be ℓ2 or cossim") |> throw
+# a error.
+# Necessary because otherwise the first external ChebHash constructor
+# will go into infinite recursion if it receives an invalid similarity
+# function.
+function ChebHash(sim::SimilarityFunction, args...; kws...)
+    valid_sims = _valid_MonteCarloHash_similarities[1] .|>
+                 string  |>
+                 collect |>
+                 sort!
+    valid_sims = join(valid_sims, ", ", " or ")
+    ErrorException("similarity must be $(valid_sims)") |> throw
+end
 
 #========================
 Helper functions for ChebHash

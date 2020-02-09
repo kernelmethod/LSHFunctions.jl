@@ -51,7 +51,16 @@ end
 MonteCarloHash(similarity, args...; kws...) =
     MonteCarloHash(SimilarityFunction(similarity), args...; kws...)
 
-for (simfn, fn_space_simfn, p) in zip([ℓ1,ℓ2,cossim], [L1,L2,cossim], [1,2,2])
+const _valid_MonteCarloHash_similarities = (
+    # Function space similarities
+    (L1, L2, cossim),  
+    # Discrete-space similarities corresponding to function space similarities
+    (ℓ1, ℓ2, cossim),  
+    # Order of L^p space that the similarity applies to
+    (1, 2, 2),
+)
+
+for (fn_space_simfn, simfn, p) in zip(_valid_MonteCarloHash_similarities...)
     quote
         # Add dispatch for case in which we specify the similarity function
         # to be $fn_space_simfn
@@ -63,6 +72,19 @@ for (simfn, fn_space_simfn, p) in zip([ℓ1,ℓ2,cossim], [L1,L2,cossim], [1,2,2
                            $p, n_samples)
         end
     end |> eval
+end
+
+# Implementation of MonteCarloHash for invalid similarity functions. Just throws
+# an error.
+# Necessary because otherwise the first MonteCarloHash constructor will go into
+# infinite recursion if it receives an invalid similarity function.
+function MonteCarloHash(sim::SimilarityFunction, args...; kws...)
+    valid_sims = _valid_MonteCarloHash_similarities[1] .|>
+                 string  |>
+                 collect |>
+                 sort!
+    valid_sims = join(valid_sims, ", ", " or ")
+    ErrorException("similarity must be $(valid_sims)") |> throw
 end
 
 #========================
