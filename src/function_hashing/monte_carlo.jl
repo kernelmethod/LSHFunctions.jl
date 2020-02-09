@@ -8,7 +8,9 @@ MonteCarloHash for hashing function spaces.
 Typedefs
 ========================#
 
-struct MonteCarloHash{H <: LSHFunction, D, T, S} <: LSHFunction
+struct MonteCarloHash{F, H <: LSHFunction, D, T, S} <: LSHFunction
+    similarity :: F
+
     discrete_hashfn :: H
     μ :: D
 
@@ -28,14 +30,18 @@ struct MonteCarloHash{H <: LSHFunction, D, T, S} <: LSHFunction
     sample_points :: Vector{S}
 
     ### Internal constructors
-    function MonteCarloHash(discrete_hashfn::H, μ, volume, p, n_samples) where {H<:LSHFunction}
+    function MonteCarloHash(similarity::F, discrete_hashfn::H, μ, volume,
+                            p, n_samples) where {F, H<:LSHFunction}
         sample_points = [μ() for ii = 1:n_samples]
 
         T = eltype(μ())
         volume = T(volume)
         p = T(p)
 
-        new{H,typeof(μ),T,eltype(sample_points)}(discrete_hashfn, μ, volume, p, n_samples, sample_points)
+        new{F,H,typeof(μ),T,eltype(sample_points)}(
+            similarity, discrete_hashfn, μ, volume,
+            p, n_samples, sample_points
+        )
     end
 end
 
@@ -45,15 +51,16 @@ end
 MonteCarloHash(similarity, args...; kws...) =
     MonteCarloHash(SimilarityFunction(similarity), args...; kws...)
 
-for (simfn,p) in zip([ℓ1,ℓ2,cossim], [1,2,2])
+for (simfn, fn_space_simfn, p) in zip([ℓ1,ℓ2,cossim], [L1,L2,cossim], [1,2,2])
     quote
-        # Create implementation of MonteCarloHash for current similarity function
-        # and order of L^p space
-        function MonteCarloHash(sim::SimilarityFunction{$simfn}, μ, args...;
+        # Add dispatch for case in which we specify the similarity function
+        # to be $fn_space_simfn
+        function MonteCarloHash(sim::SimilarityFunction{$fn_space_simfn}, μ, args...;
                                 n_samples::Int64=1024, volume=1.0, kws...)
 
             discrete_hashfn = LSHFunction($simfn, args...; kws...)
-            MonteCarloHash(discrete_hashfn, μ, volume, $p, n_samples)
+            MonteCarloHash($fn_space_simfn, discrete_hashfn, μ, volume,
+                           $p, n_samples)
         end
     end |> eval
 end
@@ -75,8 +82,7 @@ LSHFunction API compliance
 hashtype(hashfn::MonteCarloHash) =
     hashtype(hashfn.discrete_hashfn)
 
-similarity(hashfn::MonteCarloHash) =
-    similarity(hashfn.discrete_hashfn)
+similarity(hashfn::MonteCarloHash) = hashfn.similarity
 
 n_hashes(hashfn::MonteCarloHash) =
     n_hashes(hashfn.discrete_hashfn)

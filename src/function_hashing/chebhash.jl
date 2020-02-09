@@ -11,28 +11,49 @@ Typedefs
 ========================#
 
 # B = basis, which is a Symbol (e.g. :Chebyshev)
-struct ChebHash{B, H<:LSHFunction, I<:RealInterval}
+struct ChebHash{B, F<:SimilarityFunction, H<:LSHFunction, I<:RealInterval}
+    # Discrete-space hash function used after extracting Chebyshev polynomial
+    # coefficients from the input function.
     discrete_hashfn :: H
 
     # Interval over which all input functions are defined.
     interval :: I
+
+    ### Internal ChebHash constructors
+    function ChebHash{B,F}(
+                hashfn::H,
+                interval::I
+            ) where {B, F<:SimilarityFunction, H<:LSHFunction, I<:RealInterval}
+
+        new{B,F,H,I}(hashfn, interval)
+    end
 end
 
 ### External ChebHash constructors
-ChebHash{S}(hashfn::H, interval::I) where {S, H<:LSHFunction, I<:RealInterval} =
-    ChebHash{S,H,I}(hashfn, interval)
-
 ChebHash(similarity, args...; kws...) =
     ChebHash(SimilarityFunction(similarity), args...; kws...)
 
-function ChebHash(::SimilarityFunction{S},
-                  args...;
-                  interval::RealInterval = @interval(-1 ≤ x ≤ 1),
-                  kws...) where S
+for (discrete_sim, fn_sim) in zip([ℓ2, cossim], [L2, cossim])
+    quote
+        # Add an implementation of ChebHash that dispatches on the similarity
+        # function fn_sim
+        function ChebHash(sim::SimilarityFunction{$fn_sim},
+                          args...;
+                          interval::RealInterval = @interval(-1 ≤ x ≤ 1),
+                          kws...) where S
 
-    discrete_hashfn = LSHFunction(S, args...; kws...)
-    ChebHash{:Chebyshev}(discrete_hashfn, interval)
+            discrete_hashfn = LSHFunction($discrete_sim, args...; kws...)
+            ChebHash{:Chebyshev,typeof(sim)}(discrete_hashfn, interval)
+        end
+    end |> eval
 end
+
+# Implementation of ChebHash for invalid similarity functions. Just throws
+# a TypeError. Necessary because otherwise the first external ChebHash
+# constructor will go into an infinite loop when it receives an invalid
+# similarity function.
+ChebHash(sim::SimilarityFunction, args...; kws...) =
+    ErrorException("similarity must be ℓ2 or cossim") |> throw
 
 #========================
 Helper functions for ChebHash
@@ -76,8 +97,7 @@ LSHFunction API compliance
 n_hashes(hashfn::ChebHash) =
     n_hashes(hashfn.discrete_hashfn)
 
-similarity(hashfn::ChebHash) =
-    similarity(hashfn.discrete_hashfn)
+similarity(::ChebHash{T,SimilarityFunction{F}}) where {T,F} = F
 
 hashtype(hashfn::ChebHash) =
     hashtype(hashfn.discrete_hashfn)

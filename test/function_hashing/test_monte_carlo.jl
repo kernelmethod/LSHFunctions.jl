@@ -21,10 +21,10 @@ Tests
         @test hashtype(hashfn) == hashtype(LSHFunction(cossim))
 
         # Hash L^1([0,1]) over L^1 distance
-        hashfn = MonteCarloHash(ℓ1, μ, 10)
+        hashfn = MonteCarloHash(L1, μ, 10)
 
         @test n_hashes(hashfn) == 10
-        @test similarity(hashfn) == ℓ1
+        @test similarity(hashfn) == L1
         @test hashtype(hashfn) == hashtype(LSHFunction(ℓ1))
     end
 
@@ -75,7 +75,7 @@ Tests
         # you can map them into R^N isomorphically
         N = 4
         μ() = N * rand()
-        hashfn = MonteCarloHash(ℓ1, μ, 1024; volume = N)
+        hashfn = MonteCarloHash(L1, μ, 1024; volume = N)
 
         @test let success = true, ii = 1
             while success && ii ≤ 128

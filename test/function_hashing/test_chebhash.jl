@@ -19,12 +19,26 @@ Tests
         @test n_hashes(hashfn) == 5
         @test hashtype(hashfn) == hashtype(LSHFunction(cossim))
 
-        # Hash L^2([-1,1]) over L^p distance
-        hashfn = ChebHash(ℓ1)
+        # Hash L^2([-1,1]) over L^2 distance
+        hashfn = ChebHash(L2)
 
         @test n_hashes(hashfn) == 1
-        @test similarity(hashfn) == ℓ1
-        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ1))
+        @test similarity(hashfn) == L2
+        @test hashtype(hashfn) == hashtype(LSHFunction(ℓ2))
+    end
+
+    @testset "Provide invalid similarity" begin
+        # When we pass in a similarity that is not supported by ChebHash
+        # we should receive an error.
+        @test_throws(ErrorException, ChebHash((x,y) -> abs(x-y)))
+        @test_throws(ErrorException, ChebHash(ℓ1))
+        @test_throws(ErrorException, ChebHash(L1))
+        @test_throws(ErrorException, ChebHash(ℓ2))
+
+        # Construct a hash function (with valid similarity_ in the same
+        # manner as we did above in case the ChebHash API ever changes.
+        # This ensures that we won't forget to update these tests.
+        _ = ChebHash(L2)
     end
 
     #==========
@@ -97,7 +111,7 @@ Tests
         ### Hash two functions with L^2 distance ≈ 0
         f(x) = 0.0
         g(x) = (-0.5 ≤ x ≤ 0.5) ? 1e-3 : 0.0
-        hashfn = ChebHash(ℓ2, 1024)
+        hashfn = ChebHash(L2, 1024)
 
         @test embedded_similarity(hashfn, f, g) ≈ 1e-3
 
@@ -115,7 +129,7 @@ Tests
 
     @testset "Hash L^2 distance (nontrivial inputs)" begin
         interval = LSHFunctions.@interval(-1.0 ≤ x ≤ 1.0)
-        hashfn = ChebHash(ℓ2, 1024; interval=interval)
+        hashfn = ChebHash(L2, 1024; interval=interval)
 
         trig_function_test() = begin
             f = ShiftedSine(π, π * rand())
