@@ -153,25 +153,25 @@ The returned expression constructs an `LSHFunctions.RealInterval` encoding the l
 You can construct an interval using the following syntax:
 
 ```jldoctest; setup = :(using LSHFunctions)
-julia> interval = LSHFunctions.@interval(0 ≤ x < 1);
+julia> interval = @interval(0 ≤ x < 1);
 ```
 
 There are usually multiple ways of constructing the same interval. For instance, each of the expressions below are equivalent ways of constructing the interval `[-1,1]`.
 
 ```jldoctest; setup = :(using LSHFunctions)
-julia> LSHFunctions.@interval(-1 ≤  x ≤  1) ==
-       LSHFunctions.@interval(-1 <= x <= 1) ==
-       LSHFunctions.@interval(-1 ≤  y ≤  1) ==
-       LSHFunctions.@interval( 1 ≥  x ≥ -1)
+julia> @interval(-1 ≤  x ≤  1) ==
+       @interval(-1 <= x <= 1) ==
+       @interval(-1 ≤  y ≤  1) ==
+       @interval( 1 ≥  x ≥ -1)
 true
 ```
 
-You can even create intervals with `Inf` or `-Inf` at the endpoints, e.g. `LSHFunctions.@interval(-Inf < x < Inf)`.
+You can even create intervals with `Inf` or `-Inf` at the endpoints, e.g. `@interval(-Inf < x < Inf)`.
 
 There are two primary operations you can run on an interval: testing for membership and intersection. You can test whether or not `x` is in an interval using `x ∈ interval`, as shown below.
 
 ```jldoctest; setup = :(using LSHFunctions)
-julia> interval = LSHFunctions.@interval(0 ≤ x < 1);
+julia> interval = @interval(0 ≤ x < 1);
 
 julia> 0 ∈ interval && 1 ∉ interval
 true
@@ -183,7 +183,7 @@ true
 You can also intersect two intervals using the `∩` operator (or by using `intersect(interval_1, interval_2)`).
 
 ```
-julia> LSHFunctions.@interval(0 ≤ x < 1) ∩ LSHFunctions.@interval(1/2 < x ≤ 1) == LSHFunctions.@interval(1/2 < x < 1)
+julia> @interval(0 ≤ x < 1) ∩ @interval(1/2 < x ≤ 1) == @interval(1/2 < x < 1)
 true
 ```
 
@@ -191,12 +191,12 @@ See also: [`RealInterval`](@ref)
 """
 macro interval(expr)
     invalid_expr_msg = """
-    Expression is invalid. The expression passed to LSHFunctions.@interval must take the form
+    Expression is invalid. The expression passed to @interval must take the form
 
         a {<,≤,>,≥} x {<,≤,>,≥} b
 
     where a and b evaluate to real numbers, and x is a valid variable identifier.
-    See the documentation for LSHFunctions.@interval for more information.
+    See the documentation for @interval for more information.
     """
 
     if !isa(expr, Expr)

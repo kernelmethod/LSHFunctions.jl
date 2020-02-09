@@ -34,6 +34,12 @@ Private = false
 Pages = ["similarities.jl"]
 ```
 
+## Miscellaneous
+
+```@docs
+@interval
+```
+
 ## Private interface
 
 ```@autodocs

@@ -177,7 +177,7 @@ for ``p = 1``, ``p = 2``, and ``p = 3``.
 ```jldoctest; setup = :(using LSHFunctions)
 julia> f(x) = x^2 + 1; g(x) = 2x;
 
-julia> interval = LSHFunctions.@interval(0 ≤ x ≤ 1);
+julia> interval = @interval(0 ≤ x ≤ 1);
 
 julia> Lp(f, g, interval, 1) ≈ L1(f, g, interval) ≈ 3^(-1)
 true
@@ -279,7 +279,7 @@ where the interval we're integrating over is specified by the `interval` argumen
 ```jldoctest; setup = :(using LSHFunctions)
 julia> f(x) = cos(x); g(x) = sin(x);
 
-julia> inner_prod(f, g, LSHFunctions.@interval(0 ≤ x ≤ π/2)) ≈ 1/2
+julia> inner_prod(f, g, @interval(0 ≤ x ≤ π/2)) ≈ 1/2
 true
 ```
 """
@@ -356,7 +356,7 @@ Computes the ``L^p`` function-space norm of a function ``f``, which is given by 
 ```jldoctest; setup = :(using LSHFunctions)
 julia> f(x) = x;
 
-julia> interval = LSHFunctions.@interval(0 ≤ x ≤ 1);
+julia> interval = @interval(0 ≤ x ≤ 1);
 
 julia> Lp_norm(f, interval, 1) ≈ L1_norm(f, interval) ≈ 2^(-1/1)
 true
