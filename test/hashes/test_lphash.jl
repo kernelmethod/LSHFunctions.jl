@@ -123,6 +123,20 @@ Tests
             @test size(hashfn.coeff) == (n_hashes, 16)
         end
     end
+
+    @testset "collision_probability works correctly" begin
+        hashfn = L1Hash()
+
+        # collision_probability should be 1 for two inputs of distance zero
+        x = rand(4)
+        @test collision_probability(hashfn, x, x) ≈ 1.0
+
+        # collision_probability with n_hashes=N should be the same as
+        # collision_probability with n_hashes=1, raised to the power N
+        y = rand(4)
+        @test collision_probability(hashfn, x, y; n_hashes=10) ≈
+              collision_probability(hashfn, x, y; n_hashes=1)^10
+    end
 end
 
 

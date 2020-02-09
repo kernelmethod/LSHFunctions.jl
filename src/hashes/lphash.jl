@@ -185,11 +185,17 @@ n_hashes(h::LpHash) = length(h.shift)
 hashtype(::LpHash) = Int32
 
 # See Section 3.2 of the reference paper
-function single_hash_collision_probability(hashfn::LpHash, sim::Real)
+function single_hash_collision_probability(hashfn::LpHash, sim::T) where {T <: Real}
+    ### If sim ≈ 0 then the integral won't be possible to numerically compute,
+    ### however we know that the probability equals one.
+    if sim ≈ T(0)
+        return T(1)
+    end
+
     ### Compute the collision probability for a single hash function
     distr, scale = hashfn.distr, hashfn.scale
-    integral, err = quadgk(x -> pdf(distr, x/sim) * (1 - x/scale),
-                           0, scale, rtol=1e-5)
+    integral, err = quadgk(x -> pdf(distr, x/sim) * (T(1) - x/scale),
+                           T(0), T(scale), rtol=1e-5)
     integral = integral ./ sim
 
     # Note that from the reference for the L^p LSH family, we're supposed to
@@ -197,7 +203,7 @@ function single_hash_collision_probability(hashfn::LpHash, sim::Real)
     # random variable, rather than the raw p.d.f. Luckily, all of the
     # distributions we have to deal with here are symmetric and centered at
     # zero, so all we have to do is multiply the integral by two.
-    single_hash_prob = integral .* 2
+    single_hash_prob = T(integral .* 2)
 end
 
 function similarity(hashfn::LpHash)
