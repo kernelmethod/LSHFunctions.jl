@@ -80,11 +80,11 @@ join(
 Given an input function ``f\\in L^p_{\\mu}(\\Omega)``, `MonteCarloHash` works by sampling ``f`` at some randomly-selected points in ``\\Omega``, and then hashing those samples.
 
 # Arguments
-- `sim`: the similarity function you want to hash on.
+- `sim`: the similarity statistic you want to hash on.
 - `ω`: a function that takes no inputs and samples a single point from ``\\Omega``. Alternatively, it can be viewed as a random variable with probability measure
 
 ```math
-\\frac{\\mu}{\\text{vol}_{\\mu}(\\Omega)} = \\mu\\left(\\int_{\\Omega} d\\mu\\right)^{-1}
+\\frac{\\mu}{\\text{vol}_{\\mu}(\\Omega)} = \\frac{\\mu}{\\int_{\\Omega} d\\mu}
 ```
 
 - `args...`: arguments to pass on when building the `LSHFunction` instance underlying the returned `MonteCarloHash` struct.

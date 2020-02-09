@@ -6,7 +6,7 @@
 ## LSHFunction
 The `LSHFunctions` module exposes a relatively easy interface for constructing new hash functions. Namely, you call [`LSHFunction`](@ref) with 
 
-- the similarity function you want to use;
+- the similarity statistic you want to hash on;
 - the number of hash functions you want to generate; and
 - keyword parameters specific to the LSH function family that you're sampling from.
 

@@ -68,13 +68,19 @@ Compute the probability of hash collision between two inputs with similarity `si
 - `sim`: a similarity (or vector of similarities), computed using the similarity function returned by `similarity(hashfn)`.
 
 # Keyword arguments
-- `n_hashes::Union{Symbol,Integer}` (default: `:auto`): the number of hash functions to use to compute the probability of collision. If the probability that a single hash collides is ``p``, then the probability that `n_hashes` hashes simultaneously collide is
+- `n_hashes::Union{Symbol,Integer}` (default: `:auto`): the number of hash functions to use to compute the probability of collision. If the probability that a single hash collides is `p`, then the probability that `n_hashes` hashes simultaneously collide is `p^n_hashes`. As a result,
 
-  ```math
-  p^{\\text{n_hashes}}
+  ```
+  collision_probability(hashfn, sim; n_hashes=N)
   ```
 
-  As a result, `collision_probability(hashfn, sim; n_hashes=N)` is the same as `collision_probability(hashfn, sim; n_hashes=1).^N`. If `n_hashes = :auto` then this function will select the number of hashes to be `n_hashes(hashfn)` (using the [`n_hashes`](@ref) function from the [`LSHFunction`](@ref) API).
+  is the same as
+
+  ```
+  collision_probability(hashfn, sim; n_hashes=1).^N
+  ```
+
+  If `n_hashes = :auto` then this function will select the number of hashes to be `n_hashes(hashfn)` (using the [`n_hashes`](@ref) function from the [`LSHFunction`](@ref) API).
 
 # Examples
 The probability that a single MinHash hash function causes a hash collision between inputs `A` and `B` is equal to `jaccard(A,B)`:

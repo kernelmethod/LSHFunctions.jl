@@ -13,7 +13,7 @@ makedocs(
     modules  = [LSHFunctions],
     pages    = ["Home" => "index.md",
                 "The LSHFunction API" => "lshfunction_api.md",
-                "Similarity functions" => [
+                "Similarity statistics" => [
                     "Cosine similarity" => joinpath("similarities", "cosine.md"),
                     "``\\ell^p`` distance" => joinpath("similarities", "lp_distance.md"),
                     "Jaccard similarity" => joinpath("similarities", "jaccard.md"),
