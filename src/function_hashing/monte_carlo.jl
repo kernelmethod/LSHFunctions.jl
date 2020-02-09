@@ -5,6 +5,12 @@ MonteCarloHash for hashing function spaces.
 ================================================================#
 
 #========================
+Global constants
+========================#
+
+const _MONTECARLOHASH_DEFAULT_N_SAMPLES = 1024
+
+#========================
 Typedefs
 ========================#
 
@@ -46,11 +52,6 @@ struct MonteCarloHash{F, H <: LSHFunction, D, T, S} <: LSHFunction
 end
 
 ### External MonteCarloHash constructors
-
-# TODO: restrict similarities. E.g. Jaccard should not be an available similarity
-MonteCarloHash(similarity, args...; kws...) =
-    MonteCarloHash(SimilarityFunction(similarity), args...; kws...)
-
 const _valid_MonteCarloHash_similarities = (
     # Function space similarities
     (L1, L2, cossim),  
@@ -60,12 +61,107 @@ const _valid_MonteCarloHash_similarities = (
     (1, 2, 2),
 )
 
+# TODO: restrict similarities. E.g. Jaccard should not be an available similarity
+@doc """
+    MonteCarloHash(sim, ω, args...; volume=1.0, n_samples=$(_MONTECARLOHASH_DEFAULT_N_SAMPLES), kws...)
+
+Samples a hash function from an LSH family for the similarity `sim` defined over the function space ``L^p_{\\mu}(\\Omega)``. `sim` may be one of the following:
+$(
+join(
+    ["- `" * sim * "`" for sim in (_valid_MonteCarloHash_similarities[1] .|> 
+                                   string |>
+                                   collect |>
+                                   sort!)
+    ],
+    "\n"
+)
+)
+
+Given an input function ``f\\in L^p_{\\mu}(\\Omega)``, `MonteCarloHash` works by sampling ``f`` at some randomly-selected points in ``\\Omega``, and then hashing those samples.
+
+# Arguments
+- `sim`: the similarity function you want to hash on.
+- `ω`: a function that takes no inputs and samples a single point from ``\\Omega``. Alternatively, it can be viewed as a random variable with probability measure
+
+```math
+\\frac{\\mu}{\\text{vol}_{\\mu}(\\Omega)} = \\mu\\left(\\int_{\\Omega} d\\mu\\right)^{-1}
+```
+
+- `args...`: arguments to pass on when building the `LSHFunction` instance underlying the returned `MonteCarloHash` struct.
+- `volume::Real` (default: `1.0`): the volume of the space ``\\Omega``, defined as
+
+```math
+\\text{vol}_{\\mu}(\\Omega) = \\int_{\\Omega} d\\mu
+```
+
+- `n_samples::Integer` (default: `$(_MONTECARLOHASH_DEFAULT_N_SAMPLES)`): the number of points to sample from each function that is hashed by the `MonteCarloHash`. Larger values of `n_samples` tend to capture the input function better and will thus be more likely to achieve desirable collision probabilities.
+- `kws...`: keyword arguments to pass on when building the `LSHFunction` instance underlying the returned `MonteCarloHash` struct.
+
+# Examples
+Create a hash function for cosine similarity for functions in ``L^2([-1,1])``:
+
+```jldoctest; setup = :(using LSHFunctions)
+julia> μ() = 2*rand()-1;   # μ samples a random point from [-1,1]
+
+julia> hashfn = MonteCarloHash(cossim, μ, 50; volume=2.0);
+
+julia> n_hashes(hashfn)
+50
+
+julia> similarity(hashfn) == cossim
+true
+
+julia> hashtype(hashfn)
+$(cossim |> LSHFunction |> hashtype)
+```
+
+Create a hash function for ``L^2`` distance in the function space ``L^2([0,2\\pi])``. Hash the functions `f(x) = cos(x)` and `f(x) = x/(2π)` using the returned `MonteCarloHash`.
+
+```jldoctest; setup = :(using LSHFunctions, Random; Random.seed!(0))
+julia> μ() = 2π * rand(); # μ samples a random point from [0,2π]
+
+julia> hashfn = MonteCarloHash(L2, μ, 3; volume=2π);
+
+julia> hashfn(cos)
+3-element Array{Int32,1}:
+ -1
+  3
+  0
+
+julia> hashfn(x -> x/(2π))
+3-element Array{Int32,1}:
+ -1
+ -2
+ -1
+```
+
+Create a hash function with a different number of sample points.
+
+```jldoctest; setup = :(using LSHFunctions; μ() = rand())
+julia> μ() = rand();  # Samples a random point from [0,1]
+
+julia> hashfn = MonteCarloHash(cossim, μ; volume=1.0, n_samples=512);
+
+julia> length(hashfn.sample_points)
+512
+```
+
+See also: [`ChebHash`](@ref)
+"""
+MonteCarloHash(similarity, args...; kws...) =
+    MonteCarloHash(SimilarityFunction(similarity), args...; kws...)
+
 for (fn_space_simfn, simfn, p) in zip(_valid_MonteCarloHash_similarities...)
     quote
         # Add dispatch for case in which we specify the similarity function
         # to be $fn_space_simfn
-        function MonteCarloHash(sim::SimilarityFunction{$fn_space_simfn}, μ, args...;
-                                n_samples::Int64=1024, volume=1.0, kws...)
+        function MonteCarloHash(
+                    sim::SimilarityFunction{$fn_space_simfn},
+                    μ,
+                    args...;
+                    n_samples::Integer=_MONTECARLOHASH_DEFAULT_N_SAMPLES,
+                    volume=1.0,
+                    kws...)
 
             discrete_hashfn = LSHFunction($simfn, args...; kws...)
             MonteCarloHash($fn_space_simfn, discrete_hashfn, μ, volume,

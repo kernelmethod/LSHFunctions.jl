@@ -7,6 +7,12 @@ ChebHash for hashing the L^2([-1,1]) function space.
 using FFTW
 
 #========================
+Global constants
+========================#
+
+const _DEFAULT_CHEBHASH_INTERVAL = @interval(-1 ≤ x ≤ 1)
+
+#========================
 Typedefs
 ========================#
 
@@ -30,9 +36,6 @@ struct ChebHash{B, F<:SimilarityFunction, H<:LSHFunction, I<:RealInterval}
 end
 
 ### External ChebHash constructors
-ChebHash(similarity, args...; kws...) =
-    ChebHash(SimilarityFunction(similarity), args...; kws...)
-
 const _valid_ChebHash_similarities = (
     # Function space similarities
     (L2, cossim),
@@ -40,13 +43,77 @@ const _valid_ChebHash_similarities = (
     (ℓ2, cossim),
 )
 
+@doc """
+    ChebHash(sim, args...; interval=$(_DEFAULT_CHEBHASH_INTERVAL), kws...)
+
+    Samples a hash function from an LSH family for the similarity `sim` defined over the function space ``L^p_{\\mu}(\\Omega)``. `sim` may be one of the following:
+$(
+join(
+    ["- `" * sim * "`" for sim in (_valid_ChebHash_similarities[1] .|> 
+                                   string |>
+                                   collect |>
+                                   sort!)
+    ],
+    "\n"
+)
+)
+
+`ChebHash` works by approximating a function by Chebyshev polynomials. You can choose the degree of the approximation to trade between speed and generating desirable hash collision probabilities.
+
+!!! info "ChebHash limitations"
+    `ChebHash` can only hash function spaces of the form ``L^2([a,b])``, where ``[a,b]`` is an interval on the real line. For a more versatile option, checkout out [`MonteCarloHash`](@ref).
+
+# Arguments
+- `sim`: the similarity function you want to hash on.
+- `args...`: arguments to pass on when building the `LSHFunction` instance underlying the returned `ChebHash` struct.
+- `kws...`: keyword arguments to pass on when building the `LSHFunction` instance underlying the returned `ChebHash` struct.
+
+# Examples
+Create a hash function for cosine similarity for functions in ``L^2([-1,1])``:
+
+```jldoctest; setup = :(using LSHFunctions)
+julia> hashfn = ChebHash(cossim, 50; interval=@interval(-1 ≤ x ≤ 1));
+
+julia> n_hashes(hashfn)
+50
+
+julia> similarity(hashfn) == cossim
+true
+
+julia> hashtype(hashfn)
+$(cossim |> LSHFunction |> hashtype)
+```
+
+Create a hash function for ``L^2`` distance defined over ``L^2([0,2\\pi])``. Hash the functions `f(x) = cos(x)` and `f(x) = x/(2π)` using the returned `ChebHash`:
+
+```jldoctest; setup = :(using LSHFunctions, Random; Random.seed!(0))
+julia> hashfn = ChebHash(L2, 3; interval=@interval(0 ≤ x ≤ 2π));
+
+julia> hashfn(cos)
+3-element Array{Int32,1}:
+  3
+ -1
+ -2
+
+julia> hashfn(x -> x/(2π))
+3-element Array{Int32,1}:
+ 0
+ 1
+ 0
+```
+
+See also: [`MonteCarloHash`](@ref)
+"""
+ChebHash(similarity, args...; kws...) =
+    ChebHash(SimilarityFunction(similarity), args...; kws...)
+
 for (fn_sim, discrete_sim) in zip(_valid_ChebHash_similarities...)
     quote
         # Add an implementation of ChebHash that dispatches on the similarity
         # function fn_sim
         function ChebHash(sim::SimilarityFunction{$fn_sim},
                           args...;
-                          interval::RealInterval = @interval(-1 ≤ x ≤ 1),
+                          interval::RealInterval = _DEFAULT_CHEBHASH_INTERVAL,
                           kws...) where S
 
             discrete_hashfn = LSHFunction($discrete_sim, args...; kws...)
