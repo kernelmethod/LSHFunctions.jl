@@ -375,39 +375,3 @@ L1_norm(f, interval::LSHFunctions.RealInterval) = quadgk(x -> abs(f(x)), interva
 
 @doc (@doc Lp_norm)
 L2_norm(f, interval::LSHFunctions.RealInterval) = √quadgk(x -> abs2(f(x)), interval.lower, interval.upper)[1]
-
-#====================
-1D Wasserstein distance
-====================#
-
-@doc raw"""
-    wasserstein_1d(f, g, p)
-    wasserstein1_1d(f, g)
-    wasserstein2_1d(f, g)
-    emd(f, g)
-
-Compute the order-``p`` Wasserstein distance between two probability distributions defined on the interval ``[-1,1]``.
-- `wasserstein1_1d(f,g) == emd(f,g) == wasserstein_1d(f, g, 1)`
-- `wasserstein2_1d(f,g) == wasserstein_1d(f, g, 2)`
-
-# Arguments
-- `f` and `g`: two probability distributions defined on ``[-1,1]``.
-- `p::Real`: the order of Wasserstein distance to compute.
-"""
-function wasserstein_1d(f, g, p::Real)
-    # For one-dimensional probability distributions, the Wasserstein distance has
-    # the closed form
-    #
-    #       ∫_0^1 |F^{-1}(x) - G^{-1}(x)|^p dx
-    #
-    # where F^{-1} and G^{-1} are the inverse c.d.f.s of f and g. We use this
-    # formula to compute the distance between f and g.
-    error("TODO")
-end
-
-@doc (@doc wasserstein_1d)
-wasserstein1_1d(f, g) = wasserstein_1d(f, g, 1)
-emd = wasserstein1_1d
-
-@doc (@doc wasserstein_1d)
-wasserstein2_1d(f, g) = wasserstein_1d(f, g, 2)

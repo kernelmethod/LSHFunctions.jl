@@ -38,8 +38,7 @@ Exports
 
 # Similarity functions, norms, inner products
 export cossim, inner_prod, ℓ1, ℓ2, ℓp, L1, L2, Lp, ℓ1_norm, ℓ2_norm,
-       ℓp_norm, L1_norm, L2_norm, Lp_norm, jaccard, wasserstein_1d,
-       wasserstein1_1d, wasserstein2_1d
+       ℓp_norm, L1_norm, L2_norm, Lp_norm, jaccard
 
 # Hash functions
 export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
