@@ -20,8 +20,9 @@ makedocs(
                     "Inner product similarity" => joinpath("similarities", "inner_prod.md")],
                 "Function-space hashing" => "function_hashing.md",
                 "Performance tips" => "performance.md",
+                "FAQ" => "faq.md",
+                "Notation and glossary" => "notation_and_glossary.md",
                 "API reference" => "full_api.md",
-                "FAQ" => "faq.md"
                ]
 )
 

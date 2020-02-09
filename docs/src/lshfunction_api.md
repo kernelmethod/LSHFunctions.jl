@@ -94,7 +94,7 @@ LSHFunctions.jl provides a few common utility functions that you can use across 
   10
   ```
 
-- [`similarity`](@ref): returns the similarity function for which the input [`LSHFunction`](@ref) is locality-sensitive:
+- [`similarity`](@ref): returns the similarity statistic on which your hash function is locality-sensitive:
 
   ```jldoctest; setup = :(using LSHFunctions)
   julia> hashfn = LSHFunction(cossim);
@@ -103,7 +103,7 @@ LSHFunctions.jl provides a few common utility functions that you can use across 
   cossim (generic function with 2 methods)
   ```
 
-- [`hashtype`](@ref): returns the type of hash computed by the input hash function. Note that in practice `hashfn(x)` (or [`index_hash(hashfn,x)`](@ref) and [`query_hash(hashfn,x)`](@ref) for an [`AsymmetricLSHFunction`](@ref)) will return an array of hashes, one for each hash function you generated. [`hashtype`](@ref) is the data type of each element of `hashfn(x)`.
+- [`hashtype`](@ref): returns the type of hash computed by the input hash function. Note that in practice `hashfn(x)` (or [`index_hash(hashfn,x)`](@ref) and [`query_hash(hashfn,x)`](@ref) for an [`AsymmetricLSHFunction`](@ref)) will return an array of hashes, one for each hash function you sampled when you called [`LSHFunction`](@ref). [`hashtype`](@ref) is the data type of each element of `hashfn(x)`.
 
   ```jldoctest; setup = :(using LSHFunctions)
   julia> hashfn = LSHFunction(cossim, 5);
@@ -135,7 +135,7 @@ LSHFunctions.jl provides a few common utility functions that you can use across 
   true
   ```
 
-  We often want to compute the probability that not just one hash collides, but that multiple hashes collide simultaneously. You can calculate this using the `n_hashes` keyword argument. If left unspecified, then [`collision_probability`](@ref) will use [`n_hashes(hashfn)`](@ref n_hashes) hash functions to compute the probability.
+  We often want to compute the probability that not just one hash collides, but that multiple hashes collide simultaneously. You can calculate this using the `n_hashes` keyword argument. If left unspecified, this parameter will default to [`n_hashes(hashfn)`](@ref n_hashes).
 
   ```jldoctest; setup = :(using LSHFunctions)
   julia> hashfn = MinHash(5);

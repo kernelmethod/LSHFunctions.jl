@@ -4,23 +4,13 @@
     This section is currently being developed. If you're interested in helping write this section, feel free to [open a pull request](https://github.com/kernelmethod/LSHFunctions.jl/pulls); otherwise, please check back later.
 
 ## Definition
-``\ell^p`` distance is a generalization of our usual notion of distance between a pair of points. If you're not familiar with it, you can think of it as a generalization of the Pythagorean theorem: if we have two points ``(a_1,b_1)`` and ``(a_2,b_2)``, then the distance between them is
-
-```math
-\text{distance} = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2}
-```
-
-This is known as the *``\ell^2`` distance* (or Euclidean distance) between ``(a_1,b_1)`` and ``(a_2,b_2)``. In higher dimensions, the ``\ell^2`` distance between the points ``x = (x_1,\ldots,x_n)`` and ``y = (y_1,\ldots,y_n)`` is denoted as ``\|x - y\|_{\ell^2}`` (since ``\ell^2`` distance, and, for that matter, all ``\ell^p`` distances of order ``\ge 1``, are [norms](https://en.wikipedia.org/wiki/Norm_(mathematics))) and defined as[^1]
-
-```math
-\|x - y\|_{\ell^2} = \sqrt{\sum_{i=1}^n \left|x_i - y_i\right|^2}
-```
-
-More generally, the ``\ell^p`` distance between the two length-``n`` vectors ``x`` and ``y`` is given by
+The ``\ell^p`` distance between two length-``n`` vectors ``x`` and ``y`` is defined as
 
 ```math
 \|x - y\|_{\ell^p} = \left(\sum_{i=1}^n \left|x_i - y_i\right|^p\right)^{1/p}
 ```
+
+``\ell^p`` distance is a valid [norm](https://en.wikipedia.org/wiki/Norm_(mathematics)) for all ``p \ge 1``, and is bounded between ``0`` and ``+\infty``. In the context of locality-sensitive hashing, we say that two points are similar if ``\|x - y\|_{\ell^p}`` is small, and dissimilar if ``\|x - y\|_{\ell^p}`` is large[^1].
 
 In the LSHFunctions module, you can calculate the ``\ell^p`` distance between two points using the function [`ℓp`](@ref). The functions [`ℓ1`](@ref ℓp) and [`ℓ2`](@ref ℓp) are also defined for ``\ell^1`` and ``\ell^2`` distance, respectively, since they're so commonly used:
 
@@ -135,8 +125,8 @@ for scale in (0.25, 1.0, 4.0)
   y1 = [collision_probability(l1_hashfn, xii) for xii in x]
   y2 = [collision_probability(l2_hashfn, xii) for xii in x]
 
-  axes[1].plot(x, y1, label="\$r = $scale\$")
-  axes[2].plot(x, y2, label="\$r = $scale\$")
+  axes[1].plot(x, y1, label="\$scale = $scale\$")
+  axes[2].plot(x, y2, label="\$scale = $scale\$")
 end
 
 axes[1].set_xlabel(raw"$\|x - y\|_{\ell^1}$", fontsize=20)
@@ -159,7 +149,7 @@ For further information about the collision probability, see Section 3.2 of the 
 
 ### Footnotes
 
-[^1]: In general, ``x`` and ``y`` are allowed to be complex vectors. We sum over ``\left|x_i - y_i\right|`` (the magnitude of ``x_i - y_i``) instead of ``(x_i - y_i)^2`` to guarantee that ``\|x - y\|_{\ell^2}`` is a real number even when ``x`` and ``y`` are complex.
+[^1]: "small" and "large" are relative terms, of course. `LpHash` has a parameter `scale` that influences the relationship between ``\ell^p`` distance and collision probability, which helps us differentiate between what distances are small and which are large.
 
 [^Datar04]: Datar, Mayur and Indyk, Piotr and Immorlica, Nicole and Mirrokni, Vahab. (2004). *Locality-sensitive hashing scheme based on p-stable distributions*. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.
 

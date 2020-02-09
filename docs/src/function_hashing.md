@@ -19,6 +19,33 @@ julia> hashfn(x -> 5x^3 - 2x^2 - 9x + 1)
  1
 ```
 
+## Similarity statistics in ``L_{\mu}^p`` function spaces
+
+### ``L_{\mu}^p`` distance
+
+```math
+\|f - g\|_{L_{\mu}^p} = \left(\int_{\Omega} |f(x) - g(x)|^p \hspace{0.15cm} d\mu(x)\right)^{1/p}
+```
+
+### Inner product similarity
+
+```math
+\left\langle f, g\right\rangle_{L_{\mu}^2} = \int_{\Omega} f(x)g(x) \hspace{0.15cm} d\mu(x)
+```
+
+When `f(x)` and `g(x)` are allowed to take on complex values, the inner product is defined as
+
+```math
+\left\langle f, g\right\rangle_{L_{\mu}^2} = \int_{\Omega} f(x)\overline{g(x)} \hspace{0.15cm} d\mu(x)
+```
+
+where ``\overline{g(x)}`` is the complex conjugate of ``g(x)``.
+
+### Cosine similarity
+```math
+\text{cossim}(f,g) = \frac{\left\langle f,g\right\rangle_{L_{\mu}^2}}{\|f\|_{L_{\mu}^2} \cdot \|g\|_{L_{\mu}^2}}
+```
+
 ## Function approximation-based hashing
 
 !!! warning "API subject to change"
@@ -99,11 +126,13 @@ julia> hashfn(x -> x/(2π))
 Create a hash function with a different number of sample points.
 
 ```jldoctest; setup = :(using LSHFunctions)
-julia> μ() = rand();  # Samples a random point from [0,1]
+julia> μ() = rand();  # μ samples a random point from [0,1]
 
 julia> hashfn = MonteCarloHash(cossim, μ; volume=1.0, n_samples=512);
 
 julia> length(hashfn.sample_points)
 512
 ```
+
+## Footnotes
 
