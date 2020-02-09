@@ -34,6 +34,13 @@ Private = false
 Pages = ["similarities.jl"]
 ```
 
+## Hashing in function spaces
+
+```@docs
+MonteCarloHash
+ChebHash
+```
+
 ## Miscellaneous
 
 ```@docs

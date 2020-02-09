@@ -161,5 +161,5 @@ For further information about the collision probability, see Section 3.2 of the 
 
 [^1]: In general, ``x`` and ``y`` are allowed to be complex vectors. We sum over ``\left|x_i - y_i\right|`` (the magnitude of ``x_i - y_i``) instead of ``(x_i - y_i)^2`` to guarantee that ``\|x - y\|_{\ell^2}`` is a real number even when ``x`` and ``y`` are complex.
 
-[^Datar04]: Datar, Mayur & Indyk, Piotr & Immorlica, Nicole & Mirrokni, Vahab. (2004). *Locality-sensitive hashing scheme based on p-stable distributions*. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.
+[^Datar04]: Datar, Mayur and Indyk, Piotr and Immorlica, Nicole and Mirrokni, Vahab. (2004). *Locality-sensitive hashing scheme based on p-stable distributions*. Proceedings of the Annual Symposium on Computational Geometry. 10.1145/997817.997857.
 
