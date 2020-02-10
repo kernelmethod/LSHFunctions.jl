@@ -2,7 +2,7 @@
 name: Add new LSH family
 about: Request to add a new LSH family to the project
 title: ''
-labels: ''
+labels: enhancement
 assignees: ''
 
 ---
