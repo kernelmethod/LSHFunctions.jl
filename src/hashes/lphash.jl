@@ -148,10 +148,6 @@ end
 Helper functions for LpHash
 ========================#
 
-# Raise an error if the power corresponding to the L^p distance function is
-# invalid
-check_LpHash_power(hashfn::LpHash) = check_LpHash_power(hashfn.power)
-
 # Resize the coefficients of an LpHash to support vectors of size up to n
 function Base.resize!(hashfn::LpHash{T}, n::Integer) where T
     # If resize_pow2 is set, then change n to the next power of n larger than n
