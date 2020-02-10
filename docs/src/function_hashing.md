@@ -19,7 +19,8 @@ julia> hashfn(x -> 5x^3 - 2x^2 - 9x + 1)
  1
 ```
 
-## Similarity statistics in ``L_{\mu}^p`` function spaces
+## Similarity statistics in function spaces
+The LSHFunctions module currently supports the following similarity statistics for function spaces. Unless otherwise stated, all functions are assumed to be members of an [``L^p_{\mu}(\Omega)`` function space](https://en.wikipedia.org/wiki/Lp_space).
 
 ### ``L_{\mu}^p`` distance
 
@@ -33,13 +34,7 @@ julia> hashfn(x -> 5x^3 - 2x^2 - 9x + 1)
 \left\langle f, g\right\rangle_{L_{\mu}^2} = \int_{\Omega} f(x)g(x) \hspace{0.15cm} d\mu(x)
 ```
 
-When `f(x)` and `g(x)` are allowed to take on complex values, the inner product is defined as
-
-```math
-\left\langle f, g\right\rangle_{L_{\mu}^2} = \int_{\Omega} f(x)\overline{g(x)} \hspace{0.15cm} d\mu(x)
-```
-
-where ``\overline{g(x)}`` is the complex conjugate of ``g(x)``.
+When ``f`` and ``g`` are allowed to take on complex values, ``g(x)`` is replaced by ``\overline{g(x)}`` (the complex conjugate of ``g(x)``) in the formula above.
 
 ### Cosine similarity
 ```math

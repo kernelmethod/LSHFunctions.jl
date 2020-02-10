@@ -21,7 +21,7 @@ makedocs(
                 "Function-space hashing" => "function_hashing.md",
                 "Performance tips" => "performance.md",
                 "FAQ" => "faq.md",
-                "Notation and glossary" => "notation_and_glossary.md",
+                "Glossary" => "glossary.md",
                 "API reference" => "full_api.md",
                ]
 )

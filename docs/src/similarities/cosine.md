@@ -29,7 +29,7 @@ true
 ```
 
 ## SimHash
-*SimHash*[^1][^2] is a family of LSH functions for hashing with respect to cosine similarity. You can generate a new hash function from this family by calling [`SimHash`](@ref):
+*SimHash*[^1][^Charikar02] is a family of LSH functions for hashing with respect to cosine similarity. You can generate a new hash function from this family by calling [`SimHash`](@ref):
 
 ```jldoctest; setup = :(using LSHFunctions)
 julia> hashfn = SimHash();
@@ -123,6 +123,6 @@ savefig("simhash_collision_probability.svg")
 
 ### Footnotes
 
-[^1]: Moses S. Charikar. *Similarity estimation techniques from rounding algorithms*. In Proceedings of the Thiry-Fourth Annual ACM Symposium on Theory of Computing, STOC '02, page 380–388, New York, NY, USA, 2002. Association for Computing Machinery. 10.1145/509907.509965.
+[^1]: [`SimHash` API reference](@ref SimHash)
 
-[^2]: [`SimHash` API reference](@ref SimHash)
+[^Charikar02]: Moses S. Charikar. *Similarity estimation techniques from rounding algorithms*. In Proceedings of the Thiry-Fourth Annual ACM Symposium on Theory of Computing, STOC '02, page 380–388, New York, NY, USA, 2002. Association for Computing Machinery. 10.1145/509907.509965.
