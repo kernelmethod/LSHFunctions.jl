@@ -19,8 +19,10 @@ julia> hashfn(x -> 5x^3 - 2x^2 - 9x + 1)
  1
 ```
 
+LSHFunctions can hash functions in any [``L^p_{\mu}(\Omega)`` function space](https://en.wikipedia.org/wiki/Lp_space) so long as ``\Omega`` has finite volume (i.e., as long as ``\int_{\Omega} d\mu(x) < +\infty``).
+
 ## Similarity statistics in function spaces
-The LSHFunctions module currently supports the following similarity statistics for function spaces. Unless otherwise stated, all functions are assumed to be members of an [``L^p_{\mu}(\Omega)`` function space](https://en.wikipedia.org/wiki/Lp_space).
+The LSHFunctions module currently supports hashing for the following similarity statistics in function spaces.
 
 ### ``L_{\mu}^p`` distance
 

@@ -25,7 +25,7 @@ In the case where ``p = 2``, there is also an [inner product](https://en.wikiped
 
 where ``\overline{g(x)}`` is the complex conjugate of ``g(x)``. A function in ``L^p_{\mu}(\Omega)`` must have the property that ``\|f\|_{L^p_{\mu}}`` is finite.
 
-*Example*: ``f(x) = x^2 - 3x + 2`` is a function in ``L^2([-1,1])`` (with ``\mu`` chosen to be [Lebesgue measure](https://en.wikipedia.org/wiki/Lebesgue_measure)) because ``\|f\|_{L^2} = \sqrt{\int_{-1}^1 \left|f(x)\right|^2 \hspace{0.15cm} dx}`` is finite. However, it is *not* a function in ``L^2([-\infty,\infty])`` because the ``\|f\|_{L^2} = \sqrt{\int_{-\infty}^{\infty} \left|f(x)\right|^2 \hspace{0.15cm} dx`` is infinite.
+*Example*: ``f(x) = x^2 - 3x + 2`` is a function in ``L^2([-1,1])`` (with ``\mu`` chosen to be [Lebesgue measure](https://en.wikipedia.org/wiki/Lebesgue_measure)) because ``\|f\|_{L^2} = \sqrt{\int_{-1}^1 \left|f(x)\right|^2 \hspace{0.15cm} dx}`` is finite. However, it is *not* a function in ``L^2([-\infty,\infty])`` because ``\|f\|_{L^2} = \sqrt{\int_{-\infty}^{\infty} \left|f(x)\right|^2 \hspace{0.15cm} dx}`` is infinite.
 
 ---
 
