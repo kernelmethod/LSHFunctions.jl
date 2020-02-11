@@ -131,5 +131,5 @@ julia> length(hashfn.sample_points)
 512
 ```
 
-## Footnotes
-
+## References
+- Shand, William and Becker, Stephen. *Locality-sensitive hashing in function spaces*. [arXiv:2002.03909](https://arxiv.org/abs/2002.03909).

@@ -156,6 +156,3 @@ LSHFunctions.jl provides a few common utility functions that you can use across 
          collision_probability(hashfn, sim; n_hashes=1)^5
   true
   ```
-
-## References
-- Shand, William and Becker, Stephen. *Locality-sensitive hashing in function spaces*. [arXiv:2002.03909](https://arxiv.org/abs/2002.03909).
