@@ -231,8 +231,9 @@ true
 See also: [`MinHash`](@ref)
 """
 function jaccard(A::Set, B::Set) :: Float64
-    # To avoid corner cases where A and B are both empty
     if isempty(A)
+        # Use the convention that if A = B = ∅, their Jaccard
+        # similarity is zero.
         Float64(0)
     else
         length(A ∩ B) / length(A ∪ B)
@@ -262,7 +263,8 @@ julia> jaccard(x,y)
 function jaccard(x::BitArray{1}, y::BitArray{1}) :: Float64
     union = sum(x .| y)
     if union == 0
-        # To avoid corner cases where x and y are both full of zeros
+        # Use the convention that if x and y are full of zeros, their Jaccard
+        # similarity is zero.
         Float64(0)
     else
         intersection = sum(x .& y)
@@ -270,12 +272,63 @@ function jaccard(x::BitArray{1}, y::BitArray{1}) :: Float64
     end
 end
 
+@doc raw"""
+    function jaccard(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
+
+Computes the Jaccard similarity between a pair of vectors of real numbers. Here, Jaccard similarity is defined as
+
+``J(x, y) = \\frac{\\sum_{i} \\min{(x_i,y_i)}}{\\sum_{i} \\max{(x_i,y_i)}}``
+
+# Arguments
+- `x::AbstractVector{<:Real}`, `y::AbstractVector{<:Real}`: a pair of vectors containing real numbers (subtypes of `Real`).
+
+# Examples
+```jldoctest; setup = :(using LSHFunctions)
+julia> x = [0.8, 0.1, 0.3, 0.4, 0.1];
+
+julia> y = [1.0, 0.6, 0.0, 0.4, 0.5];
+
+julia> jaccard(x,y)
+0.5
+```
+"""
+function jaccard(x::AbstractVector{T}, y::AbstractVector{<:Real}) where {T <: Real}
+    if length(x) != length(y)
+        DimensionMismatch("dimensions must match") |> throw
+    end
+
+    intersection = T(0)
+    union = T(0)
+
+    @inbounds @simd for ii = 1:length(x)
+        if 0 ≤ x[ii] ≤ y[ii]
+            intersection += x[ii]
+            union += y[ii]
+        elseif 0 ≤ y[ii] < x[ii]
+            intersection += y[ii]
+            union += x[ii]
+        else
+            ErrorException("vectors must have non-negative elements") |> throw
+        end
+    end
+
+    if union == T(0)
+        # Use the convention that if x and y are full of zeros, their Jaccard
+        # similarity is zero.
+        T(union)
+    else
+        T(intersection / union)
+    end
+end
+
+jaccard(x::AbstractVector{<:Integer}, y::AbstractVector{<:AbstractFloat}) =
+    jaccard(y, x)
+
 #====================
 Inner product and norms
 ====================#
 
 ### Inner products
-# TODO: docs
 
 @doc raw"""
     inner_prod(x::AbstractVector, y::AbstractVector)

@@ -239,11 +239,39 @@ end
 
         @test jaccard(x, y) == jaccard(y, x) == 2 / 4
 
-        # When x and y are both full of false values, we define the
+        # When x and y are both full of zero bits, we define the
         # Jaccard similarity between them to be zero.
         x = falses(5)
         y = falses(5)
         @test jaccard(x, y) == 0
+    end
+
+    @testset "Compute weighted Jaccard between Real vectors" begin
+        x = [0.8, 0.1, 0.3, 0.4, 0.1]
+        y = [1.0, 0.6, 0.0, 0.4, 0.5]
+
+        @test jaccard(x, y) ==
+              jaccard(y, x) ==
+              (0.8+0.1+0.0+0.4+0.1) / (1.0+0.6+0.3+0.4+0.5)
+
+        # Test Jaccard similarity between vectors with different dtypes
+        x = mod.(rand(Int32, 20), 10)
+        y = mod.(rand(Int64, 20), 10)
+        @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(x, y)
+        @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(Float32.(x), y)
+        @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(x, Float32.(y))
+        @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(Float32.(x), Float64.(y))
+
+        # Define the Jaccard similarity between pairs of Real vectors
+        # to be zero.
+        x = zeros(10)
+        y = zeros(10)
+        @test jaccard(x, y) == 0
+
+        # Throw an error when any of the elements are negative, or when the
+        # two vectors have different lengths.
+        @test_throws(DimensionMismatch, jaccard(rand(5), rand(6)))
+        @test_throws(ErrorException, jaccard(-ones(3), ones(3)))
     end
 end
 
