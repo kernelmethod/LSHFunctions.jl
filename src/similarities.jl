@@ -212,10 +212,7 @@ Computes the Jaccard similarity between sets ``A`` and ``B``, which is defined a
 ``\text{Jaccard}(A,B) = \frac{\left|A \cap B\right|}{\left|A \cup B\right|}``
 
 # Arguments
-- `A::Set`, `B::Set`: the two sets with which to compute Jaccard similarity.
-
-# Returns
-`Float64`: the Jaccard similarity between sets `A` and `B`, which is between `0` and `1`.
+- `A::Set`, `B::Set`: two sets whose Jaccard similarity we would like to compute.
 
 # Examples
 ```jldoctest; setup = :(using LSHFunctions)
@@ -243,9 +240,9 @@ end
 @doc raw"""
     function jaccard(x::BitArray{1}, y::BitArray{1})
 
-Computes the Jaccard similarity between a pair of binary vectors. Here, Jaccard similarity is defined as
+Computes the Jaccard similarity between a pair of binary vectors:
 
-``J(x, y) = \\frac{\\sum_{i} \\min{(x_i,y_i)}}{\\sum_{i} \\max{(x_i,y_i)}}``
+``J(x, y) = \frac{\sum_{i} \min{(x_i,y_i)}}{\sum_{i} \max{(x_i,y_i)}}``
 
 # Arguments
 - `x::BitArray{1}`, `y::BitArray{1}`: two binary vectors, in the form of `BitArray`s.
@@ -275,9 +272,9 @@ end
 @doc raw"""
     function jaccard(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
 
-Computes the Jaccard similarity between a pair of vectors of real numbers. Here, Jaccard similarity is defined as
+Computes the Jaccard similarity between a pair of vectors of real numbers:
 
-``J(x, y) = \\frac{\\sum_{i} \\min{(x_i,y_i)}}{\\sum_{i} \\max{(x_i,y_i)}}``
+``J(x, y) = \frac{\sum_{i} \min{(x_i,y_i)}}{\sum_{i} \max{(x_i,y_i)}}``
 
 # Arguments
 - `x::AbstractVector{<:Real}`, `y::AbstractVector{<:Real}`: a pair of vectors containing real numbers (subtypes of `Real`).
@@ -292,7 +289,8 @@ julia> jaccard(x,y)
 0.5
 ```
 """
-function jaccard(x::AbstractVector{T}, y::AbstractVector{<:Real}) where {T <: Real}
+function jaccard(x::AbstractVector{T},
+                 y::AbstractVector) :: Float64 where {T <: Real}
     if length(x) != length(y)
         DimensionMismatch("dimensions must match") |> throw
     end
@@ -315,14 +313,63 @@ function jaccard(x::AbstractVector{T}, y::AbstractVector{<:Real}) where {T <: Re
     if union == T(0)
         # Use the convention that if x and y are full of zeros, their Jaccard
         # similarity is zero.
-        T(union)
+        Float64(0)
     else
-        T(intersection / union)
+        Float64(intersection / union)
     end
 end
 
 jaccard(x::AbstractVector{<:Integer}, y::AbstractVector{<:AbstractFloat}) =
     jaccard(y, x)
+
+@doc raw"""
+    function jaccard(A::Set{<:K},
+                     B::Set{<:K},
+                     weights::Dict{K,V}) where {K,V<:Number}
+
+Computes the weighted Jaccard similarity between two sets:
+
+``J(x, y) = \frac{\sum_{x\in A\cap B} w_x}{\sum_{y\in A\cup B} w_y}``
+
+# Arguments
+- `A::Set`, `B::Set`: two sets whose Jaccard similarity we would like to compute.
+- `weights::Dict`: a dictionary mapping symbols in the sets `A` and `B` to numerical weights. These weights must be positive.
+
+# Examples
+```jldoctest; setup = :(using LSHFunctions)
+julia> A = Set(["a", "b", "c"]);
+
+julia> B = Set(["b", "c", "d"]);
+
+julia> W = Dict("a" => 0.2, "b" => 2.4, "c" => 0.6, "d" => 1.8);
+
+julia> jaccard(A,B,W)
+0.6
+```
+"""
+function jaccard(A::Set{<:K},
+                 B::Set{<:K}, 
+                 weights::Dict{K,V}) :: Float64 where {K,V<:Real}
+
+    union_weight = V(0)
+
+    for el in A ∪ B
+        w = weights[el]
+        if w < 0
+            ErrorException("weights must be non-negative") |> throw
+        end
+        union_weight += w
+    end
+
+    intersection_weight = sum(weights[el] for el in A ∩ B)
+
+    # By convention, if A = B = ∅, their Jaccard similarity is zero
+    if union_weight == V(0)
+        Float64(0)
+    else
+        Float64(intersection_weight / union_weight)
+    end
+end
 
 #====================
 Inner product and norms

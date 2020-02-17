@@ -246,7 +246,7 @@ end
         @test jaccard(x, y) == 0
     end
 
-    @testset "Compute weighted Jaccard between Real vectors" begin
+    @testset "Compute weighted Jaccard similarity between Real vectors" begin
         x = [0.8, 0.1, 0.3, 0.4, 0.1]
         y = [1.0, 0.6, 0.0, 0.4, 0.5]
 
@@ -258,8 +258,8 @@ end
         x = mod.(rand(Int32, 20), 10)
         y = mod.(rand(Int64, 20), 10)
         @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(x, y)
-        @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(Float32.(x), y)
-        @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(x, Float32.(y))
+        @test isapprox(jaccard(Float64.(x), Float64.(y)), jaccard(Float32.(x), y), atol=1e-8)
+        @test isapprox(jaccard(Float64.(x), Float64.(y)), jaccard(x, Float32.(y)), atol=1e-8)
         @test jaccard(Float64.(x), Float64.(y)) ≈ jaccard(Float32.(x), Float64.(y))
 
         # Define the Jaccard similarity between pairs of Real vectors
@@ -272,6 +272,20 @@ end
         # two vectors have different lengths.
         @test_throws(DimensionMismatch, jaccard(rand(5), rand(6)))
         @test_throws(ErrorException, jaccard(-ones(3), ones(3)))
+    end
+
+    @testset "Compute weighted Jaccard similarity between Sets" begin
+        A = Set(["a", "b", "c"])
+        B = Set(["b", "c", "d"])
+        W = Dict("a" => 0.2, "b" => 2.4, "c" => 0.6, "d" => 1.8)
+
+        @test jaccard(A, B, W) ≈
+              jaccard(B, A, W) ≈
+              (2.4 + 0.6) / (0.2 + 2.4 + 0.6 + 1.8)
+
+        # We should throw an error when any of the weights are negative
+        W["a"] = -1.0
+        @test_throws(ErrorException, jaccard(A, B, W))
     end
 end
 
