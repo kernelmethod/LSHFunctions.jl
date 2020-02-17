@@ -239,6 +239,37 @@ function jaccard(A::Set, B::Set) :: Float64
     end
 end
 
+@doc raw"""
+    function jaccard(x::BitArray{1}, y::BitArray{1})
+
+Computes the Jaccard similarity between a pair of binary vectors. Here, Jaccard similarity is defined as
+
+``J(x, y) = \\frac{\\sum_{i} \\min{(x_i,y_i)}}{\\sum_{i} \\max{(x_i,y_i)}}``
+
+# Arguments
+- `x::BitArray{1}`, `y::BitArray{1}`: two binary vectors, in the form of `BitArray`s.
+
+# Examples
+```jldoctest; setup = :(using LSHFunctions)
+julia> x = BitArray([true, false, true, true, false]);
+
+julia> y = BitArray([false, false, true, true, true]);
+
+julia> jaccard(x,y)
+0.5
+```
+"""
+function jaccard(x::BitArray{1}, y::BitArray{1}) :: Float64
+    union = sum(x .| y)
+    if union == 0
+        # To avoid corner cases where x and y are both full of zeros
+        Float64(0)
+    else
+        intersection = sum(x .& y)
+        intersection / union
+    end
+end
+
 #====================
 Inner product and norms
 ====================#

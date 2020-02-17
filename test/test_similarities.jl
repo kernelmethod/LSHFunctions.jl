@@ -232,6 +232,19 @@ end
         # Convention used in this module
         @test jaccard(Set(), Set()) == 0
     end
+
+    @testset "Compute Jaccard similarity between binary vectors" begin
+        x = BitArray([true, false, true, true, false])
+        y = BitArray([false, false, true, true, true])
+
+        @test jaccard(x, y) == jaccard(y, x) == 2 / 4
+
+        # When x and y are both full of false values, we define the
+        # Jaccard similarity between them to be zero.
+        x = falses(5)
+        y = falses(5)
+        @test jaccard(x, y) == 0
+    end
 end
 
 @testset "Inner product similarity tests" begin
