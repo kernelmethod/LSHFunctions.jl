@@ -58,8 +58,11 @@ function LSHFunction end
 function lsh_family end
 
 @doc """
-    collision_probability(hashfn::H, sim;
-                          n_hashes::Union{Symbol,Integer}=:auto) where {H <: LSHFunction}
+    collision_probability(
+        hashfn::H,
+        sim;
+        n_hashes::Union{Symbol,Integer}=:auto
+    ) where {H <: LSHFunction}
 
 Compute the probability of hash collision between two inputs with similarity `sim` for an [`LSHFunction`](@ref) of type `H`. This function returns the probability that `n_hashes` hashes simultaneously collide.
 

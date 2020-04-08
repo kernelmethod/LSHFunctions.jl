@@ -3,10 +3,11 @@ module LSHFunctions
 using Distributions, LinearAlgebra, SparseArrays
 
 #========================
-Common types/utilities used through the LSH module
+Common types/utilities used throughout the module
 ========================#
 
-include("utils.jl")
+include(joinpath("utils", "hash_compression.jl"))
+include(joinpath("utils", "vecops.jl"))
 include("LSHBase.jl")
 include("intervals.jl")
 include("similarities.jl")
@@ -47,6 +48,6 @@ export SimHash, L1Hash, L2Hash, MIPSHash, SignALSH, MinHash,
 
 # Helper / utility functions for LSHFunctions
 export index_hash, query_hash, n_hashes, hashtype, similarity, lsh_family,
-       embedded_similarity, collision_probability, @interval
+       embedded_similarity, collision_probability, @interval, HashCompressor
 
 end # module
