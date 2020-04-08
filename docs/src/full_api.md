@@ -43,6 +43,12 @@ ChebHash
 
 ## Miscellaneous
 
+```@autodocs
+Modules = [LSHFunctions]
+Private = false
+Pages = [joinpath("utils", "hash_compression.jl")]
+```
+
 ```@docs
 @interval
 ```

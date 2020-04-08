@@ -29,8 +29,8 @@ end
         salt :: Union{Vector{UInt8}} = Vector{UInt8}(undef,0)
     )
 
-Construct a new HashCompressor that compresses a hash returned by an LSHFunction
-into `n_bytes` bytes.
+Construct a new `HashCompressor`. The created `HashCompressor` will compress hashes
+into `n_bytes` bytes, and use the provided salt during hash compression.
 
 # Keyword arguments
 - `n_bytes::Integer` (default: `32`): the number of bytes to compress hashes into.
@@ -40,12 +40,12 @@ into `n_bytes` bytes.
 ```jldoctest; setup = :(using LSHFunctions)
 julia> compressor = HashCompressor(n_bytes=4);
 
-julia> compressor([1, 4, 2, 9])
+julia> compressor([1, 4, 2, 9, 5, 5])
 4-element Array{UInt8,1}:
- 0xb8
- 0xdd
- 0x5a
- 0x5e
+ 0xf3
+ 0x91
+ 0x55
+ 0x2e
 ```
 """
 function HashCompressor(
