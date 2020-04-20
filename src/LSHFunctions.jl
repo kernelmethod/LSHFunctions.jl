@@ -36,7 +36,7 @@ Exports
 ========================#
 
 # Similarity functions, norms, inner products
-export cossim, inner_prod, ℓ1, ℓ2, ℓp, L1, L2, Lp, ℓ1_norm, ℓ2_norm,
+export cossim, hamming, inner_prod, ℓ1, ℓ2, ℓp, L1, L2, Lp, ℓ1_norm, ℓ2_norm,
        ℓp_norm, L1_norm, L2_norm, Lp_norm, jaccard
 
 # Hash functions

@@ -7,6 +7,18 @@ include("utils.jl")
 Tests
 ==================#
 
+@testset "Hamming distance tests" begin
+    @testset "Calculate Hamming distances between bit vectors" begin
+        x = BitArray([1, 1, 0, 1, 0, 1, 0, 1])
+        y = BitArray([1, 1, 1, 1, 0, 0, 0, 1])
+        z = BitArray([1, 1, 1, 0, 1, 1, 1, 0])
+
+        @test hamming(x, y) == 2
+        @test hamming(x, z) == 5
+        @test hamming(y, z) == 5
+    end
+end
+
 @testset "ℓ^p distance and norm tests" begin
     Random.seed!(RANDOM_SEED)
 

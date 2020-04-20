@@ -12,6 +12,48 @@ Definitions of built-in similarity functions
 ====================#
 
 #====================
+Hamming distance
+====================#
+
+@doc raw"""
+    hamming(x,y)
+
+Computes the Hamming distance between two bit vectors ``x`` and ``y``. Hamming distance is defined as the number of locations in which ``x`` and ``y`` disagree, i.e.
+
+``\text{Hamming}(x,y) = \sum_i |x_i - y_i|``
+
+# Arguments
+- `x::Union{BitArray{1},Vector{Bool}}`, `y::Union{BitArray{1},Vector{Bool}}`: the two bit vectors between the Hamming distance is computed.
+
+# Examples
+```jldoctest; setup = :(using LSHFunctions)
+julia> x = BitArray([1, 0, 1, 1]);
+
+julia> y = BitArray([0, 0, 1, 0]);
+
+julia> hamming(x,y)
+2
+```
+"""
+function hamming(
+    x::Union{BitArray{1}, Vector{Bool}},
+    y::Union{BitArray{1}, Vector{Bool}}
+)
+    if length(x) != length(y)
+        "Lengths of x and y are not equal ($(length(x)) != $(length(y))" |>
+        ErrorException |>
+        throw
+    end
+
+    total = 0
+    @inbounds @simd for ii = 1:length(x)
+        total += (x[ii] != y[ii])
+    end
+
+    return total
+end
+
+#====================
 Cosine similarity
 ====================#
 
