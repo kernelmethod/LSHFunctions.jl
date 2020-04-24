@@ -29,7 +29,7 @@ end
 
 @doc """
     SignALSH(n_hashes::Integer = $(DEFAULT_N_HASHES),
-             dtype::DataType = $(DEFAULT_DTYPE),
+             dtype::Type = $(DEFAULT_DTYPE),
              maxnorm::Union{Nothing,Real} = nothing,
              m::Integer = 3,
              resize_pow2::Bool = $(DEFAULT_RESIZE_POW2))

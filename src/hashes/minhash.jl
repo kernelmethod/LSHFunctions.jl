@@ -25,7 +25,7 @@ end
 
 """
     MinHash(n_hashes::Integer = $(DEFAULT_N_HASHES);
-            dtype::DataType = Any,
+            dtype::Type = Any,
             symbols::Union{Vector,Set} = Set())
 
 Construct a locality-sensitive hash function for Jaccard similarity.
@@ -34,7 +34,7 @@ Construct a locality-sensitive hash function for Jaccard similarity.
 - $(N_HASHES_DOCSTR())
 
 # Keyword parameters
-- `dtype::DataType` (default: `Any`): the type of symbols in the sets you're hashing. This is overriden by the data type contained in `symbols` when `symbols` is non-empty.
+- `dtype::Type` (default: `Any`): the type of symbols in the sets you're hashing. This is overriden by the data type contained in `symbols` when `symbols` is non-empty.
 - `symbols::Union{Vector,Set}`: a `Vector` or `Set` containing all of the possible elements ("symbols") of the sets that you will be hashing. If left empty, `MinHash` will instead expand its dictionary when it sees new symbols (at small additional computational expense).
 
 # Examples
@@ -80,7 +80,7 @@ julia> hashfn(Set(["a", "b", "c"]));
 See also: [`jaccard`](@ref)
 """
 function MinHash(args...;
-                 dtype::DataType = Any,
+                 dtype::Type = Any,
                  symbols::C = Set{Any}()) where {T, C <: Union{Vector{T},Set{T}}}
 
     if length(symbols) > 0

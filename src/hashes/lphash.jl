@@ -81,7 +81,7 @@ L1Hash(args...; kws...) where {T} = LpHash(args...; power = 1, kws...)
 
 L2Hash(args...; kws...) where {T} = LpHash(args...; power = 2, kws...)
 
-LpHash(args...; dtype::DataType = DEFAULT_DTYPE, kws...) =
+LpHash(args...; dtype::Type = DEFAULT_DTYPE, kws...) =
     LpHash{dtype}(args...; kws...)
 
 ### Documentation for L1Hash and L2Hash
@@ -95,7 +95,7 @@ for (hashfn, power) in zip((:L1Hash, :L2Hash), (1, 2))
 @doc """
     $($hashfn)(
         n_hashes::Integer = $(DEFAULT_N_HASHES);
-        dtype::DataType = $(DEFAULT_DTYPE),
+        dtype::Type = $(DEFAULT_DTYPE),
         r::Real = 1.0,
         resize_pow2::Bool = $(DEFAULT_RESIZE_POW2)
     )

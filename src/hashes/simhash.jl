@@ -37,7 +37,7 @@ SimHash(args...; dtype = DEFAULT_DTYPE, kws...) =
 
 @doc """
     SimHash(n_hashes::Integer = $(DEFAULT_N_HASHES);
-            dtype::DataType = $(DEFAULT_DTYPE),
+            dtype::Type = $(DEFAULT_DTYPE),
             resize_pow2::Bool = $(DEFAULT_RESIZE_POW2))
 
 Creates a locality-sensitive hash function for cosine similarity.

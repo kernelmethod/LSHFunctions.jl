@@ -345,7 +345,7 @@ N_HASHES_DOCSTR(; default = DEFAULT_N_HASHES) = """
 `n_hashes::Integer` (default: `$(default)`): the number of hash functions to generate."""
 
 DTYPE_DOCSTR(hashfn; default = DEFAULT_DTYPE) = """
-`dtype::DataType` (default: `$(default)`): the data type to use in the $(hashfn) internals. For performance reasons you should pick `dtype` to match the type of the data you're hashing."""
+`dtype::Type` (default: `$(default)`): the data type to use in the $(hashfn) internals. For performance reasons you should pick `dtype` to match the type of the data you're hashing."""
 
 RESIZE_POW2_DOCSTR(hashfn; default = DEFAULT_RESIZE_POW2) = """
 `resize_pow2::Bool` (default: `$(default)`): affects the way in which the returned `$(hashfn)` resizes to hash inputs of different sizes. If you think you'll be hashing inputs of many different sizes, it's more efficient to set `resize_pow2 = true`."""
