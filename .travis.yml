@@ -1,5 +1,13 @@
 language: julia
 
+# Cache artifacts between tests:
+#
+#   http://discourse.julialang.org/t/recommendation-cache-julia-artifacts-in-ci-services/
+#
+cache:
+  directories:
+  - $HOME/.julia/artifacts
+
 os: linux
 dist: bionic
 
