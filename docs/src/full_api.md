@@ -38,7 +38,6 @@ Pages = ["similarities.jl"]
 
 ```@docs
 MonteCarloHash
-ChebHash
 ```
 
 ## Miscellaneous

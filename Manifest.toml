@@ -1,11 +1,5 @@
 # This file is machine-generated - editing it directly is not advised
 
-[[AbstractFFTs]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "051c95d6836228d120f5f4b984dd5aba1624f716"
-uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
-version = "0.5.0"
-
 [[Arpack]]
 deps = ["Arpack_jll", "Libdl", "LinearAlgebra"]
 git-tree-sha1 = "2ff92b71ba1747c5fdd541f8fc87736d82f40ec9"
@@ -64,29 +58,11 @@ git-tree-sha1 = "f3464968c65fc78846dad1c038c474a2c39bbb23"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 version = "0.25.0"
 
-[[FFTW]]
-deps = ["AbstractFFTs", "FFTW_jll", "IntelOpenMP_jll", "Libdl", "LinearAlgebra", "MKL_jll", "Reexport"]
-git-tree-sha1 = "14536c95939aadcee44014728a459d2fe3ca9acf"
-uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.2.2"
-
-[[FFTW_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "6c975cd606128d45d1df432fb812d6eb10fee00b"
-uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
-version = "3.3.9+5"
-
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
 git-tree-sha1 = "bf726ba7ce99e00d10bf63c031285fb9ab3676ae"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
 version = "0.8.11"
-
-[[IntelOpenMP_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "fb8e1c7a5594ba56f9011310790e03b5384998d6"
-uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2018.0.3+0"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -111,12 +87,6 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
-
-[[MKL_jll]]
-deps = ["IntelOpenMP_jll", "Libdl", "Pkg"]
-git-tree-sha1 = "0ce9a7fa68c70cf83c49d05d2c04d91b47404b08"
-uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2020.1.216+0"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -181,12 +151,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [[Random]]
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-
-[[Reexport]]
-deps = ["Pkg"]
-git-tree-sha1 = "7b1d07f411bc8ddb7977ec7f377b97b158514fe0"
-uuid = "189a3867-3050-52da-a836-e630ba90ab69"
-version = "0.2.0"
 
 [[Rmath]]
 deps = ["Random", "Rmath_jll"]

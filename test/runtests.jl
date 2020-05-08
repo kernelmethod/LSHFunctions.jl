@@ -27,6 +27,5 @@ include(joinpath("hashes", "test_sign_alsh.jl"))
 include(joinpath("hashes", "test_lshfunction.jl"))
 
 include(joinpath("function_hashing", "test_monte_carlo.jl"))
-include(joinpath("function_hashing", "test_chebhash.jl"))
 
 include(joinpath("utils", "test_hash_compression.jl"))

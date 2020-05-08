@@ -145,8 +145,6 @@ julia> hashfn = MonteCarloHash(cossim, μ; volume=1.0, n_samples=512);
 julia> length(hashfn.sample_points)
 512
 ```
-
-See also: [`ChebHash`](@ref)
 """
 MonteCarloHash(similarity, args...; kws...) =
     MonteCarloHash(SimilarityFunction(similarity), args...; kws...)

@@ -22,6 +22,7 @@ julia> hashfn(x -> 5x^3 - 2x^2 - 9x + 1)
 LSHFunctions can hash functions in any [``L^p_{\mu}(\Omega)`` function space](https://en.wikipedia.org/wiki/Lp_space) so long as ``\Omega`` has finite volume (i.e., as long as ``\int_{\Omega} d\mu(x) < +\infty``).
 
 ## Similarity statistics in function spaces
+
 The LSHFunctions module currently supports hashing for the following similarity statistics in function spaces.
 
 ### ``L_{\mu}^p`` distance
@@ -39,49 +40,15 @@ The LSHFunctions module currently supports hashing for the following similarity 
 When ``f`` and ``g`` are allowed to take on complex values, ``g(x)`` is replaced by ``\overline{g(x)}`` (the complex conjugate of ``g(x)``) in the formula above.
 
 ### Cosine similarity
+
 ```math
 \text{cossim}(f,g) = \frac{\left\langle f,g\right\rangle_{L_{\mu}^2}}{\|f\|_{L_{\mu}^2} \cdot \|g\|_{L_{\mu}^2}}
 ```
 
-## Function approximation-based hashing
+## Monte Carlo-based hashing
 
 !!! warning "API subject to change"
-    The API for both [`ChebHash`](@ref) and [`MonteCarloHash`](@ref), but especially the former, is being modified very quickly. As a result, the docs below may change radically for future versions of the LSHFunctions package.
-
-Create a hash function for cosine similarity for functions in ``L^2([-1,1])``:
-
-```
-julia> hashfn = ChebHash(cossim, 50; interval=@interval(-1 ≤ x ≤ 1));
-
-julia> n_hashes(hashfn)
-50
-
-julia> similarity(hashfn) == cossim
-true
-
-julia> hashtype(hashfn)
-Bool
-```
-
-Create a hash function for ``L^2`` distance defined over ``L^2([0,2\pi])``. Hash the functions `f(x) = cos(x)` and `f(x) = x/(2π)` using the returned [`ChebHash`](@ref):
-
-```
-julia> hashfn = ChebHash(L2, 3; interval=@interval(0 ≤ x ≤ 2π));
-
-julia> hashfn(cos)
-3-element Array{Int32,1}:
-  3
- -1
- -2
-
-julia> hashfn(x -> x/(2π))
-3-element Array{Int32,1}:
- 0
- 1
- 0
-```
-
-## Monte Carlo-based hashing
+    The API for [`MonteCarloHash`](@ref) is still under heavy design. As a result, the docs below may change radically for future versions of the LSHFunctions package.
 
 Create a hash function for cosine similarity for functions in ``L^2([-1,1])``:
 
@@ -132,4 +99,5 @@ julia> length(hashfn.sample_points)
 ```
 
 ## References
+
 - Shand, William and Becker, Stephen. *Locality-sensitive hashing in function spaces*. [arXiv:2002.03909](https://arxiv.org/abs/2002.03909).
