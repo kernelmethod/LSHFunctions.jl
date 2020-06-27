@@ -37,6 +37,9 @@ jobs:
         - julia -e 'using Coverage; Codecov.submit(Codecov.process_folder());'
 
     - stage:
+      julia: 1.5
+
+    - stage:
       julia: nightly
 
     ########################################################
