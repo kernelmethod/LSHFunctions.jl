@@ -43,7 +43,7 @@ So far, there are hash functions for the similarity functions:
   - `MonteCarloHash`
   - `ChebHash`
 
-This package still needs a lot of work, including improvement to the documentation and API. In general, if you want to draw one or more new hash functions, you can use the following syntax:
+This package still needs a lot of work, including improvement to the documentation and API.
 
 ## Examples
 The easiest way to start constructing new hash functions is by calling `LSHFunction` with the following syntax:
