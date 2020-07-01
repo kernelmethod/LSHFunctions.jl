@@ -4,6 +4,8 @@ Definition of MIPSHash for hashing on inner products.
 
 ================================================================#
 
+using Logging
+
 #========================
 Typedefs
 ========================#
@@ -52,7 +54,7 @@ Create a `MIPSHash` hash function for hashing on inner product similarity.
 # Examples
 `MIPSHash` is an [`AsymmetricLSHFunction`](@ref), and hence hashes must be computed using `index_hash` and `query_hash`.
 
-```jldoctest; setup = :(using LSHFunctions)
+```
 julia> hashfn = MIPSHash(5; maxnorm=10);
 
 julia> x = rand(4);
@@ -68,14 +70,14 @@ true
 
 You need to explicitly specify the `maxnorm` keyword parameter when constructing `MIPSHash`, otherwise you will get an error.
 
-```jldoctest; setup = :(using LSHFunctions)
+```
 julia> hashfn = MIPSHash(5)
 ERROR: maxnorm must be specified for MIPSHash
 ```
 
 You'll also get an error if you try to hash a vector that has norm greater than the `maxnorm` that you specified.
 
-```jldoctest; setup = :(using LSHFunctions)
+```
 julia> hashfn = MIPSHash(; maxnorm=1);
 
 julia> index_hash(hashfn, ones(4))
@@ -98,6 +100,7 @@ See also: [`inner_prod`](@ref), [`ℓ2_norm`](@ref ℓp_norm)
           throw)
     else
         quote
+            @warn "MIPSHash is deprecated. Starting in version 0.2.0 MIPSHash will no longer be available."
             if n_hashes < 1
                 "n_hashes must be positive" |>
                 ErrorException |>
@@ -125,8 +128,8 @@ See also: [`inner_prod`](@ref), [`ℓ2_norm`](@ref ℓp_norm)
 
             MIPSHash{T}(coeff_A, coeff_B, scale, shift, Qshift, m,
 	                    maxnorm, resize_pow2)
-	    end
 	end
+    end
 end
 
 MIPSHash(args...; dtype=DEFAULT_DTYPE, kws...) =

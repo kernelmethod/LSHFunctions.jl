@@ -50,7 +50,7 @@ When ``f`` and ``g`` are allowed to take on complex values, ``g(x)`` is replaced
 
 Create a hash function for cosine similarity for functions in ``L^2([-1,1])``:
 
-```jldoctest; setup = :(using LSHFunctions)
+```
 julia> hashfn = ChebHash(cossim, 50; interval=@interval(-1 ≤ x ≤ 1));
 
 julia> n_hashes(hashfn)
@@ -65,7 +65,7 @@ Bool
 
 Create a hash function for ``L^2`` distance defined over ``L^2([0,2\pi])``. Hash the functions `f(x) = cos(x)` and `f(x) = x/(2π)` using the returned [`ChebHash`](@ref):
 
-```jldoctest; setup = :(using LSHFunctions, Random; Random.seed!(0))
+```
 julia> hashfn = ChebHash(L2, 3; interval=@interval(0 ≤ x ≤ 2π));
 
 julia> hashfn(cos)

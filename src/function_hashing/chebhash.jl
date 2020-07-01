@@ -5,6 +5,7 @@ ChebHash for hashing the L^2([-1,1]) function space.
 ================================================================#
 
 using FFTW
+using Logging
 
 #========================
 Global constants
@@ -31,6 +32,7 @@ struct ChebHash{B, F<:SimilarityFunction, H<:LSHFunction, I<:RealInterval}
                 interval::I
             ) where {B, F<:SimilarityFunction, H<:LSHFunction, I<:RealInterval}
 
+        @warn "ChebHash is deprecated. Starting in version 0.2.0 ChebHash will no longer be available."
         new{B,F,H,I}(hashfn, interval)
     end
 end
@@ -71,7 +73,7 @@ join(
 # Examples
 Create a hash function for cosine similarity for functions in ``L^2([-1,1])``:
 
-```jldoctest; setup = :(using LSHFunctions)
+```
 julia> hashfn = ChebHash(cossim, 50; interval=@interval(-1 ≤ x ≤ 1));
 
 julia> n_hashes(hashfn)
@@ -86,7 +88,7 @@ $(cossim |> LSHFunction |> hashtype)
 
 Create a hash function for ``L^2`` distance defined over ``L^2([0,2\\pi])``. Hash the functions `f(x) = cos(x)` and `f(x) = x/(2π)` using the returned `ChebHash`:
 
-```jldoctest; setup = :(using LSHFunctions, Random; Random.seed!(0))
+```
 julia> hashfn = ChebHash(L2, 3; interval=@interval(0 ≤ x ≤ 2π));
 
 julia> hashfn(cos)
