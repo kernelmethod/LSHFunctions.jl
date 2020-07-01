@@ -19,7 +19,6 @@ Hash functions
 include(joinpath("hashes", "simhash.jl"))
 include(joinpath("hashes", "minhash.jl"))
 include(joinpath("hashes", "lphash.jl"))
-include(joinpath("hashes", "mips_hash.jl"))
 include(joinpath("hashes", "sign_alsh.jl"))
 
 # Must be placed last, since it uses the definitions of LSHFunction subtypes
