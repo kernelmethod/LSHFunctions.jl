@@ -41,6 +41,14 @@ See also: [`SymmetricLSHFunction`](@ref)
 """
 abstract type AsymmetricLSHFunction <: LSHFunction end
 
+function Base.show(io::IO, hashfn::LSHFunction)
+    args = "n_hashes = $(n_hashes(hashfn))"
+    args = args * ", similarity = $(similarity(hashfn))"
+    args = args * ", hashtype = $(hashtype(hashfn))"
+    msg = "$(typeof(hashfn))($args)"
+    print(io, msg)
+end
+
 #========================
 Similarity function API
 ========================#
