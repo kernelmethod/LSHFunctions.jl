@@ -1,12 +1,13 @@
 # LSHFunctions.jl
 
-- Docs: [![Stable docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://kernelmethod.github.io/LSHFunctions.jl/stable/) [![Dev docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://kernelmethod.github.io/LSHFunctions.jl/dev/)
-- Build status: [![Build Status](https://travis-ci.com/kernelmethod/LSHFunctions.jl.svg?branch=master)](https://travis-ci.com/kernelmethod/LSHFunctions.jl)
-- Code coverage: [![Coverage Status](https://coveralls.io/repos/github/kernelmethod/LSHFunctions.jl/badge.svg?branch=master)](https://coveralls.io/github/kernelmethod/LSHFunctions.jl?branch=master)
-[![codecov](https://codecov.io/gh/kernelmethod/LSHFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSHFunctions.jl)
-- DOI to cite this code: [![DOI](https://zenodo.org/badge/197700982.svg)](https://zenodo.org/badge/latestdoi/197700982)
+[![Stable docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://kernelmethod.github.io/LSHFunctions.jl/stable/) [![Dev docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://kernelmethod.github.io/LSHFunctions.jl/dev/)
+[![Build Status](https://github.com/kernelmethod/LSHFunctions.jl/workflows/CI/badge.svg)](https://github.com/kernelmethod/LSHFunctions.jl/actions)
+[![Codecov](https://codecov.io/gh/kernelmethod/LSHFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kernelmethod/LSHFunctions.jl)
+[![DOI](https://zenodo.org/badge/197700982.svg)](https://zenodo.org/badge/latestdoi/197700982)
 
-A Julia package for [locality-sensitive hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) to accelerate similarity search.
+A Julia package for [locality-sensitive
+hashing](https://en.wikipedia.org/wiki/Locality-sensitive_hashing) to accelerate
+similarity search.
 
 - [What's LSH?](#whats-lsh)
 - [Installation](#installation)
@@ -14,12 +15,29 @@ A Julia package for [locality-sensitive hashing](https://en.wikipedia.org/wiki/L
 - [Examples](#examples)
 
 ## What's LSH?
-Traditionally, if you have a data point `x`, and want to find the most similar point(s) to `x` in your database, you would compute the similarity between `x` and all of the points in your database, and keep whichever points were the most similar. For instance, this type of approach is used by the classic [k-nearest neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm). However, it has two major problems:
+Traditionally, if you have a data point `x`, and want to find the most similar
+point(s) to `x` in your database, you would compute the similarity between `x`
+and all of the points in your database, and keep whichever points were the most
+similar. For instance, this type of approach is used by the classic [k-nearest
+neighbors algorithm](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm).
+However, it has two major problems:
 
-- The time to find the most similar point(s) to `x` is linear in the number of points in your database. This can make similarity search prohibitively expensive for even moderately large datasets.
-- In addition, the time complexity to compute the similarity between two datapoints is typically linear in the number of dimensions of those datapoints. If your data are high-dimensional (i.e. in the thousands to millions of dimensions), every similarity computation you perform can be fairly costly.
+- The time to find the most similar point(s) to `x` is linear in the number of
+  points in your database. This can make similarity search prohibitively
+  expensive for even moderately large datasets.
+- In addition, the time complexity to compute the similarity between two
+  datapoints is typically linear in the number of dimensions of those
+  datapoints. If your data are high-dimensional (i.e. in the thousands to
+  millions of dimensions), every similarity computation you perform can be
+  fairly costly.
 
-**Locality-sensitive hashing** (LSH) is a technique for accelerating these kinds of similarity searches. Instead of measuring how similar your query point is to every point in your database, you calculate a few hashes of the query point and only compare it against those points with which it experiences a hash collision. Locality-sensitive hash functions are randomly generated, with the fundamental property that as the similarity between `x` and `y` increases, the probability of a hash collision between `x` and `y` also increases.
+**Locality-sensitive hashing** (LSH) is a technique for accelerating these kinds
+of similarity searches. Instead of measuring how similar your query point is to
+every point in your database, you calculate a few hashes of the query point and
+only compare it against those points with which it experiences a hash collision.
+Locality-sensitive hash functions are randomly generated, with the fundamental
+property that as the similarity between `x` and `y` increases, the probability
+of a hash collision between `x` and `y` also increases.
 
 
 ## Installation
@@ -43,10 +61,12 @@ So far, there are hash functions for the similarity functions:
   - `MonteCarloHash`
   - `ChebHash`
 
-This package still needs a lot of work, including improvement to the documentation and API.
+This package still needs a lot of work, including improvement to the
+documentation and API.
 
 ## Examples
-The easiest way to start constructing new hash functions is by calling `LSHFunction` with the following syntax:
+The easiest way to start constructing new hash functions is by calling
+`LSHFunction` with the following syntax:
 
 ```
 hashfn = LSHFunction(similarity function,
@@ -54,7 +74,8 @@ hashfn = LSHFunction(similarity function,
                      [LSH family-specific keyword arguments])
 ```
 
-For example, the following snippet generates 10 locality-sensitive hash functions (bundled together into a single `SimHash` struct) for cosine similarity:
+For example, the following snippet generates 10 locality-sensitive hash
+functions (bundled together into a single `SimHash` ) for cosine similarity:
 
 ```julia
 julia> using LSHFunctions;
@@ -76,4 +97,5 @@ julia> x = randn(128);
 julia> x_hashes = hashfn(x);
 ```
 
-For more details, [check out the LSHFunctions.jl documentation](https://kernelmethod.github.io/LSHFunctions.jl/dev/).
+For more details, [check out the LSHFunctions.jl
+documentation](https://kernelmethod.github.io/LSHFunctions.jl/dev/).
