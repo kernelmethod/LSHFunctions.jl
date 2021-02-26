@@ -6,7 +6,6 @@ using Distributions, LinearAlgebra, SparseArrays
 Common types/utilities used throughout the module
 ========================#
 
-include(joinpath("utils", "hash_compression.jl"))
 include(joinpath("utils", "vecops.jl"))
 include("LSHBase.jl")
 include("intervals.jl")
