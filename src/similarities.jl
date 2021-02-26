@@ -4,7 +4,7 @@ Definitions of various similarity functions
 
 =============================================#
 
-using Markdown, QuadGK
+using QuadGK
 using LinearAlgebra: dot, norm
 
 #====================

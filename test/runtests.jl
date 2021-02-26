@@ -14,8 +14,6 @@ include("utils.jl")
 Tests
 ========================#
 
-include("doctests.jl")
-
 include("test_intervals.jl")
 include("test_similarities.jl")
 
@@ -26,5 +24,3 @@ include(joinpath("hashes", "test_sign_alsh.jl"))
 include(joinpath("hashes", "test_lshfunction.jl"))
 
 include(joinpath("function_hashing", "test_monte_carlo.jl"))
-
-include(joinpath("utils", "test_hash_compression.jl"))
