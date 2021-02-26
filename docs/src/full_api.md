@@ -23,7 +23,6 @@ MinHash
 L1Hash
 L2Hash
 SignALSH
-MIPSHash
 ```
 
 ## Similarity functions
