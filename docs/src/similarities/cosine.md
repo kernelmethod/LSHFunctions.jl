@@ -76,7 +76,7 @@ julia> n_hashes(hashfn)
 julia> hashes = hashfn(randn(4));
 
 julia> typeof(hashes)
-BitArray{1}
+BitVector (alias for BitArray{1})
 
 julia> length(hashes)
 1

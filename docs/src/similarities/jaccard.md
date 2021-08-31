@@ -40,12 +40,12 @@ UInt64
 julia> A = Set([1, 2, 3]);
 
 julia> hashfn(A)
-5-element Array{UInt64,1}:
- 0x21be0e591a3b69ea
- 0x19c5f638a776ab3c
- 0x63c12fd5d2f073ab
- 0x5c6b11e538a36352
- 0x129ef927e80a1b39
+5-element Vector{UInt64}:
+ 0x68ab426365cf3fcf
+ 0x13095267e4625e58
+ 0x0c0f74c97d4d341e
+ 0x1b294d39ad1e06a7
+ 0x74a5bce47c6b635a
 ```
 
 The probability of a collision for an individual hash between sets ``A`` and ``B`` is just equal to their Jaccard similarity, i.e.

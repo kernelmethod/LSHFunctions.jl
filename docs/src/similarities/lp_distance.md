@@ -75,7 +75,7 @@ julia> x = rand(20);
 julia> hashes = hashfn(x);
 
 julia> typeof(hashes)
-Array{Int32,1}
+Vector{Int32} (alias for Array{Int32, 1})
 ```
 
 `L1Hash` and `L2Hash` support a keyword parameter called `scale`. `scale` impacts the collision probability: if `scale` is large then hash collisions are more likely (even among distant points). If `scale` is small, then hash collisions are less likely (even among close points).

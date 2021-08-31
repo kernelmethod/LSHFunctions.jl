@@ -17,7 +17,7 @@ julia> data[end,1:end] .= rand(100);  # Randomize the last dimension of each poi
 julia> hashes = map(x -> hashfn(x), eachcol(data));
 
 julia> unique(hashes)
-1-element Array{BitArray{1},1}:
+1-element Vector{BitVector}:
  [0]
 ```
 
