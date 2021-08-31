@@ -88,17 +88,17 @@ end
 
     @testset "Compute L^1 distance and norm" begin
         interval = LSHFunctions.@interval(-π ≤ x ≤ π)
-        f(x) = 0
-        g(x) = 2
+        f = x -> 0
+        g = x -> 2
 
         @test L1_norm(g, interval) ≈ L1(f, g, interval) ≈ 4π
 
-        g(x) = x
+        g = x -> x
 
         @test L1_norm(g, interval) ≈ L1(f, g, interval) ≈ π^2
 
-        f(x) = x
-        g(x) = 2x.^2
+        f = x -> x
+        g = x -> 2x.^2
 
         @test L1(f, g, interval) ≈ L1_norm(x -> f(x) - g(x), interval)
         @test L1(f, g, interval) ≈ quadgk(x -> abs(f(x) - g(x)), -π, π)[1]
@@ -106,17 +106,17 @@ end
 
     @testset "Compute L^2 distance and norm" begin
         interval = LSHFunctions.@interval(-π ≤ x ≤ π)
-        f(x) = 0
-        g(x) = 2
+        f = x -> 0
+        g = x -> 2
 
         @test L2_norm(g, interval) ≈ L2(f, g, interval) ≈ √(8π)
 
-        g(x) = x
+        g = x -> x
 
         @test L2_norm(g, interval) ≈ L2(f, g, interval) ≈ √(2π^3 / 3)
 
-        f(x) = x
-        g(x) = 2x.^2
+        f = x -> x
+        g = x -> 2x.^2
 
         @test L2(f, g, interval) ≈ L2_norm(x -> f(x) - g(x), interval)
         @test L2(f, g, interval) ≈ √quadgk(x -> abs2(f(x) - g(x)), -π, π)[1]
@@ -124,21 +124,21 @@ end
 
     @testset "Compute L^p distance and norm" begin
         interval = LSHFunctions.@interval(-π ≤ x ≤ π)
-        f(x) = 0
-        g(x) = 2
+        f = x -> 0
+        g = x -> 2
 
         @test Lp_norm(g, interval, 1) ≈ Lp(f, g, interval, 1) ≈ L1(f, g, interval)
         @test Lp_norm(g, interval, 2) ≈ Lp(f, g, interval, 2) ≈ L2(f, g, interval)
         @test Lp_norm(g, interval, 3) ≈ Lp(f, g, interval, 3) ≈ (16π)^(1/3)
 
-        g(x) = x
+        g = x -> x
 
         @test Lp_norm(g, interval, 1) ≈ Lp(f, g, interval, 1) ≈ L1(f, g, interval)
         @test Lp_norm(g, interval, 2) ≈ Lp(f, g, interval, 2) ≈ L2(f, g, interval)
         @test Lp_norm(g, interval, 3) ≈ Lp(f, g, interval, 3) ≈ (π^4/2)^(1/3)
 
-        f(x) = x
-        g(x) = 2x.^2
+        f = x -> x
+        g = x -> 2x.^2
         p = rand() + 1
 
         @test Lp(f, g, interval, p) ≈ Lp_norm(x -> f(x) - g(x), interval, p)
@@ -172,8 +172,8 @@ end
 
     @testset "Compute cosine similarity between functions" begin
         interval = LSHFunctions.@interval(0 ≤ x ≤ 1)
-        f(x) = (x ≤ 0.5) ? 1.0 : 0.0
-        g(x) = (x ≤ 0.5) ? 0.0 : 1.0
+        f = x -> (x ≤ 0.5) ? 1.0 : 0.0
+        g = x -> (x ≤ 0.5) ? 0.0 : 1.0
 
         @test cossim(f, g, interval) ≈ 0
         @test cossim(f, f, interval) ≈ cossim(g, g, interval) ≈ 1
@@ -183,8 +183,8 @@ end
               cossim(g, x -> -g(x), interval) ≈ -1
         @test_throws ErrorException cossim(f, x -> 0.0, interval)
 
-        f(x) = x
-        g(x) = x.^2
+        f = x -> x
+        g = x -> x.^2
 
         @test L2_norm(f, interval) ≈ 1/√3
         @test L2_norm(g, interval) ≈ 1/√5
@@ -310,15 +310,15 @@ end
 
     @testset "Compute L^2 inner products between pairs of functions" begin
         interval = LSHFunctions.@interval(-π ≤ x ≤ π)
-        f(x) = 1
-        g(x) = x
+        f = x -> 1
+        g = x -> x
 
         @test inner_prod(f, f, interval) ≈ L2_norm(f, interval)^2 ≈ 2π
         @test inner_prod(g, g, interval) ≈ L2_norm(g, interval)^2 ≈ 2π^3 / 3
         @test isapprox(inner_prod(f, g, interval), 0.0; atol = 1e-15)
 
-        f(x) = sin(x)
-        g(x) = cos(x)
+        f = x -> sin(x)
+        g = x -> cos(x)
 
         @test inner_prod(f, f, interval) ≈ L2_norm(f, interval)^2 ≈
               quadgk(x -> sin(x)^2, -π, π)[1]
