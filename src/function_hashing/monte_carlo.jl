@@ -123,13 +123,13 @@ julia> μ() = 2π * rand(); # μ samples a random point from [0,2π]
 julia> hashfn = MonteCarloHash(L2, μ, 3; volume=2π);
 
 julia> hashfn(cos)
-3-element Array{Int32,1}:
+3-element Vector{Int32}:
  -1
   3
   0
 
 julia> hashfn(x -> x/(2π))
-3-element Array{Int32,1}:
+3-element Vector{Int32}:
  -1
  -2
  -1

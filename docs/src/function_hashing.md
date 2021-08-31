@@ -13,7 +13,7 @@ julia> μ() = 2π*rand();   # μ samples a random point from [0,2π]
 julia> hashfn = MonteCarloHash(cossim, μ, 3);
 
 julia> hashfn(x -> 5x^3 - 2x^2 - 9x + 1)
-3-element BitArray{1}:
+3-element BitVector:
  0
  1
  1
@@ -75,13 +75,13 @@ julia> μ() = 2π * rand(); # μ samples a random point from [0,2π]
 julia> hashfn = MonteCarloHash(L2, μ, 3; volume=2π);
 
 julia> hashfn(cos)
-3-element Array{Int32,1}:
+3-element Vector{Int32}:
  -1
   3
   0
 
 julia> hashfn(x -> x/(2π))
-3-element Array{Int32,1}:
+3-element Vector{Int32}:
  -1
  -2
  -1

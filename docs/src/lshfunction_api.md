@@ -114,7 +114,7 @@ LSHFunctions.jl provides a few common utility functions that you can use across 
   julia> hashes = hashfn(rand(100));
 
   julia> typeof(hashes)
-  BitArray{1}
+  BitVector (alias for BitArray{1})
 
   julia> typeof(hashes[1]) == hashtype(hashfn)
   true
